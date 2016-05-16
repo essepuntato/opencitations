@@ -1,0 +1,38 @@
+{
+    "@context": "https://w3id.org/oc/corpus/context.json",
+    "iri": "gocc:",
+    "a": "occ_dataset",
+    "title": "The Open Citations Corpus",
+    "description": "The Open Citations Corpus (OCC) is an open access repository of scholarly citation data, information about the author-created bibliographic references present in scholarly publications that cite other scholarly publications.",
+    "pub_date": "2016-02-01T00:00:00",
+    "mod_date": "2016-04-01T00:00:00",
+    "keyword": [ "OCC", "Open Citations", "Open Citations Corpus", "SPAR Ontologies" ],
+    "subject": [ "scholarly_communication", "bibliographic_database", "open_access" ],
+    "distribution": [ 
+        {
+            "iri": "gdi:1",
+            "a": "occ_distribution",
+            "title": "The Open Citations Corpus: distribution in Turtle dated 3rd April 2016",
+            "description": "The distribution of the Open Citations Corpus (OCC) stored in Turtle dated 3rd April 2016.",
+            "pub_date": "2016-04-03T12:00:00",
+            "license": "cc0",
+            "download": "http://www.opencitations.net/static/distribution/occ-2016-04-03.ttl.zip",
+            "file_type": "turtle",
+            "byte": "14098371"
+        }
+    ],
+    "webpage": "http://www.opencitations.net",
+    "subset": [
+        {
+            "iri": "gbr:",
+            "a": "occ_dataset",
+            "title": "The Open Citations Corpus: Bibliographic Resource dataset",
+            "description": "The Bibliographic Resource dataset of the Open Citations Corpus (OCC) contains all the data related to any bibliograhic resource (articles, journals, proceedings papers, etc.) that has been included in the corpus.",
+            "pub_date": "2016-02-01T00:00:00",
+            "mod_date": "2016-03-29T00:00:00",
+            "keyword": [ "citations", "bibliographic metadata", "bibliographic resources" ],
+            "subject": [ "scholarly_communication", "bibliographic_database", "open_access" ]
+        }
+    ],
+    "endpoint": "https://w3id.org/oc/corpus/sparql"
+}

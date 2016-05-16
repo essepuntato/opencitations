@@ -1,0 +1,16 @@
+{
+    "@context": "https://w3id.org/oc/corpus/context.json",
+    "iri": "gra:1",
+    "a": "agent",
+    "name": "Silvio Peroni",
+    "gname": "Silvio",
+    "fname": "Peroni",
+    "contributor": [ 
+        {
+            "iri": "gar:1",
+            "a": "role",
+            "role_type": "author",
+            "in": "gbr:1"
+        }
+    ]
+}

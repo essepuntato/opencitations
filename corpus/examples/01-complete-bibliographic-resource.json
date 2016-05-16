@@ -1,0 +1,143 @@
+{
+    "@context": "https://w3id.org/oc/corpus/context.json",
+    "iri": "gbr:1",
+    "a": "article",
+    "identifier": [
+        {
+            "iri": "gid:1",
+            "a": "unique_identifier",
+            "id": "br/1",
+            "type": "occ"
+        },
+        {
+            "iri": "gid:2",
+            "a": "unique_identifier",
+            "id": "10.1108/JD-12-2013-0166",
+            "type": "doi"
+        },
+        {
+            "iri": "gid:3",
+            "a": "unique_identifier",
+            "id": "http://www.emeraldinsight.com/doi/abs/10.1108/JD-12-2013-0166",
+            "type": "url"
+        },
+        {
+            "iri": "gid:4",
+            "a": "unique_identifier",
+            "id": "http://dx.doi.org/10.1108/JD-12-2013-0166",
+            "type": "url"
+        }
+    ],
+    "title": "Setting our bibliographic references free: towards open citation data",
+    "year": "2015",
+    "format": [
+        {
+            "iri": "gre:1",
+            "a": "digital_format",
+            "identifier": {
+                "iri": "gid:5",
+                "a": "unique_identifier",
+                "id": "re/1",
+                "type": "occ"
+            },
+            "mime_type": "pdf",
+            "fpage": "253",
+            "lpage": "277",
+            "document_url": "http://www.emeraldinsight.com/doi/pdfplus/10.1108/JD-12-2013-0166"
+        },
+        {
+            "iri": "gre:2",
+            "a": "digital_format",
+            "identifier": {
+                "iri": "gid:6",
+                "a": "unique_identifier",
+                "id": "re/2",
+                "type": "occ"
+            },
+            "mime_type": "html",
+            "document_url": "http://www.emeraldinsight.com/doi/full/10.1108/JD-12-2013-0166"
+        }
+    ],
+    "part_of": {
+        "iri": "gbr:2",
+        "a": "periodical_issue",
+        "identifier": {
+            "iri": "gid:7",
+            "a": "unique_identifier",
+            "id": "br/2",
+            "type": "occ"
+        },
+        "number": "2",
+        "part_of": {
+            "iri": "gbr:3",
+            "a": "periodical_volume",
+            "identifier": {
+                "iri": "gid:8",
+                "a": "unique_identifier",
+                "id": "br/3",
+                "type": "occ"
+            },
+            "number": "71",
+            "part_of": {
+                "iri": "gbr:4",
+                "a": "periodical_journal",
+                "identifier": [ 
+                    {
+                        "iri": "gid:9",
+                        "a": "unique_identifier",
+                        "id": "br/4",
+                        "type": "occ"
+                    },
+                    {
+                        "iri": "gid:10",
+                        "a": "unique_identifier",
+                        "id": "0022-0418",
+                        "type": "issn"
+                    }
+                ],
+                "title": "Journal of Documentation"
+            }
+        }
+    },
+    "citation": [
+        {
+            "iri": "gbr:5",
+            "a": "inproceedings",
+            "identifier": [ 
+                {
+                    "iri": "gid:11",
+                    "a": "unique_identifier",
+                    "id": "br/5",
+                    "type": "occ"
+                }
+            ],
+            "title": "Automatically classifying the role of citations in biomedical articles",
+            "year": "2010",
+            "format": [
+                {
+                    "iri": "gre:3",
+                    "a": "generic_format",
+                    "identifier": {
+                        "iri": "gid:12",
+                        "a": "unique_identifier",
+                        "id": "re/3",
+                        "type": "occ"
+                    },
+                    "fpage": "11",
+                    "lpage": "15"
+                }
+            ],
+            "part_of": {
+                "iri": "gbr:10",
+                "a": "proceedings",
+                "identifier": {
+                    "iri": "gid:13",
+                    "a": "unique_identifier",
+                    "id": "br/10",
+                    "type": "occ"
+                },
+                "title": "Proceedings of the 2010 AMIA Annual Symposium"
+            }
+        }
+    ]
+}

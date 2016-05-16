@@ -1,0 +1,13 @@
+private
+.idea
+triplestore/*.jar
+triplestore/*.jnl
+triplestore/rules.log
+*.pyc
+website/opencitations_log.txt
+website/src/*.pyc
+*~
+.DS_Store
+run-and-check.sh
+triplestore/log.txt
+website/log.txt

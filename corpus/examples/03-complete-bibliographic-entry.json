@@ -1,0 +1,8 @@
+{
+    "@context": "https://w3id.org/oc/corpus/context.json",
+    "iri": "gbe:1",
+    "a": "entry",
+    "part_of": "gbr:1",
+    "content": "Agarwal, S. , Choubey, L. and Yu, H. (2010), “Automatically classifying the role of citations in biomedical articles”, Proceedings of the 2010 AMIA Annual Symposium, pp. 11-15.",
+    "crossref": "gbr:5"
+}
