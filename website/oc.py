@@ -38,7 +38,7 @@ web_logger = WebLogger("opencitations.net", "opencitations_log.txt", [
     "REQUEST_URI"       # The interpreted pathname of the requested document
                         # or CGI (relative to the document root)
     ],
-    {"REMOTE_ADDR": ["130.136.2.47"]}  # uncomment this for real app
+    {"REMOTE_ADDR": ["130.136.2.47", "127.0.0.1"]}  # uncomment this for real app
     # {"REMOTE_ADDR": ["127.0.0.1"]}  # uncomment this for test
 )
 
