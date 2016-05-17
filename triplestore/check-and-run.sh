@@ -3,7 +3,7 @@ myv=`curl -s http://localhost:3000/blazegraph/sparql?query=SELECT%20%3Fs%20%7B%3
 
 if [ -z "$myv" ] || [[ $myv != *"results"* ]];
 then
-    stop.sh
-    run.sh
+    ./stop.sh
+    ./run.sh
     date >> log.txt
 fi

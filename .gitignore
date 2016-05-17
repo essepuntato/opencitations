@@ -6,6 +6,7 @@ triplestore/rules.log
 *.pyc
 website/opencitations_log.txt
 website/src/*.pyc
+website/*.pyc
 *~
 .DS_Store
 check-and-run.sh
