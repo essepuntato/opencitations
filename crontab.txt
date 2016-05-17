@@ -1,0 +1,3 @@
+# This is the line one should add to the crontab so as to check
+# that all the services are running correctly (it runs every 5 minutes)
+*/5 *   *   *   *   /home/essepuntato/check-and-run.sh
