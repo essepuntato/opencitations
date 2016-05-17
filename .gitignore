@@ -10,4 +10,6 @@ website/src/*.pyc
 .DS_Store
 check-and-run.sh
 triplestore/log.txt
+triplestore/nohup.out
 website/log.txt
+website/nohup.out
