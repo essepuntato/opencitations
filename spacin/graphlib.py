@@ -386,10 +386,10 @@ class GraphSet(object):
         for cur_g in self.g:
             self.__store_graph(cur_g, base_dir)
 
-    def push_on_triplestore_and_store(self, base_dir, triplestore_url, user="user", pwd="pass"):
+    def push_on_triplestore_and_store(self, base_dir, triplestore_url):
         self.repok.add_sentence("[Triplestore: INFO] Starting the process")
 
-        tp = SPARQLWrapper(triplestore_url + "/update?user=%s&pass=%s" % (user, pwd))
+        tp = SPARQLWrapper(triplestore_url + "/sparql")
         tp.setMethod('POST')
         for idx, cur_g in enumerate(self.g):
             cur_g_iri = GraphSet.get_graph_iri(cur_g)
