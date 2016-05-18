@@ -8,9 +8,14 @@
         "iri": "gbr:1/prov/ca/2",
         "a": "update",
         "involved": {
-            "iri": "gbr:1/prov/pa/2",
-            "a": "provenance_agent",
-            "name": "CrossRef"
+            "iri": "gbr:1/prov/cr/1",
+            "a": "curatorial_role",
+            "curatorial_role_type": "source_provider",
+            "held_by": {
+                "iri": "gbr:1/prov/pa/1",
+                "a": "provenance_agent",
+                "name": "CrossRef"
+            }
         },
         "description": "The field 'title' of the entity 'https://w3id.org/oc/corpus/br/1' has been modified.",
         "update_action": "DELETE DATA { GRAPH <https://w3id.org/oc/corpus/br/> { <https://w3id.org/oc/corpus/br/1> <http://purl.org/dc/terms/title> 'Setting our bibliographic references free' } }; INSERT DATA { GRAPH <https://w3id.org/oc/corpus/br/> { <https://w3id.org/oc/corpus/br/1> <http://purl.org/dc/terms/title> 'Setting our bibliographic references free: towards open citation data' } }"
@@ -25,9 +30,10 @@
                 "iri": "gbr:1/prov/ca/1",
                 "a": "creation",
                 "involved": {
-                    "iri": "gbr:1/prov/pa/1",
-                    "a": "provenance_agent",
-                    "name": "CrossRef"  
+                    "iri": "gbr:1/prov/cr/1",
+                    "a": "curatorial_role",
+                    "curatorial_role_type": "source_provider",
+                    "held_by": "gbr:1/prov/pa/1"
                 },
                 "description": "The entity 'https://w3id.org/oc/corpus/br/1' has been created."
             },
