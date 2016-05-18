@@ -68,5 +68,5 @@ class WorkInProgress:
 
 
 if __name__ == "__main__":
-    app = web.application(urls, globals())
+    app = web.application(rewrite.get_urls(), globals())
     app.run()
