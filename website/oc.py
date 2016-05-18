@@ -16,18 +16,30 @@ __author__ = 'essepuntato'
 import web
 import json
 from src.wl import WebLogger
+from src.rrh import RewriteRuleHandler
 
 # Load the configuration file
 with open("conf.json") as f:
     c = json.load(f)
 
-# For redirecting
+# For redirecting to classes
 urls = (
     "/", "WorkInProgress"
 )
 
 # For rendering
 render = web.template.render(c["html"])
+
+# Additional rewrite rules for any URLs
+rewrite = RewriteRuleHandler(
+    "Redirect",
+    [
+        ("^/corpus/context.json$",
+         "https://rawgit.com/essepuntato/opencitations/master/corpus/context.json",
+         True)
+    ],
+    urls
+)
 
 # Set the web logger
 web_logger = WebLogger("opencitations.net", "opencitations_log.txt", [
@@ -41,6 +53,13 @@ web_logger = WebLogger("opencitations.net", "opencitations_log.txt", [
     {"REMOTE_ADDR": ["130.136.2.47", "127.0.0.1"]}  # uncomment this for real app
     # {"REMOTE_ADDR": ["127.0.0.1"]}  # uncomment this for test
 )
+
+
+class Redirect:
+    def GET(self, u):
+        web_logger.mes()
+        raise web.seeother(rewrite.rewrite(u))
+
 
 class WorkInProgress:
     def GET(self):
