@@ -35,7 +35,7 @@ rewrite = RewriteRuleHandler(
     "Redirect",
     [
         ("^/corpus/context.json$",
-         "https://rawgit.com/essepuntato/opencitations/master/corpus/context.json",
+         "http://rawgit.com/essepuntato/opencitations/master/corpus/context.json",
          True)
     ],
     urls

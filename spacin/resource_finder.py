@@ -16,6 +16,7 @@ class ResourceFinder(object):
         if ts_url is None:
             self.ts = None
         else:
+            # TODO: test with blazegraph
             self.ts = ConjunctiveGraph('SPARQLUpdateStore')
             self.ts.open((ts_url + "/query", ts_url + "/update"))
 

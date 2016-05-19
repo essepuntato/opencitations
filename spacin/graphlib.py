@@ -69,6 +69,7 @@ class GraphEntity(object):
     name = FOAF.name
     embodiment = FRBR.embodiment
     part_of = FRBR.partOf
+    contains_reference = FRBR.part
     has_literal_value = LITERAL.hasLiteralValue
     ending_page = PRISM.endingPage
     starting_page = PRISM.startingPage
@@ -104,6 +105,7 @@ class GraphEntity(object):
         if not existing_ref:
             self.resp_agent = resp_agent
             self.__create_type(res_type)
+            # TODO: this local id should be the OCC local id, that could be removed entirely
             if local_id is not None:
                 self.has_id(local_id)
                 local_id.create_occ(re.sub(base_iri, "", GraphSet.get_graph_iri(g)) + str(count))
@@ -257,6 +259,9 @@ class GraphEntity(object):
 
     def has_part(self, br_res):
         br_res.g.add((URIRef(str(br_res)), GraphEntity.part_of, self.res))
+
+    def contains_in_reference_list(self, be_res):
+        self.g.add((self.res, GraphEntity.contains_reference, URIRef(str(be_res))))
 
     def has_citation(self, br_res):
         self.g.add((self.res, GraphEntity.cites, URIRef(str(br_res))))
