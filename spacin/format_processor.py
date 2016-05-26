@@ -12,10 +12,21 @@ class FormatProcessor(object):
     http_pattern = "(https?://([A-z]|[0-9]|%|&|\?|/|\.|_|~|-|:)+)"
 
     """This class is the abstract one for any kind of processors."""
-    def __init__(self, base_iri, context_base, info_dir, tmp_dir, entries, name, agent_id=None):
-        self.entries = entries
-        self.name = name
-        self.g_set = GraphSet(base_iri, context_base, info_dir, tmp_dir)
+    def __init__(self, base_iri, context_base, info_dir, entries, agent_id=None):
+        self.citing_id = entries["citing_id"]
+        self.curator = entries["curator"]
+        if "source" in entries:
+            self.source = entries["source"]
+        else:
+            self.source = None
+        if "source_provider" in entries:
+            self.source_provider = entries["source_provider"]
+        else:
+            self.source_provider = None
+
+        self.entries = entries["references"]
+        self.name = "SPACIN " + self.__class__.__name__
+        self.g_set = GraphSet(base_iri, context_base, info_dir)
         self.id = agent_id
         self.reperr = Reporter(True)
         self.reperr.new_article()

@@ -5,7 +5,7 @@ __author__ = 'essepuntato'
 # Configuration for local test
 base_dir = "../test/corpus/"
 base_iri = "https://localhost:8000/corpus/"
-triplestore_url = "http://localhost:3000/blazegraph"
+triplestore_url = "http://localhost:3000/blazegraph/sparql"
 context_path = "https://w3id.org/oc/corpus/context.json"
 info_dir = "../test/id-counter/"
 temp_dir_for_rdf_loading = "/Users/six/Desktop/"
