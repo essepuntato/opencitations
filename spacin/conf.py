@@ -9,6 +9,7 @@ triplestore_url = "http://localhost:3000/blazegraph/sparql"
 context_path = "https://w3id.org/oc/corpus/context.json"
 info_dir = "../test/id-counter/"
 temp_dir_for_rdf_loading = "/Users/six/Desktop/"
+orcid_conf_path = "conf.json"
 
 # Official configuration
 # base_dir = "/srv/oc/corpus/"
@@ -17,4 +18,5 @@ temp_dir_for_rdf_loading = "/Users/six/Desktop/"
 # context_path = "https://w3id.org/oc/corpus/context.json"
 # info_dir = "/srv/oc/id-counter/"
 # temp_dir_for_rdf_loading = "/srv/oc/"
+# orcid_conf_path = "/home/essepuntato/OC/spacin/conf.json"
 

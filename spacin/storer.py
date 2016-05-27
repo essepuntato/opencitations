@@ -26,8 +26,7 @@ class Storer(object):
         else:
             self.reperr = reperr
 
-    # TODO: file_name should change for prov entity to consider
-    def upload_and_store(self, base_dir, triplestore_url, base_iri, context_path, file_name=None, tmp_dir=None):
+    def upload_and_store(self, base_dir, triplestore_url, base_iri, context_path, tmp_dir=None):
         self.repok.new_article()
         self.reperr.new_article()
 
@@ -35,7 +34,7 @@ class Storer(object):
 
         for idx, cur_g in enumerate(self.g):
             self.upload(cur_g, triplestore_url, idx)
-            self.store(cur_g, base_dir, base_iri, context_path, file_name, tmp_dir)
+            self.store(cur_g, base_dir, base_iri, context_path, tmp_dir)
 
     def upload(self, cur_g, triplestore_url, idx=0):
         self.repok.new_article()
@@ -66,24 +65,19 @@ class Storer(object):
 
             return False
 
-    def store(self, cur_g, base_dir, base_iri, context_path, file_name=None, tmp_dir=None):
+    def store(self, cur_g, base_dir, base_iri, context_path, tmp_dir=None):
         self.repok.new_article()
         self.reperr.new_article()
 
         if len(cur_g) > 0:
-            cur_g_iri = str(cur_g.identifier)
+            cur_subject = set(cur_g.subjects(None, None)).pop()
 
-            cur_graph_short_name = re.sub("^%s" % base_iri, "", cur_g_iri)
-            cur_dir_path = base_dir + os.sep + cur_graph_short_name
+            cur_dir_path = base_dir + re.sub("^%s(.+)/[0-9]+$" % base_iri, "\\1", str(cur_subject))
             if not os.path.exists(cur_dir_path):
                 os.makedirs(cur_dir_path)
 
-            if file_name is None:
-                cur_subject = set(cur_g.subjects(None, None)).pop()
-                cur_file_path = cur_dir_path + os.sep + \
-                                re.sub("^%s" % cur_g_iri, "", str(cur_subject)) + ".json"
-            else:
-                cur_file_path = cur_dir_path + os.sep + file_name + ".json"
+            cur_file_path = cur_dir_path + os.sep + \
+                            re.sub("^.+/([0-9]+)$", "\\1", str(cur_subject)) + ".json"
 
             # Merging the data
             if os.path.exists(cur_file_path):

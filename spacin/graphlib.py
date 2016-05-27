@@ -34,6 +34,7 @@ class GraphEntity(object):
     cites = CITO.cites
     doi = DATACITE.doi
     occ = DATACITE.occ
+    orcid = DATACITE.orcid
     has_identifier = DATACITE.hasIdentifier
     identifier = DATACITE.Identifier
     isbn = DATACITE.isbn
@@ -82,8 +83,8 @@ class GraphEntity(object):
     with_role = PRO.withRole
 
     # This constructor creates a new instance of an RDF resource
-    def __init__(self, g, res=None, res_type=None,
-                 resp_agent=None, source_agent=None, source=None, count=None, label=None, g_set=None):
+    def __init__(self, g, res=None, res_type=None, resp_agent=None, source_agent=None,
+                 source=None, count=None, label=None, short_name="", g_set=None):
         self.cur_name = "SPACIN " + self.__class__.__name__
         self.resp_agent = resp_agent
         self.source_agent = source_agent
@@ -93,7 +94,8 @@ class GraphEntity(object):
 
         # Create the reference if not specified
         if res is None:
-            self.res = URIRef(str(g.identifier) + str(count))
+            self.res = \
+                URIRef(str(g.identifier) + (short_name + "/" if short_name != "" else "") + str(count))
         else:
             self.res = res
             existing_ref = True
@@ -250,6 +252,9 @@ class GraphEntity(object):
     def create_editor(self, br_res):
         return self._associate_role_with_document(GraphEntity.editor, br_res)
 
+    def create_orcid(self, string):
+        return self._associate_identifier_with_scheme(string, GraphEntity.orcid)
+
     def create_doi(self, string):
         return self._associate_identifier_with_scheme(string, GraphEntity.doi)
 
@@ -378,30 +383,30 @@ class GraphSet(object):
     # Add resources related to bibliographic entities
     def add_ar(self, res_or_resp_agent, source_agent=None, source=None):
         return self._add(
-            self.g_ar, GraphEntity.role_in_time, res_or_resp_agent, source_agent,
-            source, self.ar_info_path, "ar")
+            self.g_ar, GraphEntity.role_in_time, res_or_resp_agent,
+            source_agent, source, self.ar_info_path, "ar")
 
     def add_be(self, res_or_resp_agent, source_agent=None, source=None):
         return self._add(
             self.g_be, GraphEntity.bibliographic_reference, res_or_resp_agent,
-            source, source_agent, self.be_info_path, "be")
+            source_agent, source, self.be_info_path, "be")
 
     def add_br(self, res_or_resp_agent, source_agent=None, source=None):
         return self._add(self.g_br, GraphEntity.expression, res_or_resp_agent,
-                         source, source_agent, self.br_info_path, "br")
+                         source_agent, source, self.br_info_path, "br")
 
     def add_id(self, res_or_resp_agent, source_agent=None, source=None):
         return self._add(self.g_id, GraphEntity.identifier, res_or_resp_agent,
-                         source, source_agent, self.id_info_path, "id")
+                         source_agent, source, self.id_info_path, "id")
 
     def add_ra(self, res_or_resp_agent, source_agent=None, source=None):
         return self._add(self.g_ra, GraphEntity.agent, res_or_resp_agent,
-                         source, source_agent, self.ra_info_path, "ra")
+                         source_agent, source, self.ra_info_path, "ra")
 
     def add_re(self, res_or_resp_agent, source_agent=None, source=None):
         return self._add(
-            self.g_re, GraphEntity.manifestation, res_or_resp_agent, source_agent,
-            source, self.re_info_path, "re")
+            self.g_re, GraphEntity.manifestation, res_or_resp_agent,
+            source_agent, source, self.re_info_path, "re")
 
     def _add(self, graph_url, main_type, res_or_resp_agent, source_agent,
              source, info_file_path, short_name, list_of_entities=[]):
@@ -424,10 +429,11 @@ class GraphSet(object):
                 self.labels[short_name], str(count), short_name, str(count))
             return self._generate_entity(
                 cur_g, res_type=main_type, resp_agent=res_or_resp_agent, source_agent=source_agent,
-                source=source, count=count, label=label, list_of_entities=list_of_entities)
+                source=source, count=count, label=label, short_name=short_name,
+                list_of_entities=list_of_entities)
 
     def _generate_entity(self, g, res=None, res_type=None, resp_agent=None, source_agent=None,
-                         source=None, count=None, label=None, list_of_entities=[]):
+                         source=None, count=None, label=None, short_name="", list_of_entities=[]):
         return GraphEntity(g, res=res, res_type=res_type, resp_agent=resp_agent,
                            source_agent=source_agent, source=source, count=count,
                            label=label, g_set=self)
@@ -503,7 +509,7 @@ class ProvEntity(GraphEntity):
     create = PROV.Create
     modify = PROV.Modify
     replace = PROV.Replace
-    association = PROV.Assiciation
+    association = PROV.Association
     generated_at_time = PROV.generatedAtTime
     invalidated_at_time = PROV.invalidatedAtTime
     specialization_of = PROV.specializationOf
@@ -516,14 +522,15 @@ class ProvEntity(GraphEntity):
     has_update_query = OCO.hasUpdateQuery
     had_role = PROV.hadRole
     associated_agent = PROV.agent
-    curator = OCO.curator
+    curator = OCO["occ-curator"]
     source_provider = OCO["source-metadata-provider"]
 
     def __init__(self, prov_subject, g, res=None, res_type=None,
-                 resp_agent=None, source_agent=None, source=None, count=None, label=None, g_set=None):
+                 resp_agent=None, source_agent=None, source=None, count=None, label=None,
+                 short_name="", g_set=None):
         self.prov_subject = prov_subject
         super(ProvEntity, self).__init__(
-            g, res, res_type, resp_agent, source_agent, source, count, label, g_set)
+            g, res, res_type, resp_agent, source_agent, source, count, label, short_name, g_set)
 
     # /START Literal Attributes
     def create_generation_time(self, string):
@@ -581,7 +588,7 @@ class ProvEntity(GraphEntity):
 class ProvSet(GraphSet):
     def __init__(self, prov_subj_graph_set, base_iri, context_path, info_dir):
         super(ProvSet, self).__init__(base_iri, context_path, info_dir)
-        self.resp = "SPACIN Prov Set"
+        self.resp = "SPACIN ProvSet"
         self.prov_g = prov_subj_graph_set
         self.labels.update(
             {
@@ -654,7 +661,7 @@ class ProvSet(GraphSet):
         g.namespace_manager.bind("prov", ProvEntity.PROV)
 
     def _generate_entity(self, g, res=None, res_type=None, resp_agent=None, source_agent=None,
-                         source=None, count=None, label=None, list_of_entities=[]):
+                         source=None, count=None, label=None, short_name="", list_of_entities=[]):
         return ProvEntity(list_of_entities[0], g, res=res, res_type=res_type, resp_agent=resp_agent,
                           source_agent=source_agent, source=source,
-                          count=count, label=label, g_set=self)
+                          count=count, label=label, short_name=short_name, g_set=self)

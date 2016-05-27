@@ -8,9 +8,13 @@ import requests
 from time import sleep
 import json
 from graphlib import GraphEntity as ge
+from support import dict_get as dg
+from support import dict_list_get_by_value_ascii as dgt
+from support import list_from_idx as lfi
+from support import string_list_close_match as slc
 
 
-class CrossRefProcessor(FormatProcessor):
+class CrossrefProcessor(FormatProcessor):
     isbn_base_url = "http://id.crossref.org/isbn/"
     member_base_url = "http://id.crossref.org/member/"
 
@@ -26,6 +30,7 @@ class CrossRefProcessor(FormatProcessor):
                  info_dir,
                  entries,
                  res_finder,
+                 of_finder,
                  headers={"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10; "
                                         "rv:33.0) Gecko/20100101 Firefox/33.0"},
                  sec_to_wait=10,
@@ -41,11 +46,12 @@ class CrossRefProcessor(FormatProcessor):
         self.max_iteration = max_iteration
         self.timeout = timeout
         self.rf = res_finder
+        self.of = of_finder
         self.get_bib_entry_url = use_url_in_bibentry_as_id
         self.get_bib_entry_doi = use_doi_in_bibentry_as_id
         self.crossref_min_similarity_score = crossref_min_similarity_score
-        super(CrossRefProcessor, self).__init__(
-            base_iri, context_base, info_dir, entries, "CrossRef")
+        super(CrossrefProcessor, self).__init__(
+            base_iri, context_base, info_dir, entries, "Crossref")
 
     def __process_entity(self, entity, entity_type, api_url):
         tentative = 0
@@ -109,7 +115,8 @@ class CrossRefProcessor(FormatProcessor):
             cur_json = self.get_crossref_item(self.__process_entity(doi, "doi", self.crossref_api_works))
             if cur_json is not None:
                 return self.process_crossref_json(
-                    cur_json, self.crossref_api_works + doi, doi_curator, doi_source_provider, self.source)
+                    cur_json, self.crossref_api_works + doi, doi_curator,
+                    doi_source_provider, self.source)
         else:
             result = self.g_set.add_br(existing_res)
             self.rf.update_graph_set(self.g_set)
@@ -118,26 +125,25 @@ class CrossRefProcessor(FormatProcessor):
     def process(self):
         """This methods returns a GraphSet populated with the citation data form the input
         source, or None if any issue has been encountered."""
-        for cur_citing_id in self.citing_id:
-            if cur_citing_id["type"] == "doi":
-                citing_entity = self.process_doi(
-                    cur_citing_id["value"], self.curator, self.source_provider)
-                cited_entities = self.process_references()
+        citing_entity = self.process_doi(self.doi, self.curator, self.source_provider)
+        cited_entities = self.process_references()
 
-                if cited_entities is not None:
-                    for idx, cited_entity in enumerate(cited_entities):
-                        citing_entity.has_citation(cited_entity)
-                        cur_be = self.g_set.add_be(self.curator, self.source_provider, self.source)
-                        cur_be.create_content(self.entries[idx]["bibentry"])
-                        citing_entity.contains_in_reference_list(cur_be)
-                        cited_entity.has_reference(cur_be)
+        if cited_entities is not None:
+            for idx, cited_entity in enumerate(cited_entities):
+                citing_entity.has_citation(cited_entity)
+                cur_be = self.g_set.add_be(self.curator, self.source_provider, self.source)
+                cur_be.create_content(self.entries[idx]["bibentry"])
+                citing_entity.contains_in_reference_list(cur_be)
+                cited_entity.has_reference(cur_be)
 
-                    return self.g_set
+            return self.g_set
 
     def process_references(self):
         result = []
 
         for full_entry in self.entries:
+            self.repok.new_article()
+            self.reperr.new_article()
             cur_res = None
 
             entry = full_entry["bibentry"]
@@ -208,6 +214,7 @@ class CrossRefProcessor(FormatProcessor):
         return result
 
     def __add_url(self, cur_res, extracted_url):
+        self.rf.update_graph_set(self.g_set)
         if extracted_url is not None:
             cur_id = self.rf.retrieve_br_url(cur_res, extracted_url)
 
@@ -218,6 +225,7 @@ class CrossRefProcessor(FormatProcessor):
             cur_res.has_id(cur_id)
 
     def __add_doi(self, cur_res, extracted_doi):
+        self.rf.update_graph_set(self.g_set)
         if extracted_doi is not None:
             cur_id = self.rf.retrieve_br_doi(cur_res, extracted_doi)
 
@@ -257,18 +265,87 @@ class CrossRefProcessor(FormatProcessor):
                 elif key == "subtitle":
                     cur_br.create_subtitle(self.__create_title_from_list(crossref_json[key]))
                 elif key == "author":
+                    # Get all ORCID of the authors (if any)
+                    all_authors = crossref_json["author"]
+                    all_family_names = dg(all_authors, ["family"])
+                    author_orcid = []
+                    if "DOI" in crossref_json and all_family_names:
+                        doi_string = crossref_json["DOI"]
+                        author_orcid = self.of.get_orcid_ids(doi_string, all_family_names)
+
+                    # Analyse all authors
                     for author in crossref_json["author"]:
-                        cur_agent = self.g_set.add_ra(self.name, self.id, crossref_source)
+                        given_name_string = None
                         if "given" in author:
-                            cur_agent.create_given_name(author["given"])
+                            given_name_string = author["given"]
+                        family_name_string = None
                         if "family" in author:
-                            cur_agent.create_family_name(author["family"])
+                            family_name_string = author["family"]
+
+                        cur_orcid_record = None
+                        if family_name_string:
+                            # Get all the ORCID/author records retrieved that share the
+                            # family name into consideration
+                            orcid_with_such_family = dgt(author_orcid, "family", family_name_string)
+                            author_with_such_family = dgt(all_authors, "family", family_name_string)
+                            if len(orcid_with_such_family) == 1 and len(author_with_such_family) == 1:
+                                cur_orcid_record = orcid_with_such_family[0]
+                            elif given_name_string is not None and \
+                                 len(orcid_with_such_family) >= 1 and len(author_with_such_family) >= 1:
+
+                                # From the previous lists of ORCID/author record, get the list
+                                # of all the given name defined
+                                orcid_given_with_such_family = dg(orcid_with_such_family, ["given"])
+                                author_given_with_such_family = dg(author_with_such_family, ["given"])
+
+                                # Get the indexes of the previous list that best match with the
+                                # given name of the author we are considering
+                                closest_orcid_matches_idx = \
+                                    slc(orcid_given_with_such_family, given_name_string)
+                                closest_author_matches_idx = \
+                                    slc(author_given_with_such_family, given_name_string)
+                                if len(closest_orcid_matches_idx) == 1 and \
+                                   len(closest_author_matches_idx) == 1:
+                                    cur_orcid_record = \
+                                        orcid_given_with_such_family[closest_orcid_matches_idx[0]]
+
+                        # An ORCID has been found to match with such author record, and we try to
+                        # see if such orcid (and thus, the author) has been already added in the
+                        # store
+                        retrieved_agent = None
+                        if cur_orcid_record is not None:
+                            retrieved_agent = self.rf.retrieve_from_orcid(cur_orcid_record["orcid"])
+
+                        # If the resource does not exist already, create a new one
+                        if retrieved_agent is None:
+                            cur_agent = self.g_set.add_ra(self.name, self.id, crossref_source)
+                            if cur_orcid_record is not None:
+                                cur_agent_orcid = \
+                                    self.g_set.add_id(self.of.name, self.of.id, self.of.get_last_query())
+                                cur_agent_orcid.create_orcid(cur_orcid_record["orcid"])
+                                cur_agent.has_id(cur_agent_orcid)
+
+                            if given_name_string is not None:
+                                cur_agent.create_given_name(given_name_string)
+                            elif cur_orcid_record is not None and "given" in cur_orcid_record:
+                                cur_agent.create_given_name(cur_orcid_record["given"])
+
+                            if family_name_string is not None:
+                                cur_agent.create_family_name(family_name_string)
+                            elif cur_orcid_record is not None and "family" in cur_orcid_record:
+                                cur_agent.create_family_name(cur_orcid_record["family"])
+                        else:
+                            cur_agent = self.g_set.add_ra(retrieved_agent)
+
+                        # Add statements related to the author resource (that could or could not
+                        # exist in the store
                         cur_role = self.g_set.add_ar(self.name, self.id, crossref_source)
-                        cur_agent.has_role(cur_role)
                         if crossref_json["type"] == "edited-book":
                             cur_role.create_editor(cur_br)
                         else:
                             cur_role.create_author(cur_br)
+                        cur_agent.has_role(cur_role)
+
                 elif key == "publisher":
                     cur_agent = None
 
@@ -502,7 +579,7 @@ class CrossRefProcessor(FormatProcessor):
         return cur_br
 
     def message(self, mess, entity_type, entity, url="not provided"):
-        return super(CrossRefProcessor, self).message(mess) + \
+        return super(CrossrefProcessor, self).message(mess) + \
                "\n\t%s: %s\n\tURL: %s" % (entity_type, entity, url)
 
     def __get_ids_for_type(self, crossref_data):
@@ -563,7 +640,7 @@ class CrossRefProcessor(FormatProcessor):
         result = []
         if "ISBN" in crossref_data:
             for string in crossref_data["ISBN"]:
-                result += [re.sub("^" + CrossRefProcessor.isbn_base_url, "", string)]
+                result += [re.sub("^" + CrossrefProcessor.isbn_base_url, "", string)]
         return result
 
     def __get_all_urls(self, crossref_data):

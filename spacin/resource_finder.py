@@ -31,6 +31,9 @@ class ResourceFinder(object):
                 if res is not None:
                     return res
 
+    def retrieve_from_orcid(self, string):
+        return self.__id_with_type(string, GraphEntity.orcid)
+
     def retrieve_from_doi(self, string):
         return self.__id_with_type(string, GraphEntity.doi)
 

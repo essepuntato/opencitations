@@ -6,11 +6,12 @@ import codecs
 class Reporter:
     """This class is used as a metaphoric agent being a reporter"""
 
-    def __init__(self, print_sentences=True):
+    def __init__(self, print_sentences=True, prefix=""):
         self.articles = []
         self.last_article = None
         self.last_sentence = None
         self.print_sentences = print_sentences
+        self.prefix = prefix
 
     def new_article(self):
         if self.last_article is None or len(self.last_article) > 0:
@@ -21,10 +22,11 @@ class Reporter:
                 print "\n"
 
     def add_sentence(self, sentence):
-        self.last_sentence = sentence
-        self.last_article.append(sentence)
+        cur_sentence = self.prefix + sentence
+        self.last_sentence = cur_sentence
+        self.last_article.append(cur_sentence)
         if self.print_sentences:
-            print sentence
+            print cur_sentence
 
     def get_last_sentence(self):
         return self.last_sentence
