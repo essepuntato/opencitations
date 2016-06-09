@@ -37,7 +37,7 @@
     
     "iri": "@id",
     "a": "@type",
-    
+
     "agent": "foaf:Agent",
     "article": "fabio:JournalArticle",
     "book": "fabio:Book",
@@ -80,7 +80,7 @@
     "update": "prov:Modify",
         
     "citation": { "@id": "cito:cites", "@type": "@vocab" },
-    "contributor": { "@id": "pro:holdsRoleInTime", "@type": "@vocab" },
+    "contributor": { "@id": "pro:isDocumentContextFor", "@type": "@vocab" },
     "crossref": { "@id": "biro:references", "@type": "@vocab"},
     "curatorial_role_type": { "@id": "prov:hadRole" , "@type": "@vocab" },
     "derived_from": { "@id": "prov:wasDerivedFrom", "@type": "@vocab" },
@@ -92,16 +92,17 @@
     "generated_by": { "@id": "prov:wasGeneratedBy", "@type": "@vocab" },
     "held_by": { "@id": "prov:agent" , "@type": "@vocab" },
     "identifier": { "@id": "datacite:hasIdentifier", "@type": "@vocab" },
-    "in": { "@id": "pro:relatesToDocument", "@type": "@vocab" },
+    "role_of": { "@id": "pro:isHeldBy", "@type": "@vocab" },
     "invalidated_by": { "@id": "prov:wasInvalidatedBy", "@type": "@vocab" },
     "involved": { "@id": "prov:qualifiedAssociation", "@type": "@vocab" },
     "license": { "@id": "dcterms:license", "@type": "@vocab" },
     "mime_type": { "@id": "dcterms:format", "@type": "@vocab" },
+    "next": { "@id": "oco:hasNext", "@type": "@vocab" },
     "reference": { "@id": "frbr:part", "@type": "@vocab" },
     "part_of": { "@id": "frbr:partOf", "@type": "@vocab" },
     "role_type": { "@id": "pro:withRole", "@type": "@vocab" },
     "snapshot_of": { "@id": "prov:specializationOf", "@type": "@vocab" },
-    "source": { "@id": "prov:hadPrimarySoruce", "@type": "@vocab" },
+    "source": { "@id": "prov:hadPrimarySource", "@type": "@vocab" },
     "subject": { "@id": "dcat:theme", "@type": "@vocab" },
     "subset": { "@id": "void:subset", "@type": "@vocab" },
     "type": { "@id": "datacite:usesIdentifierScheme", "@type": "@vocab" },

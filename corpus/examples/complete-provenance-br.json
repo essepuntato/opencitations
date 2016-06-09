@@ -6,7 +6,7 @@
     "generated": "2016-04-01T00:00:00",
     "generated_by": {
         "iri": "gbr:1/prov/ca/2",
-        "a": "update",
+        "a": ["curatorial_activity", "update"],
         "involved": {
             "iri": "gbr:1/prov/cr/2",
             "a": "curatorial_role",
@@ -24,7 +24,7 @@
             "generated": "2016-02-01T00:00:00",
             "generated_by": {
                 "iri": "gbr:1/prov/ca/1",
-                "a": "creation",
+                "a": ["curatorial_activity", "creation"],
                 "involved": {
                     "iri": "gbr:1/prov/cr/1",
                     "a": "curatorial_role",

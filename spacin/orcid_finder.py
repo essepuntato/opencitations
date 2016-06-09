@@ -8,8 +8,10 @@ import argparse
 from reporter import Reporter
 from support import dict_get as dg
 from support import dict_add as da
+from support import normalise_ascii as na
 from time import sleep
 from requests.exceptions import ReadTimeout, ConnectTimeout
+from urllib import quote
 
 
 class ORCIDFinder(object):
@@ -45,11 +47,11 @@ class ORCIDFinder(object):
             for idx, family_name in enumerate(family_names):
                 if idx > 0:
                     cur_query += " OR "
-                cur_query += "family-name:\"%s\"" % family_name
+                cur_query += "family-name:\"%s\"" % na(family_name)
 
             cur_query += ")"
 
-        self.__last_query_done = ORCIDFinder.__api_url + cur_query
+        self.__last_query_done = ORCIDFinder.__api_url + quote(cur_query)
 
         tentative = 0
         error_no_200 = False

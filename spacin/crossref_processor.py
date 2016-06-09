@@ -10,7 +10,6 @@ import json
 from graphlib import GraphEntity as ge
 from support import dict_get as dg
 from support import dict_list_get_by_value_ascii as dgt
-from support import list_from_idx as lfi
 from support import string_list_close_match as slc
 
 
@@ -78,7 +77,9 @@ class CrossrefProcessor(FormatProcessor):
                             errors += ["The JSON returned is malformed. %s." %
                                        str(e)]
                 else:
-                    if not error_no_200:
+                    if entry_data.status_code == 404:
+                        return None  # We can avoid to try again, since the resource simply does not exist
+                    elif not error_no_200:
                         error_no_200 = True
                         errors += ["We got an HTTP error when retrieving data (HTTP status code: %s)." %
                                    str(entry_data.status_code)]
@@ -118,25 +119,39 @@ class CrossrefProcessor(FormatProcessor):
                     cur_json, self.crossref_api_works + doi, doi_curator,
                     doi_source_provider, self.source)
         else:
-            result = self.g_set.add_br(existing_res)
+            result = self.g_set.add_br(self.name, doi_source_provider, self.source, existing_res)
             self.rf.update_graph_set(self.g_set)
             return result
 
     def process(self):
         """This methods returns a GraphSet populated with the citation data form the input
         source, or None if any issue has been encountered."""
-        citing_entity = self.process_doi(self.doi, self.curator, self.source_provider)
-        cited_entities = self.process_references()
+        if self.rf.retrieve_citing_from_doi(self.doi) is None:
+            citing_entity = self.process_doi(self.doi, self.name, self.source_provider)
+            if citing_entity is None:
+                citing_entity = self.g_set.add_br(self.name)
+                self.__add_doi(citing_entity, self.doi)
+                self.rf.update_graph_set(self.g_set)
+                self.repok.add_sentence(
+                    self.message("The citing entity has been created even if no results have "
+                                 "been returned by the API.",
+                                 "doi", self.doi))
 
-        if cited_entities is not None:
-            for idx, cited_entity in enumerate(cited_entities):
-                citing_entity.has_citation(cited_entity)
-                cur_be = self.g_set.add_be(self.curator, self.source_provider, self.source)
-                cur_be.create_content(self.entries[idx]["bibentry"])
-                citing_entity.contains_in_reference_list(cur_be)
-                cited_entity.has_reference(cur_be)
+            cited_entities = self.process_references()
 
-            return self.g_set
+            if cited_entities is not None:
+                for idx, cited_entity in enumerate(cited_entities):
+                    citing_entity.has_citation(cited_entity)
+                    cur_be = self.g_set.add_be(self.curator, self.source_provider, self.source)
+                    cur_be.create_content(self.entries[idx]["bibentry"])
+                    citing_entity.contains_in_reference_list(cur_be)
+                    cited_entity.has_reference(cur_be)
+
+                return self.g_set
+        else:
+            self.repok.add_sentence(
+                "The citing entity with DOI '%s' has been already "
+                "processed in the past." % self.doi)
 
     def process_references(self):
         result = []
@@ -149,6 +164,7 @@ class CrossrefProcessor(FormatProcessor):
             entry = full_entry["bibentry"]
 
             extracted_doi = FormatProcessor.extract_doi(entry)
+            extracted_doi_used = False
             extracted_url = FormatProcessor.extract_url(entry)
 
             if "doi" in full_entry:
@@ -164,6 +180,7 @@ class CrossrefProcessor(FormatProcessor):
                 cur_res = self.process_entry(entry)
                 if cur_res is None:
                     if self.get_bib_entry_doi and extracted_doi is not None:
+                        extracted_doi_used = True
                         cur_res = self.process_doi(extracted_doi, self.name, self.source_provider)
                         if cur_res is not None:
                             self.repok.add_sentence(
@@ -173,7 +190,8 @@ class CrossrefProcessor(FormatProcessor):
                     if cur_res is None and self.get_bib_entry_url and extracted_url is not None:
                         existing_res = self.rf.retrieve_from_url(extracted_url)
                         if existing_res is not None:
-                            cur_res = self.g_set.add_br(existing_res)
+                            cur_res = self.g_set.add_br(
+                                self.name, self.source_provider, self.source, existing_res)
                             self.repok.add_sentence(
                                 self.message("The entity for '%s' has been found by means of the "
                                              "URL extracted from it." % entry,
@@ -200,8 +218,10 @@ class CrossrefProcessor(FormatProcessor):
                 if self.get_bib_entry_url:
                     self.__add_url(cur_res, extracted_url)
 
-                # Add any DOI extracted from the entry if it is not already included
-                if self.get_bib_entry_doi:
+                # Add any DOI extracted from the entry if it is not already included (and only if
+                # a resource has not been retrieved by a DOI specified in the entry explicitly, or
+                # by a Crossref search.
+                if self.get_bib_entry_doi and extracted_doi_used:
                     self.__add_doi(cur_res, extracted_doi)
 
                 result += [cur_res]
@@ -255,7 +275,7 @@ class CrossrefProcessor(FormatProcessor):
         retrieved_resource = self.rf.retrieve(self.__get_ids_for_type(crossref_json))
 
         if retrieved_resource is not None:
-            cur_br = self.g_set.add_br(retrieved_resource)
+            cur_br = self.g_set.add_br(self.name, self.id, crossref_source, retrieved_resource)
         else:
             cur_br = self.g_set.add_br(self.name, self.id, crossref_source)
             for key in crossref_json:
@@ -272,6 +292,9 @@ class CrossrefProcessor(FormatProcessor):
                     if "DOI" in crossref_json and all_family_names:
                         doi_string = crossref_json["DOI"]
                         author_orcid = self.of.get_orcid_ids(doi_string, all_family_names)
+
+                    # Used to create ordered list of authors/editors of bibliographic entities
+                    prev_role = None
 
                     # Analyse all authors
                     for author in crossref_json["author"]:
@@ -307,7 +330,7 @@ class CrossrefProcessor(FormatProcessor):
                                 if len(closest_orcid_matches_idx) == 1 and \
                                    len(closest_author_matches_idx) == 1:
                                     cur_orcid_record = \
-                                        orcid_given_with_such_family[closest_orcid_matches_idx[0]]
+                                        orcid_with_such_family[closest_orcid_matches_idx[0]]
 
                         # An ORCID has been found to match with such author record, and we try to
                         # see if such orcid (and thus, the author) has been already added in the
@@ -335,16 +358,22 @@ class CrossrefProcessor(FormatProcessor):
                             elif cur_orcid_record is not None and "family" in cur_orcid_record:
                                 cur_agent.create_family_name(cur_orcid_record["family"])
                         else:
-                            cur_agent = self.g_set.add_ra(retrieved_agent)
+                            cur_agent = self.g_set.add_ra(
+                                self.name, self.id, crossref_source, retrieved_agent)
 
                         # Add statements related to the author resource (that could or could not
-                        # exist in the store
+                        # exist in the store)
                         cur_role = self.g_set.add_ar(self.name, self.id, crossref_source)
                         if crossref_json["type"] == "edited-book":
                             cur_role.create_editor(cur_br)
                         else:
                             cur_role.create_author(cur_br)
                         cur_agent.has_role(cur_role)
+
+                        if prev_role is not None:
+                            cur_role.follows(prev_role)
+
+                        prev_role = cur_role
 
                 elif key == "publisher":
                     cur_agent = None
@@ -354,7 +383,8 @@ class CrossrefProcessor(FormatProcessor):
                         cur_member_url = crossref_json["member"]
                         retrieved_agent = self.rf.retrieve_from_url(cur_member_url)
                         if retrieved_agent is not None:
-                            cur_agent = self.g_set.add_ra(retrieved_agent)
+                            cur_agent = self.g_set.add_ra(
+                                self.name, self.id, crossref_source, retrieved_agent)
                     else:
                         cur_member_url = None
 
@@ -390,8 +420,8 @@ class CrossrefProcessor(FormatProcessor):
                         cur_br.has_format(cur_re)
                 elif key == "container-title":
                     retrieved_container = None
+                    cont_br = None
                     cur_type = crossref_json["type"]
-                    # TODO: add this approach also when creating new issues and volume below
 
                     container_ids = self.__get_ids_for_container(crossref_json)
                     if cur_type == "journal-article":
@@ -412,7 +442,8 @@ class CrossrefProcessor(FormatProcessor):
                             self.rf.retrieve(container_ids)
 
                     if retrieved_container is not None:
-                        cont_br = self.g_set.add_br(retrieved_container)
+                        cont_br = self.g_set.add_br(
+                            self.name, self.id, crossref_source, retrieved_container)
                     else:
                         cur_container_title = None
                         if len(crossref_json[key]) > 0:
@@ -439,7 +470,7 @@ class CrossrefProcessor(FormatProcessor):
                                 cont_book = self.g_set.add_br(self.name, self.id, crossref_source)
                                 cont_book.create_book()
                                 cont_book.create_title(cur_container_title)
-                                self.__associate_isbn(cont_book, crossref_json)
+                                self.__associate_isbn(cont_book, crossref_json, crossref_source)
                                 cont_book.has_part(cont_br)
                                 cont_br.create_book_section()
                             elif cur_type == "component":
@@ -454,7 +485,7 @@ class CrossrefProcessor(FormatProcessor):
                                     jou_br = cont_br
                                 else:
                                     jou_br = self.g_set.add_br(self.name, self.id, crossref_source)
-                                    self.__associate_issn(jou_br, crossref_json)
+                                    self.__associate_issn(jou_br, crossref_json, crossref_source)
 
                                 self.__add_journal_data(jou_br, cur_container_title, crossref_json)
 
@@ -510,9 +541,9 @@ class CrossrefProcessor(FormatProcessor):
                             # add the identifier to the resource
                             if cur_container_type is not None:
                                 if cur_container_type in self.issn_types:
-                                    self.__associate_issn(cont_br, crossref_json)
+                                    self.__associate_issn(cont_br, crossref_json, crossref_source)
                                 if cur_container_type in self.isbn_types:
-                                    self.__associate_isbn(cont_br, crossref_json)
+                                    self.__associate_isbn(cont_br, crossref_json, crossref_source)
 
                     if cont_br is not None:
                         cont_br.has_part(cur_br)
@@ -572,9 +603,9 @@ class CrossrefProcessor(FormatProcessor):
                     # If the current type is in any of the ISSN or ISBN list
                     # add the identifier to the resource
                     if cur_type in self.issn_types:
-                        self.__associate_issn(cur_br, crossref_json)
+                        self.__associate_issn(cur_br, crossref_json, crossref_source)
                     if cur_type in self.isbn_types:
-                        self.__associate_isbn(cur_br, crossref_json)
+                        self.__associate_isbn(cur_br, crossref_json, crossref_source)
 
         return cur_br
 
@@ -616,9 +647,9 @@ class CrossrefProcessor(FormatProcessor):
 
         return result
 
-    def __associate_issn(self, res, crossref_data):
+    def __associate_issn(self, res, crossref_data, crossref_source):
         for string in self.__get_all_issns(crossref_data):
-            cur_id = self.g_set.add_id(self.id)
+            cur_id = self.g_set.add_id(self.name, self.id, crossref_source)
             if cur_id.create_issn(string):
                 res.has_id(cur_id)
 
@@ -630,9 +661,9 @@ class CrossrefProcessor(FormatProcessor):
                     result += [string]
         return result
 
-    def __associate_isbn(self, res, crossref_data):
+    def __associate_isbn(self, res, crossref_data, crossref_source):
         for string in self.__get_all_isbns(crossref_data):
-            cur_id = self.g_set.add_id(self.id)
+            cur_id = self.g_set.add_id(self.name, self.id, crossref_source)
             if cur_id.create_isbn(string):
                 res.has_id(cur_id)
 

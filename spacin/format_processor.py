@@ -5,6 +5,7 @@ from urllib import quote
 import re
 from reporter import Reporter
 from graphlib import GraphSet
+from support import normalise_ascii as sa
 
 
 class FormatProcessor(object):
@@ -13,8 +14,11 @@ class FormatProcessor(object):
 
     """This class is the abstract one for any kind of processors."""
     def __init__(self, base_iri, context_base, info_dir, entries, agent_id=None):
-        self.doi = entries["doi"]
-        self.curator = entries["curator"]
+        self.doi = entries["doi"].lower()
+        if "curator" in entries:
+            self.curator = entries["curator"]
+        else:
+            self.curator = None
         if "source" in entries:
             self.source = entries["source"]
         else:
@@ -43,11 +47,11 @@ class FormatProcessor(object):
         return self.g_set.graphs()
 
     def message(self, mess):
-        return "\n[%s] %s" % (self.name, mess)
+        return "%s" % mess
 
     @staticmethod
     def clean_entry(entry):
-        return quote(re.sub(":", ",", entry).encode("utf-8"))
+        return quote(sa(re.sub(":", ",", entry)))
 
     @staticmethod
     def extract_data(string, pattern):

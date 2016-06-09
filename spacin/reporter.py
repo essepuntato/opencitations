@@ -39,9 +39,9 @@ class Reporter:
             result += "\n"
         return result
 
-    def write_file(self, filePath):
-        with codecs.open(filePath, 'w') as file:
-            file.write(self.get_articles_as_string())
+    def write_file(self, file_path):
+        with codecs.open(file_path, 'w') as f:
+            f.write(self.get_articles_as_string())
 
     def is_empty(self):
         return self.last_sentence is None

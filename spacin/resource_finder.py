@@ -3,7 +3,7 @@
 __author__ = 'essepuntato'
 
 from rdflib import Graph
-from graphlib import GraphEntity
+from graphlib import GraphEntity, ProvEntity
 from rdflib import ConjunctiveGraph
 
 
@@ -11,6 +11,7 @@ class ResourceFinder(object):
 
     def __init__(self, g_set=None, ts_url=None):
         self.g = Graph()
+        self.name = "SPACIN " + self.__class__.__name__
         if g_set is not None:
             self.update_graph_set(g_set)
         if ts_url is None:
@@ -31,14 +32,28 @@ class ResourceFinder(object):
                 if res is not None:
                     return res
 
+    def retrieve_provenance_agent_from_name(self, string):
+        query = """
+            SELECT DISTINCT ?pa WHERE {
+              ?pa a <%s> ;
+                <%s> "%s"
+            } LIMIT 1
+        """ % (ProvEntity.prov_agent,
+               GraphEntity.name, string)
+        return self.__query(query)
+
     def retrieve_from_orcid(self, string):
         return self.__id_with_type(string, GraphEntity.orcid)
 
+    def retrieve_citing_from_doi(self, string):
+        return self.__id_with_type(
+            string.lower(), GraphEntity.doi, "?res <%s> ?cited" % GraphEntity.cites)
+
     def retrieve_from_doi(self, string):
-        return self.__id_with_type(string, GraphEntity.doi)
+        return self.__id_with_type(string.lower(), GraphEntity.doi)
 
     def retrieve_from_url(self, string):
-        return self.__id_with_type(string, GraphEntity.url)
+        return self.__id_with_type(string.lower(), GraphEntity.url)
 
     def retrieve_from_issn(self, string):
         return self.__id_with_type(string, GraphEntity.issn)
@@ -53,10 +68,24 @@ class ResourceFinder(object):
         return self.__retrieve_from_journal(id_dict, GraphEntity.journal_volume, volume_id)
 
     def retrieve_br_url(self, res, string):
-        return self.__retrieve_res_id_by_type(res, string, GraphEntity.url)
+        return self.__retrieve_res_id_by_type(res, string.lower(), GraphEntity.url)
 
     def retrieve_br_doi(self, res, string):
-        return self.__retrieve_res_id_by_type(res, string, GraphEntity.doi)
+        return self.__retrieve_res_id_by_type(res, string.lower(), GraphEntity.doi)
+
+    def retrieve_last_snapshot(self, prov_subj):
+        query = """
+            SELECT DISTINCT ?se WHERE {
+                GRAPH <%s>
+                {
+                  ?se %s <%s> .
+                  FILTER NOT EXISTS {?se %s ?ca }
+                }
+            } LIMIT 1
+        """ % (str(prov_subj) + "/prov/",
+               ProvEntity.specialization_of, str(prov_subj),
+               ProvEntity.was_invalidated_by)
+        return self.__query(query)
 
     def __retrieve_res_id_by_type(self, res, id_string, id_type):
         if id_string is not None:
@@ -94,17 +123,18 @@ class ResourceFinder(object):
 
                 return self.__query(query)
 
-    def __id_with_type(self, id_string, id_type):
+    def __id_with_type(self, id_string, id_type, extras=""):
         query = """
         SELECT DISTINCT ?res WHERE {
             ?res <%s> ?id .
             ?id
                 <%s> <%s> ;
-                <%s> "%s"
+                <%s> "%s" .
+                %s
         }""" % (
             GraphEntity.has_identifier,
             GraphEntity.uses_identifier_scheme, id_type,
-            GraphEntity.has_literal_value, id_string)
+            GraphEntity.has_literal_value, id_string, extras)
 
         return self.__query(query)
 

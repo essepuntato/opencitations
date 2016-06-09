@@ -4,7 +4,10 @@ __author__ = 'essepuntato'
 
 import unicodedata
 import re
+import os
+import shutil
 from nltk.metrics import binary_distance as lev
+from rdflib import Literal, RDF
 
 
 def dict_get(d, key_list):
@@ -92,9 +95,36 @@ def string_list_close_match(ls, m):
 
     return final_result
 
-l = [
-    {u"g": u"Alberto", u"f": u"Rossi"},
-    {u"g": u"Albert", u"f": u"Guidi"},
-    {u"g": u"Francesco", u"f": u"Rossi"}
-]
-print list_from_idx(l, [0,2])
+
+def move_file(src, dst):
+    if not os.path.exists(dst):
+        os.makedirs(dst)
+    shutil.move(src, dst)
+    return dst + os.sep + os.path.basename(src)
+
+
+def create_literal(g, res, p, s, dt=None):
+    if isinstance(s, basestring):
+        string = s
+    else:
+        string = str(s)
+    if not is_string_empty(string):
+        g.add((res, p, Literal(string, datatype=dt)))
+        return True
+    return False
+
+
+def create_type(g, res, res_type):
+    g.add((res, RDF.type, res_type))
+
+
+def is_string_empty(string):
+    return string is None or string.strip() == ""
+
+
+def get_short_name(res):
+    return re.sub("^.+/([a-z][a-z])(/[0-9]+)?$", "\\1", str(res))
+
+
+def get_count(res):
+    return re.sub("^.+/[a-z][a-z]/([0-9]+)$", "\\1", str(res))

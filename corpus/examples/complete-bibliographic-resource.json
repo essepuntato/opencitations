@@ -1,45 +1,108 @@
 {
     "@context": "https://w3id.org/oc/corpus/context.json",
     "iri": "gbr:1",
-    "a": "article",
+    "a": [ "document", "article" ],
     "identifier": [
         {
             "iri": "gid:1",
             "a": "unique_identifier",
-            "id": "br/1",
-            "type": "occ"
+            "id": "10.1108/JD-12-2013-0166",
+            "type": "doi",
+            "label": "identifier 1 [id/1]"
         },
         {
             "iri": "gid:2",
             "a": "unique_identifier",
-            "id": "10.1108/JD-12-2013-0166",
-            "type": "doi"
+            "id": "http://www.emeraldinsight.com/doi/abs/10.1108/JD-12-2013-0166",
+            "type": "url",
+            "label": "identifier 2 [id/2]"
         },
         {
             "iri": "gid:3",
             "a": "unique_identifier",
-            "id": "http://www.emeraldinsight.com/doi/abs/10.1108/JD-12-2013-0166",
-            "type": "url"
-        },
-        {
-            "iri": "gid:4",
-            "a": "unique_identifier",
             "id": "http://dx.doi.org/10.1108/JD-12-2013-0166",
-            "type": "url"
+            "type": "url",
+            "label": "identifier 3 [id/3]"
         }
     ],
     "title": "Setting our bibliographic references free: towards open citation data",
     "year": "2015",
+    "contributor": [
+        {
+            "iri": "gar:1",
+            "a": "role",
+            "role_type": "author",
+            "role_of": {
+                "iri": "gra:1",
+                "a": "agent",
+                "label": "responsible agent 1 [ra/1]",
+                "gname": "Silvio",
+                "fname": "Peroni",
+                "identifier": {
+                    "iri": "gid:4",
+                    "a": "unique_identifier",
+                    "type": "orcid",
+                    "id": "0000-0003-0530-4305",
+                    "label": "identifier 4 [id/4]"
+                }
+            },
+            "next": "gar:2"
+        },
+        {
+            "iri": "gar:2",
+            "a": "role",
+            "role_type": "author",
+            "role_of": {
+                "iri": "gra:2",
+                "a": "agent",
+                "label": "responsible agent 2 [ra/2]",
+                "gname": "Alexander",
+                "fname": "Dutton"
+            },
+            "next": "gar:3"
+        },
+        {
+            "iri": "gar:3",
+            "a": "role",
+            "role_type": "author",
+            "role_of": {
+                "iri": "gra:3",
+                "a": "agent",
+                "label": "responsible agent 3 [ra/3]",
+                "gname": "Tanya",
+                "fname": "Grey"
+            },
+            "next": "gar:4"
+        },
+        {
+            "iri": "gar:4",
+            "a": "role",
+            "role_type": "author",
+            "role_of": {
+                "iri": "gra:4",
+                "a": "agent",
+                "label": "responsible agent 4 [ra/4]",
+                "gname": "David",
+                "fname": "Shotton"
+            }
+        },
+        {
+            "a": "role",
+            "iri": "gar:5",
+            "role_type": "publisher",
+            "label": "agent role 5 [ar/5]"
+            "role_of": {
+                "iri": "gra:5",
+                "a": "agent",
+                "name": "Emerald",
+                "label": "responsible agent 5 [ra/5]"
+            }
+        }
+    ],
     "format": [
         {
             "iri": "gre:1",
-            "a": "digital_format",
-            "identifier": {
-                "iri": "gid:5",
-                "a": "unique_identifier",
-                "id": "re/1",
-                "type": "occ"
-            },
+            "a": [ "generic_format", "digital_format"],
             "mime_type": "pdf",
             "fpage": "253",
             "lpage": "277",
@@ -47,13 +110,7 @@
         },
         {
             "iri": "gre:2",
-            "a": "digital_format",
-            "identifier": {
-                "iri": "gid:6",
-                "a": "unique_identifier",
-                "id": "re/2",
-                "type": "occ"
-            },
+            "a": [ "generic_format", "digital_format"],
             "mime_type": "html",
             "document_url": "http://www.emeraldinsight.com/doi/full/10.1108/JD-12-2013-0166"
         }
@@ -66,39 +123,22 @@
     },
     "part_of": {
         "iri": "gbr:2",
-        "a": "periodical_issue",
-        "identifier": {
-            "iri": "gid:7",
-            "a": "unique_identifier",
-            "id": "br/2",
-            "type": "occ"
-        },
+        "a":  [ "document", "periodical_issue" ],
         "number": "2",
         "part_of": {
             "iri": "gbr:3",
-            "a": "periodical_volume",
-            "identifier": {
-                "iri": "gid:8",
-                "a": "unique_identifier",
-                "id": "br/3",
-                "type": "occ"
-            },
+            "a":  [ "document", "periodical_volume" ],
             "number": "71",
             "part_of": {
                 "iri": "gbr:4",
-                "a": "periodical_journal",
-                "identifier": [ 
+                "a":  [ "document", "periodical_journal" ],
+                "identifier": [
                     {
-                        "iri": "gid:9",
-                        "a": "unique_identifier",
-                        "id": "br/4",
-                        "type": "occ"
-                    },
-                    {
-                        "iri": "gid:10",
+                        "iri": "gid:5",
                         "a": "unique_identifier",
                         "id": "0022-0418",
-                        "type": "issn"
+                        "type": "issn",
+                        "label": "identifier 5 [id/5]"
                     }
                 ],
                 "title": "Journal of Documentation"
@@ -108,13 +148,14 @@
     "citation": [
         {
             "iri": "gbr:5",
-            "a": "inproceedings",
+            "a":  [ "document", "inproceedings" ],
             "identifier": [ 
                 {
-                    "iri": "gid:11",
+                    "iri": "gid:6",
                     "a": "unique_identifier",
                     "id": "br/5",
-                    "type": "occ"
+                    "type": "occ",
+                    "label": "identifier 6 [id/6]"
                 }
             ],
             "title": "Automatically classifying the role of citations in biomedical articles",
@@ -124,10 +165,11 @@
                     "iri": "gre:3",
                     "a": "generic_format",
                     "identifier": {
-                        "iri": "gid:12",
+                        "iri": "gid:7",
                         "a": "unique_identifier",
                         "id": "re/3",
-                        "type": "occ"
+                        "type": "occ",
+                        "label": "identifier 7 [id/7]"
                     },
                     "fpage": "11",
                     "lpage": "15"
@@ -135,12 +177,13 @@
             ],
             "part_of": {
                 "iri": "gbr:10",
-                "a": "proceedings",
+                "a":  [ "document", "proceedings" ],
                 "identifier": {
-                    "iri": "gid:13",
+                    "iri": "gid:8",
                     "a": "unique_identifier",
                     "id": "br/10",
-                    "type": "occ"
+                    "type": "occ",
+                    "label": "identifier 8 [id/8]"
                 },
                 "title": "Proceedings of the 2010 AMIA Annual Symposium"
             }
