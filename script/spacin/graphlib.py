@@ -5,11 +5,11 @@ from xml.sax import SAXParseException
 __author__ = 'essepuntato'
 from rdflib import Graph, Literal, Namespace, URIRef
 from rdflib.namespace import RDF, XSD, RDFS
-from reporter import Reporter
+from script.reporter import Reporter
 import re
 import os
 from datetime import datetime
-from support import is_string_empty, create_literal, create_type, get_short_name, get_count
+from script.support import is_string_empty, create_literal, create_type, get_short_name, get_count
 
 
 class GraphEntity(object):
@@ -36,6 +36,8 @@ class GraphEntity(object):
     cites = CITO.cites
     doi = DATACITE.doi
     occ = DATACITE.occ
+    pmid = DATACITE.pmid
+    pmcid = DATACITE.pmcid
     orcid = DATACITE.orcid
     has_identifier = DATACITE.hasIdentifier
     identifier = DATACITE.Identifier
@@ -261,6 +263,12 @@ class GraphEntity(object):
 
     def create_doi(self, string):
         return self._associate_identifier_with_scheme(string.lower(), GraphEntity.doi)
+
+    def create_pmid(self, string):
+        return self._associate_identifier_with_scheme(string, GraphEntity.pmid)
+
+    def create_pmcid(self, string):
+        return self._associate_identifier_with_scheme(string, GraphEntity.pmcid)
 
     def create_issn(self, string):
         cur_string = re.sub("–", "-", string)
@@ -590,7 +598,7 @@ class ProvEntity(GraphEntity):
         self.g.add((self.res, ProvEntity.had_role, URIRef(str(any_res))))
 
     def has_role_in(self, ca_res):
-        ca_res.g.add((URIRef(str(ca_res)), ProvEntity.agent, self.res))
+        ca_res.g.add((URIRef(str(ca_res)), ProvEntity.associated_agent, self.res))
 
     def has_source(self, any_res):
         self.g.add((self.res, ProvEntity.had_primary_source, URIRef(str(any_res))))
@@ -675,6 +683,7 @@ class ProvSet(GraphSet):
             cur_activity = self.add_ca(self.cur_name, cur_subj)
             cur_activity.create_creation_activity()
             cur_activity.generates(cur_snapshot)
+            cur_activity.create_description("The entity '%s' has been created." % str(cur_subj.res))
             if cur_curator_ass is not None:
                 cur_activity.involves_agent_with_role(cur_curator_ass)
             if cur_source_ass is not None:

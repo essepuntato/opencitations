@@ -3,7 +3,7 @@
 __author__ = 'essepuntato'
 
 from SPARQLWrapper import SPARQLWrapper
-from reporter import Reporter
+from script.reporter import Reporter
 import re
 import os
 from rdflib import Graph, BNode

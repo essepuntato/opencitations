@@ -49,8 +49,22 @@ class ResourceFinder(object):
         return self.__id_with_type(
             string.lower(), GraphEntity.doi, "?res <%s> ?cited" % GraphEntity.cites)
 
+    def retrieve_citing_from_pmid(self, string):
+        return self.__id_with_type(
+            string, GraphEntity.pmid, "?res <%s> ?cited" % GraphEntity.cites)
+
+    def retrieve_citing_from_pmid(self, string):
+        return self.__id_with_type(
+            string, GraphEntity.pmcid, "?res <%s> ?cited" % GraphEntity.cites)
+
     def retrieve_from_doi(self, string):
         return self.__id_with_type(string.lower(), GraphEntity.doi)
+
+    def retrieve_from_pmid(self, string):
+        return self.__id_with_type(string, GraphEntity.pmid)
+
+    def retrieve_from_pmcid(self, string):
+        return self.__id_with_type(string, GraphEntity.pmcid)
 
     def retrieve_from_url(self, string):
         return self.__id_with_type(string.lower(), GraphEntity.url)
@@ -72,6 +86,12 @@ class ResourceFinder(object):
 
     def retrieve_br_doi(self, res, string):
         return self.__retrieve_res_id_by_type(res, string.lower(), GraphEntity.doi)
+
+    def retrieve_br_pmid(self, res, string):
+        return self.__retrieve_res_id_by_type(res, string, GraphEntity.pmid)
+
+    def retrieve_br_pmcid(self, res, string):
+        return self.__retrieve_res_id_by_type(res, string, GraphEntity.pmcid)
 
     def retrieve_last_snapshot(self, prov_subj):
         query = """

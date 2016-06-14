@@ -7,10 +7,10 @@ import re
 import os
 from rdflib import Graph, Namespace, URIRef
 from rdflib.namespace import XSD, RDF, RDFS
-from support import create_literal, create_type
+from script.support import create_literal, create_type
 from graphlib import GraphSet
 from storer import Storer
-from reporter import Reporter
+from script.reporter import Reporter
 
 
 class DatasetHandler(object):
@@ -43,6 +43,7 @@ class DatasetHandler(object):
     bibliographic_database = DBR.Bibliographic_database
     open_access = DBR.Open_access
     scholary_communication = DBR.Scholarly_communication
+    citations = DBR.Citation
 
     def __init__(self, triplestore_url, context_path, context_file_path,
                  base_iri, base_dir, info_dir, dataset_home, tmp_dir):
@@ -167,7 +168,8 @@ class DatasetHandler(object):
                 dataset_short_name = str(res)[-3:-1]
                 dataset_name = GraphSet.labels[dataset_short_name]
                 dataset_title += ": %s dataset" % dataset_name.title()
-                dataset_description += " This sub-dataset contains all the %s resources." % dataset_name
+                dataset_description += " This sub-dataset contains all the '%s' resources." % \
+                                       dataset_name
                 dataset_label += " / %s" % dataset_short_name
                 self.create_keyword(g, res, dataset_name)
             else:
@@ -183,9 +185,12 @@ class DatasetHandler(object):
             self.create_keyword(g, res, "OpenCitations")
             self.create_keyword(g, res, "OpenCitations Corpus")
             self.create_keyword(g, res, "SPAR Ontologies")
+            self.create_keyword(g, res, "bibliographic references")
+            self.create_keyword(g, res, "citations")
             self.has_subject(g, res, self.bibliographic_database)
             self.has_subject(g, res, self.scholary_communication)
             self.has_subject(g, res, self.open_access)
+            self.has_subject(g, res, self.citations)
 
             return g
 

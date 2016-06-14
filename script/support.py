@@ -1,5 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+from requests.exceptions import ReadTimeout, ConnectTimeout
+
 __author__ = 'essepuntato'
 
 import unicodedata
@@ -8,6 +10,8 @@ import os
 import shutil
 from nltk.metrics import binary_distance as lev
 from rdflib import Literal, RDF
+from time import sleep
+import requests
 
 
 def dict_get(d, key_list):
@@ -128,3 +132,45 @@ def get_short_name(res):
 
 def get_count(res):
     return re.sub("^.+/[a-z][a-z]/([0-9]+)$", "\\1", str(res))
+
+
+def get_data(max_iteration, sec_to_wait, get_url, headers, timeout, repok, reper):
+    tentative = 0
+    error_no_200 = False
+    error_read = False
+    error_connection = False
+    error_generic = False
+    errors = []
+    while tentative < max_iteration:
+        if tentative != 0:
+            sleep(sec_to_wait)
+        tentative += 1
+
+        try:
+            response = requests.get(get_url, headers=headers, timeout=timeout)
+            if response.status_code == 200:
+                repok.add_sentence("Data retrieved.")
+                return response.text
+            else:
+                if not error_no_200:
+                    error_no_200 = True
+                    errors += ["We got an HTTP error when retrieving data "
+                               "(HTTP status code: %s)." % str(response.status_code)]
+        except ReadTimeout as e:
+            if not error_read:
+                error_read = True
+                errors += ["A timeout error happened when reading results from the API "
+                           "when retrieving data. %s" % str(e)]
+        except ConnectTimeout as e:
+            if not error_connection:
+                error_connection = True
+                errors += ["A timeout error happened when connecting to the API "
+                           "when retrieving data. %s" % str(e)]
+        except Exception as e:
+            if not error_generic:
+                error_generic = True
+                errors += ["A generic error happened when trying to use the API "
+                           "when retrieving data. %s" % str(e)]
+
+    # If the process comes here, no valid result has been returned
+    reper.add_sentence(" | ".join(errors) + "\n\tRequested URL: " + get_url)

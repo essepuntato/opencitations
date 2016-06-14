@@ -14,4 +14,7 @@ triplestore/nohup.out
 website/log.txt
 website/nohup.out
 test
-spacin/conf.json
+script/*.pyc
+script/spacin/*.pyc
+script/bee/*.pyc
+script/conf.json

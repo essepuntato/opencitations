@@ -2,45 +2,67 @@
     "@context": "https://w3id.org/oc/corpus/context.json",
     "iri": "gbr:1/prov/se/2",
     "a": "metadata_snapshot",
+    "label": "snapshot of entity metadata 2 related to bibliographic resource 1 [se/2 -> br/1]",
     "snapshot_of": "gbr:1",
     "generated": "2016-04-01T00:00:00",
     "generated_by": {
         "iri": "gbr:1/prov/ca/2",
-        "a": ["curatorial_activity", "update"],
+        "a": ["curatorial_activity", "modification"],
+        "label": "curatorial activity 2 related to bibliographic resource 1 [ca/2 -> br/1]",
         "involved": {
-            "iri": "gbr:1/prov/cr/2",
+            "iri": "gbr:1/prov/cr/3",
             "a": "curatorial_role",
-            "curatorial_role_type": "source_provider",
-            "held_by": "gbr:1/prov/pa/1"
+            "label": "curatorial role 3 related to bibliographic resource 1 [cr/3 -> br/1]",
+            "curatorial_role_type": "curator",
+            "held_by": {
+                "iri": "gpa:3",
+                "a": "provenance_agent",
+                "name": "Silvio Peroni"
+            }
         },
         "description": "The field 'title' of the entity 'https://w3id.org/oc/corpus/br/1' has been modified.",
-        "update_action": "DELETE DATA { GRAPH <https://w3id.org/oc/corpus/br/> { <https://w3id.org/oc/corpus/br/1> <http://purl.org/dc/terms/title> 'Setting our bibliographic references free' } }; INSERT DATA { GRAPH <https://w3id.org/oc/corpus/br/> { <https://w3id.org/oc/corpus/br/1> <http://purl.org/dc/terms/title> 'Setting our bibliographic references free: towards open citation data' } }"
+        "update_action": "DELETE DATA { GRAPH <https://w3id.org/oc/corpus/br/> { <https://w3id.org/oc/corpus/br/1> <http://purl.org/dc/terms/title> 'Setting our bibliographic references free: towards open citation data' } }; INSERT DATA { GRAPH <https://w3id.org/oc/corpus/br/> { <https://w3id.org/oc/corpus/br/1> <http://purl.org/dc/terms/title> 'Setting Our Bibliographic References Free: Towards Open Citation Data' } }"
     },
     "derived_from": [ 
         {
             "iri": "gbr:1/prov/se/1",
             "a": "metadata_snapshot",
+            "label": "snapshot of entity metadata 1 related to bibliographic resource 1 [se/1 -> br/1]",
             "snapshot_of": "gbr:1",
             "generated": "2016-02-01T00:00:00",
             "generated_by": {
                 "iri": "gbr:1/prov/ca/1",
                 "a": ["curatorial_activity", "creation"],
-                "involved": {
-                    "iri": "gbr:1/prov/cr/1",
-                    "a": "curatorial_role",
-                    "curatorial_role_type": "source_provider",
-                    "held_by": {
-                        "iri": "gbr:1/prov/pa/1",
-                        "a": "provenance_agent",
-                        "name": "CrossRef"
+                "label": "curatorial activity 1 related to bibliographic resource 1 [ca/1 -> br/1]",
+                "involved": [
+                    {
+                        "iri": "gbr:1/prov/cr/1",
+                        "a": "curatorial_role",
+                        "label": "curatorial role 1 related to bibliographic resource 1 [cr/1 -> br/1]",
+                        "curatorial_role_type": "metadata_provider",
+                        "held_by": {
+                            "iri": "gpa:1",
+                            "a": "provenance_agent",
+                            "name": "CrossRef"
+                        }
+                    },
+                    {
+                        "iri": "gbr:1/prov/cr/2",
+                        "a": "curatorial_role",
+                        "label": "curatorial role 2 related to bibliographic resource 1 [cr/2 -> br/1]",
+                        "curatorial_role_type": "curator",
+                        "held_by": {
+                            "iri": "gpa:2",
+                            "a": "provenance_agent",
+                            "name": "SPACIN CrossrefProcessor"
+                        }
                     }
-                },
+                ],
                 "description": "The entity 'https://w3id.org/oc/corpus/br/1' has been created."
             },
             "source": "http://api.crossref.org/works/10.1108/JD-12-2013-0166",
             "invalidated": "2016-04-01T00:00:00",
             "invalidated_by": "gbr:1/prov/ca/2"
         }
-    ],
-    "source": "http://api.crossref.org/works/10.1108/JD-12-2013-0166"
+    ]
 }

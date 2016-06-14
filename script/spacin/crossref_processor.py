@@ -2,15 +2,12 @@
 # -*- coding: utf-8 -*-
 __author__ = 'essepuntato'
 
-from requests.exceptions import ReadTimeout, ConnectTimeout
 from format_processor import *
-import requests
-from time import sleep
-import json
 from graphlib import GraphEntity as ge
-from support import dict_get as dg
-from support import dict_list_get_by_value_ascii as dgt
-from support import string_list_close_match as slc
+from script.support import dict_get as dg
+from script.support import dict_list_get_by_value_ascii as dgt
+from script.support import string_list_close_match as slc
+from script.support import get_data
 
 
 class CrossrefProcessor(FormatProcessor):
@@ -52,60 +49,14 @@ class CrossrefProcessor(FormatProcessor):
         super(CrossrefProcessor, self).__init__(
             base_iri, context_base, info_dir, entries, "Crossref")
 
-    def __process_entity(self, entity, entity_type, api_url):
-        tentative = 0
-        error_no_200 = False
-        error_read = False
-        error_connection = False
-        error_json = False
-        error_generic = False
-        errors = []
-        while tentative < self.max_iteration:
-            if tentative != 0:
-                sleep(self.sec_to_wait)
-            tentative += 1
-
-            try:
-                url_request = api_url + entity
-                entry_data = requests.get(url_request, headers=self.headers, timeout=self.timeout)
-                if entry_data.status_code == 200:
-                    try:
-                        return json.loads(entry_data.text)
-                    except ValueError as e:
-                        if not error_json:
-                            error_json = True
-                            errors += ["The JSON returned is malformed. %s." %
-                                       str(e)]
-                else:
-                    if entry_data.status_code == 404:
-                        return None  # We can avoid to try again, since the resource simply does not exist
-                    elif not error_no_200:
-                        error_no_200 = True
-                        errors += ["We got an HTTP error when retrieving data (HTTP status code: %s)." %
-                                   str(entry_data.status_code)]
-            except ReadTimeout as e:
-                if not error_read:
-                    error_read = True
-                    errors += ["A timeout error happened when reading results from the API. %s" %
-                               str(e)]
-            except ConnectTimeout as e:
-                if not error_connection:
-                    error_connection = True
-                    errors += ["A timeout error happened when connecting to the API. %s" %
-                               str(e)]
-            except Exception as e:
-                if not error_generic:
-                    error_generic = True
-                    errors += ["A generic error happened when trying to use the API. %s" %
-                               str(e)]
-
-        # If the process comes here, no valid result has been returned
-        self.reperr.add_sentence(self.message(" | ".join(errors), entity_type, entity, url_request))
+    def __process_entity(self, entity, api_url):
+        return get_data(self.max_iteration, self.sec_to_wait, api_url + entity,
+                        self.headers, self.timeout, self.repok, self.reperr)
 
     def process_entry(self, entry):
         entry_cleaned = FormatProcessor.clean_entry(entry)
         cur_json = self.get_crossref_item(
-            self.__process_entity(entry_cleaned, "entry", self.crossref_api_search))
+            self.__process_entity(entry_cleaned, self.crossref_api_search))
         if cur_json is not None:
             return self.process_crossref_json(
                 cur_json, self.crossref_api_search + entry_cleaned, self.name, self.id, self.source)
@@ -113,45 +64,70 @@ class CrossrefProcessor(FormatProcessor):
     def process_doi(self, doi, doi_curator, doi_source_provider):
         existing_res = self.rf.retrieve_from_doi(doi)
         if existing_res is None:
-            cur_json = self.get_crossref_item(self.__process_entity(doi, "doi", self.crossref_api_works))
+            cur_json = self.get_crossref_item(self.__process_entity(doi, self.crossref_api_works))
             if cur_json is not None:
                 return self.process_crossref_json(
                     cur_json, self.crossref_api_works + doi, doi_curator,
                     doi_source_provider, self.source)
         else:
-            result = self.g_set.add_br(self.name, doi_source_provider, self.source, existing_res)
+            return self.process_existing_by_id(existing_res, doi_source_provider)
+
+    def process_pmid(self, pmid, pmid_source_provider):
+        existing_res = self.rf.retrieve_from_pmid(pmid)
+        return self.process_existing_by_id(existing_res, pmid_source_provider)
+
+    def process_pmcid(self, pmcid, pmcid_source_provider):
+        existing_res = self.rf.retrieve_from_pmcid(pmcid)
+        return self.process_existing_by_id(existing_res, pmcid_source_provider)
+
+    def process_existing_by_id(self, existing_res, source_provider):
+        if existing_res is not None:
+            result = self.g_set.add_br(self.name, source_provider, self.source, existing_res)
             self.rf.update_graph_set(self.g_set)
             return result
 
     def process(self):
         """This methods returns a GraphSet populated with the citation data form the input
         source, or None if any issue has been encountered."""
-        if self.rf.retrieve_citing_from_doi(self.doi) is None:
-            citing_entity = self.process_doi(self.doi, self.name, self.source_provider)
-            if citing_entity is None:
-                citing_entity = self.g_set.add_br(self.name)
-                self.__add_doi(citing_entity, self.doi)
-                self.rf.update_graph_set(self.g_set)
+        if self.doi is not None:
+            citing_resource = self.rf.retrieve_citing_from_doi(self.doi)
+            if citing_resource is None and self.pmid is not None:
+                citing_resource = self.rf.retrieve_citing_from_pmid(self.pmid)
+            if citing_resource is None and self.pmcid is not None:
+                citing_resource = self.rf.retrieve_citing_from_pmcid(self.pmcid)
+
+            if citing_resource is None:
+                citing_entity = self.process_doi(self.doi, self.curator, self.source_provider)
+                if citing_entity is None:
+                    citing_entity = self.g_set.add_br(self.name)
+                    self.__add_doi(citing_entity, self.doi, self.curator)
+                    self.rf.update_graph_set(self.g_set)
+                    self.repok.add_sentence(
+                        self.message("The citing entity has been created even if no results have "
+                                     "been returned by the API.",
+                                     "doi", self.doi))
+
+                # Add other ids if they exist
+                self.__add_pmid(citing_entity, self.pmid)
+                self.__add_pmcid(citing_entity, self.pmcid)
+
+                cited_entities = self.process_references()
+
+                if cited_entities is not None:
+                    for idx, cited_entity in enumerate(cited_entities):
+                        citing_entity.has_citation(cited_entity)
+                        cur_bibentry = dg(self.entries[idx], ["bibentry"])
+                        cur_be = self.g_set.add_be(self.curator, self.source_provider, self.source)
+                        citing_entity.contains_in_reference_list(cur_be)
+                        cited_entity.has_reference(cur_be)
+                        if cur_bibentry is not None and cur_bibentry.strip():
+                            cur_be.create_content(cur_bibentry.strip())
+
+                    return self.g_set
+            else:
                 self.repok.add_sentence(
-                    self.message("The citing entity has been created even if no results have "
-                                 "been returned by the API.",
-                                 "doi", self.doi))
-
-            cited_entities = self.process_references()
-
-            if cited_entities is not None:
-                for idx, cited_entity in enumerate(cited_entities):
-                    citing_entity.has_citation(cited_entity)
-                    cur_be = self.g_set.add_be(self.curator, self.source_provider, self.source)
-                    cur_be.create_content(self.entries[idx]["bibentry"])
-                    citing_entity.contains_in_reference_list(cur_be)
-                    cited_entity.has_reference(cur_be)
-
-                return self.g_set
-        else:
-            self.repok.add_sentence(
-                "The citing entity with DOI '%s' has been already "
-                "processed in the past." % self.doi)
+                    "The citing entity with DOI '%s' has been already "
+                    "processed in the past." % self.doi)
 
     def process_references(self):
         result = []
@@ -161,22 +137,40 @@ class CrossrefProcessor(FormatProcessor):
             self.reperr.new_article()
             cur_res = None
 
-            entry = full_entry["bibentry"]
+            entry = dg(full_entry, ["bibentry"])
+            provided_doi = dg(full_entry, ["doi"])
+            provided_pmid = dg(full_entry, ["pmid"])
+            provided_pmcid = dg(full_entry, ["pmcid"])
 
             extracted_doi = FormatProcessor.extract_doi(entry)
             extracted_doi_used = False
             extracted_url = FormatProcessor.extract_url(entry)
 
-            if "doi" in full_entry:
-                provided_doi = full_entry["doi"]
+            if provided_doi is not None:
                 cur_res = self.process_doi(provided_doi, self.curator, self.source_provider)
                 if cur_res is not None:
                     self.repok.add_sentence(
-                        self.message("The entity for '%s' has been found by means of the "
-                                     "DOI provided as input by %s." % (entry, self.source_provider),
+                        self.message("The entity has been found by means of the "
+                                     "DOI provided as input by %s." % self.source_provider,
                                      "DOI", provided_doi))
 
-            if cur_res is None:
+            if cur_res is None and provided_pmid is not None:
+                cur_res = self.process_pmid(provided_pmid, self.source_provider)
+                if cur_res is not None:
+                    self.repok.add_sentence(
+                        self.message("The entity has been found by means of the "
+                                     "PMID provided as input by %s." % self.source_provider,
+                                     "PMID", self.pmid))
+
+            if cur_res is None and provided_pmcid is not None:
+                cur_res = self.process_pmcid(provided_pmcid, self.source_provider)
+                if cur_res is not None:
+                    self.repok.add_sentence(
+                        self.message("The entity has been found by means of the "
+                                     "PMCID provided as input by %s." % self.source_provider,
+                                     "PMCID", self.pmid))
+
+            if cur_res is None and entry is not None:
                 cur_res = self.process_entry(entry)
                 if cur_res is None:
                     if self.get_bib_entry_doi and extracted_doi is not None:
@@ -214,15 +208,21 @@ class CrossrefProcessor(FormatProcessor):
                                      "been returned by the API.",
                                      "entry", entry))
 
-                # Add any URL extracted from the entry if it is not already included
-                if self.get_bib_entry_url:
-                    self.__add_url(cur_res, extracted_url)
+                # Add the DOI, the PMID and the PMCID if they have been provided by the curator
+                # (if they are not already associated to the resource)
+                self.__add_doi(cur_res, provided_doi, self.curator)
+                self.__add_pmid(cur_res, provided_pmid)
+                self.__add_pmcid(cur_res, provided_pmcid)
 
                 # Add any DOI extracted from the entry if it is not already included (and only if
                 # a resource has not been retrieved by a DOI specified in the entry explicitly, or
                 # by a Crossref search.
                 if self.get_bib_entry_doi and extracted_doi_used:
-                    self.__add_doi(cur_res, extracted_doi)
+                    self.__add_doi(cur_res, extracted_doi, self.name)
+
+                # Add any URL extracted from the entry if it is not already included
+                if self.get_bib_entry_url:
+                    self.__add_url(cur_res, extracted_url)
 
                 result += [cur_res]
                 self.rf.update_graph_set(self.g_set)
@@ -244,13 +244,35 @@ class CrossrefProcessor(FormatProcessor):
 
             cur_res.has_id(cur_id)
 
-    def __add_doi(self, cur_res, extracted_doi):
+    def __add_pmid(self, cur_res, pmid_string):
+        self.rf.update_graph_set(self.g_set)
+        if pmid_string is not None:
+            cur_id = self.rf.retrieve_br_pmid(cur_res, pmid_string)
+
+            if cur_id is None:
+                cur_id = self.g_set.add_id(self.curator, self.source_provider, self.source)
+                cur_id.create_pmid(pmid_string)
+
+            cur_res.has_id(cur_id)
+
+    def __add_pmcid(self, cur_res, pmcid_string):
+        self.rf.update_graph_set(self.g_set)
+        if pmcid_string is not None:
+            cur_id = self.rf.retrieve_br_pmcid(cur_res, pmcid_string)
+
+            if cur_id is None:
+                cur_id = self.g_set.add_id(self.curator, self.source_provider, self.source)
+                cur_id.create_pmcid(pmcid_string)
+
+            cur_res.has_id(cur_id)
+
+    def __add_doi(self, cur_res, extracted_doi, curator):
         self.rf.update_graph_set(self.g_set)
         if extracted_doi is not None:
             cur_id = self.rf.retrieve_br_doi(cur_res, extracted_doi)
 
             if cur_id is None:
-                cur_id = self.g_set.add_id(self.name, self.source_provider, self.source)
+                cur_id = self.g_set.add_id(curator, self.source_provider, self.source)
                 cur_id.create_doi(extracted_doi)
 
             cur_res.has_id(cur_id)

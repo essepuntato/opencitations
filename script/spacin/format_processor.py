@@ -3,9 +3,9 @@
 __author__ = 'essepuntato'
 from urllib import quote
 import re
-from reporter import Reporter
+from script.reporter import Reporter
 from graphlib import GraphSet
-from support import normalise_ascii as sa
+from script.support import normalise_ascii as sa
 
 
 class FormatProcessor(object):
@@ -14,7 +14,18 @@ class FormatProcessor(object):
 
     """This class is the abstract one for any kind of processors."""
     def __init__(self, base_iri, context_base, info_dir, entries, agent_id=None):
-        self.doi = entries["doi"].lower()
+        if "doi" in entries:
+            self.doi = entries["doi"].lower()
+        else:
+            self.doi = None
+        if "pmid" in entries:
+            self.pmid = entries["pmid"]
+        else:
+            self.pmid = None
+        if "pmcid" in entries:
+            self.pmcid = entries["pmcid"]
+        else:
+            self.pmcid = None
         if "curator" in entries:
             self.curator = entries["curator"]
         else:
@@ -55,22 +66,25 @@ class FormatProcessor(object):
 
     @staticmethod
     def extract_data(string, pattern):
-        result = re.search(pattern, string)
-        if result:
-            return result.group(1)
+        if string is not None:
+            result = re.search(pattern, string)
+            if result:
+                return result.group(1)
 
     @staticmethod
     def extract_doi(string):
-        result = FormatProcessor.extract_data(string, FormatProcessor.doi_pattern)
-        if result:
-            result = re.sub("(\.|,)?$", "", result)
+        if string is not None:
+            result = FormatProcessor.extract_data(string, FormatProcessor.doi_pattern)
+            if result:
+                result = re.sub("(\.|,)?$", "", result)
 
         return result
 
     @staticmethod
     def extract_url(string):
-        result = FormatProcessor.extract_data(string, FormatProcessor.http_pattern)
-        if result:
-            result = re.sub("\\\\", "", re.sub("/?\.?$", "", result))
+        if string is not None:
+            result = FormatProcessor.extract_data(string, FormatProcessor.http_pattern)
+            if result:
+                result = re.sub("\\\\", "", re.sub("/?\.?$", "", result))
 
-        return result
+            return result

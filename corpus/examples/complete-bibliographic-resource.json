@@ -2,6 +2,7 @@
     "@context": "https://w3id.org/oc/corpus/context.json",
     "iri": "gbr:1",
     "a": [ "document", "article" ],
+    "label": "bibliographic resource 1 [br/1]",
     "identifier": [
         {
             "iri": "gid:1",
@@ -31,6 +32,7 @@
         {
             "iri": "gar:1",
             "a": "role",
+            "label": "agent role 1 [ar/1]",
             "role_type": "author",
             "role_of": {
                 "iri": "gra:1",
@@ -51,6 +53,7 @@
         {
             "iri": "gar:2",
             "a": "role",
+            "label": "agent role 2 [ar/2]",
             "role_type": "author",
             "role_of": {
                 "iri": "gra:2",
@@ -64,6 +67,7 @@
         {
             "iri": "gar:3",
             "a": "role",
+            "label": "agent role 3 [ar/3]",
             "role_type": "author",
             "role_of": {
                 "iri": "gra:3",
@@ -77,6 +81,7 @@
         {
             "iri": "gar:4",
             "a": "role",
+            "label": "agent role 4 [ar/4]",
             "role_type": "author",
             "role_of": {
                 "iri": "gra:4",
@@ -89,8 +94,8 @@
         {
             "a": "role",
             "iri": "gar:5",
+            "label": "agent role 5 [ar/5]",
             "role_type": "publisher",
-            "label": "agent role 5 [ar/5]"
             "role_of": {
                 "iri": "gra:5",
                 "a": "agent",
@@ -103,6 +108,7 @@
         {
             "iri": "gre:1",
             "a": [ "generic_format", "digital_format"],
+            "label": "resource embodiment 1 [re/1]",
             "mime_type": "pdf",
             "fpage": "253",
             "lpage": "277",
@@ -111,27 +117,32 @@
         {
             "iri": "gre:2",
             "a": [ "generic_format", "digital_format"],
+            "label": "resource embodiment 2 [re/2]",
             "mime_type": "html",
             "document_url": "http://www.emeraldinsight.com/doi/full/10.1108/JD-12-2013-0166"
         }
     ],
-    "reference": {
+    "reference": [{
         "iri": "gbe:1",
         "a": "entry",
+        "label": "bibliographic entry 1 [be/1]",
         "content": "Agarwal, S., Choubey, L. and Yu, H. (2010), “Automatically classifying the role of citations in biomedical articles”, Proceedings of the 2010 AMIA Annual Symposium, pp. 11-15.",
         "crossref": "gbr:5"
-    },
+    }],
     "part_of": {
         "iri": "gbr:2",
         "a":  [ "document", "periodical_issue" ],
+        "label": "bibliographic resource 2 [br/2]",
         "number": "2",
         "part_of": {
             "iri": "gbr:3",
             "a":  [ "document", "periodical_volume" ],
+            "label": "bibliographic resource 3 [br/3]",
             "number": "71",
             "part_of": {
                 "iri": "gbr:4",
                 "a":  [ "document", "periodical_journal" ],
+                "label": "bibliographic resource 4 [br/4]",
                 "identifier": [
                     {
                         "iri": "gid:5",
@@ -149,42 +160,22 @@
         {
             "iri": "gbr:5",
             "a":  [ "document", "inproceedings" ],
-            "identifier": [ 
-                {
-                    "iri": "gid:6",
-                    "a": "unique_identifier",
-                    "id": "br/5",
-                    "type": "occ",
-                    "label": "identifier 6 [id/6]"
-                }
-            ],
+            "label": "bibliographic resource 5 [br/5]",
             "title": "Automatically classifying the role of citations in biomedical articles",
             "year": "2010",
             "format": [
                 {
                     "iri": "gre:3",
                     "a": "generic_format",
-                    "identifier": {
-                        "iri": "gid:7",
-                        "a": "unique_identifier",
-                        "id": "re/3",
-                        "type": "occ",
-                        "label": "identifier 7 [id/7]"
-                    },
+                    "label": "resource embodiment 3 [re/3]",
                     "fpage": "11",
                     "lpage": "15"
                 }
             ],
             "part_of": {
-                "iri": "gbr:10",
+                "iri": "gbr:6",
                 "a":  [ "document", "proceedings" ],
-                "identifier": {
-                    "iri": "gid:8",
-                    "a": "unique_identifier",
-                    "id": "br/10",
-                    "type": "occ",
-                    "label": "identifier 8 [id/8]"
-                },
+                "label": "bibliographic resource 6 [br/6]",
                 "title": "Proceedings of the 2010 AMIA Annual Symposium"
             }
         }

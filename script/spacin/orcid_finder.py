@@ -5,10 +5,11 @@ __author__ = 'essepuntato'
 import json
 import requests
 import argparse
-from reporter import Reporter
-from support import dict_get as dg
-from support import dict_add as da
-from support import normalise_ascii as na
+from script.reporter import Reporter
+from script.support import dict_get as dg
+from script.support import dict_add as da
+from script.support import normalise_ascii as na
+from script.support import get_data
 from time import sleep
 from requests.exceptions import ReadTimeout, ConnectTimeout
 from urllib import quote
@@ -53,49 +54,8 @@ class ORCIDFinder(object):
 
         self.__last_query_done = ORCIDFinder.__api_url + quote(cur_query)
 
-        tentative = 0
-        error_no_200 = False
-        error_read = False
-        error_connection = False
-        error_generic = False
-        errors = []
-        while tentative < self.max_iteration:
-            if tentative != 0:
-                sleep(self.sec_to_wait)
-            tentative += 1
-
-            try:
-                response = requests.get(
-                    self.__last_query_done, headers=self.headers, timeout=self.timeout)
-                if response.status_code == 200:
-                    self.repok.add_sentence("ORCID data for DOI '%s' retrieved." % doi_string)
-                    return response.text
-                else:
-                    if not error_no_200:
-                        error_no_200 = True
-                        errors += ["We got an HTTP error when retrieving ORCID data for DOI '%s' "
-                                   "(HTTP status code: %s)." % (doi_string, str(response.status_code))]
-            except ReadTimeout as e:
-                if not error_read:
-                    error_read = True
-                    errors += ["A timeout error happened when reading results from the API "
-                               "when retrieving ORCID data for DOI '%s'. %s" %
-                               (doi_string, str(e))]
-            except ConnectTimeout as e:
-                if not error_connection:
-                    error_connection = True
-                    errors += ["A timeout error happened when connecting to the API "
-                               "when retrieving ORCID data for DOI '%s'. %s" %
-                               (doi_string, str(e))]
-            except Exception as e:
-                if not error_generic:
-                    error_generic = True
-                    errors += ["A generic error happened when trying to use the API "
-                               "when retrieving ORCID data for DOI '%s'. %s" %
-                               (doi_string, str(e))]
-
-        # If the process comes here, no valid result has been returned
-        self.reper.add_sentence(" | ".join(errors))
+        return get_data(self.max_iteration, self.sec_to_wait, self.__last_query_done,
+                        self.headers, self.timeout, self.repok, self.reper)
         # TODO: store error somewhere
 
     def get_orcid_ids(self, doi_string, family_names=[]):
