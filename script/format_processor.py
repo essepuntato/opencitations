@@ -3,9 +3,9 @@
 __author__ = 'essepuntato'
 from urllib import quote
 import re
-from script.reporter import Reporter
+from reporter import Reporter
 from graphlib import GraphSet
-from script.support import normalise_ascii as sa
+from support import normalise_ascii as sa
 
 
 class FormatProcessor(object):

@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 from requests.exceptions import ReadTimeout, ConnectTimeout
+import json
 
 __author__ = 'essepuntato'
 
@@ -50,6 +51,10 @@ def normalise_ascii(string):
 
 def normalise_name(name):
     return re.sub("[^A-Za-z ]", "", normalise_ascii(name).lower())
+
+
+def normalise_id(id_string):
+    return re.sub("[^A-Za-z0-9#]", "_", normalise_ascii(id_string).replace("/", "#").lower())
 
 
 def dict_list_get_by_value_ascii(l, k, v):
@@ -149,13 +154,15 @@ def get_data(max_iteration, sec_to_wait, get_url, headers, timeout, repok, reper
         try:
             response = requests.get(get_url, headers=headers, timeout=timeout)
             if response.status_code == 200:
-                repok.add_sentence("Data retrieved.")
-                return response.text
+                repok.add_sentence("Data retrieved from '%s'." % get_url)
+                return json.loads(response.text)
             else:
                 if not error_no_200:
                     error_no_200 = True
                     errors += ["We got an HTTP error when retrieving data "
                                "(HTTP status code: %s)." % str(response.status_code)]
+                if response.status_code == 404:
+                    break  # If the resource has not found, we can break the process immediately
         except ReadTimeout as e:
             if not error_read:
                 error_read = True

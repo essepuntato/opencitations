@@ -5,11 +5,11 @@ from xml.sax import SAXParseException
 __author__ = 'essepuntato'
 from rdflib import Graph, Literal, Namespace, URIRef
 from rdflib.namespace import RDF, XSD, RDFS
-from script.reporter import Reporter
+from reporter import Reporter
 import re
 import os
 from datetime import datetime
-from script.support import is_string_empty, create_literal, create_type, get_short_name, get_count
+from support import is_string_empty, create_literal, create_type, get_short_name, get_count
 
 
 class GraphEntity(object):
@@ -646,6 +646,11 @@ class ProvSet(GraphSet):
         for prov_subject in self.all_subjects:
             cur_subj = self.prov_g.get_entity(prov_subject)
 
+            last_snapshot = None
+            last_snapshot_res = self.rf.retrieve_last_snapshot(prov_subject)
+            if last_snapshot_res is not None:
+                last_snapshot = self.add_se(self.cur_name, cur_subj, last_snapshot_res)
+
             # Snapshot
             cur_snapshot = self.add_se(self.cur_name, cur_subj)
             cur_snapshot.snapshot_of(cur_subj)
@@ -681,13 +686,36 @@ class ProvSet(GraphSet):
 
             # Activity
             cur_activity = self.add_ca(self.cur_name, cur_subj)
-            cur_activity.create_creation_activity()
             cur_activity.generates(cur_snapshot)
-            cur_activity.create_description("The entity '%s' has been created." % str(cur_subj.res))
             if cur_curator_ass is not None:
                 cur_activity.involves_agent_with_role(cur_curator_ass)
             if cur_source_ass is not None:
                 cur_activity.involves_agent_with_role(cur_source_ass)
+
+            # Old snapshot
+            if last_snapshot is None:
+                cur_activity.create_creation_activity()
+                cur_activity.create_description("The entity '%s' has been created." % str(cur_subj.res))
+            else:
+                cur_activity.create_update_activity()
+                cur_activity.create_description("The entity '%s' has been extended with citation data."
+                                                % str(cur_subj.res))
+                last_snapshot.create_invalidation_time(cur_time)
+                cur_activity.invalidates(last_snapshot)
+                cur_snapshot.derives_from(last_snapshot)
+                cur_snapshot.create_update_query(self._create_citation_query(cur_subj.g))
+
+    @staticmethod
+    def _create_citation_query(cur_subj_g):
+        query_string = "INSERT DATA { GRAPH <%s> { " % cur_subj_g.identifier
+        is_first = True
+        for s, p, o in cur_subj_g.triples((None, None, None)):
+            if not is_first:
+                query_string += ". "
+            is_first = False
+            query_string += "<%s> <%s> <%s> " % (str(s), str(p), str(o))
+
+        return query_string + "} }"
 
     def _add_prov(self, short_name, prov_type, res, resp_agent, prov_subject=None):
         if prov_subject is None:

@@ -7,10 +7,10 @@ import re
 import os
 from rdflib import Graph, Namespace, URIRef
 from rdflib.namespace import XSD, RDF, RDFS
-from script.support import create_literal, create_type
+from support import create_literal, create_type
 from graphlib import GraphSet
 from storer import Storer
-from script.reporter import Reporter
+from reporter import Reporter
 
 
 class DatasetHandler(object):

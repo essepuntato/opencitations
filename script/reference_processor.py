@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-from script.reporter import Reporter
+from reporter import Reporter
 import csv
 from reference_storer import BibliographicReferenceStorer
 
@@ -9,6 +9,7 @@ class ReferenceProcessor(object):
     def __init__(self,
                  stored_file,
                  reference_dir,
+                 error_dir,
                  headers={"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10; "
                                         "rv:33.0) Gecko/20100101 Firefox/33.0"},
                  sec_to_wait=10,
@@ -27,7 +28,7 @@ class ReferenceProcessor(object):
         self.repok.new_article()
         self.reper = Reporter(prefix="[%s - ERROR] " % self.name)
         self.reper.new_article()
-        self.rs = BibliographicReferenceStorer(stored_file, reference_dir)
+        self.rs = BibliographicReferenceStorer(stored_file, reference_dir, error_dir)
 
     def process(self):
         pass  # To implement in subclasses

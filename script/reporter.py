@@ -21,11 +21,11 @@ class Reporter:
             if self.print_sentences and len(self.last_article) > 0:
                 print "\n"
 
-    def add_sentence(self, sentence):
+    def add_sentence(self, sentence, print_this_sentence=True):
         cur_sentence = self.prefix + sentence
         self.last_sentence = cur_sentence
         self.last_article.append(cur_sentence)
-        if self.print_sentences:
+        if self.print_sentences and print_this_sentence:
             print cur_sentence
 
     def get_last_sentence(self):

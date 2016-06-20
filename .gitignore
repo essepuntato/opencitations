@@ -15,6 +15,4 @@ website/log.txt
 website/nohup.out
 test
 script/*.pyc
-script/spacin/*.pyc
-script/bee/*.pyc
 script/conf.json

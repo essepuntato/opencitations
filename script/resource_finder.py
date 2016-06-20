@@ -96,14 +96,10 @@ class ResourceFinder(object):
     def retrieve_last_snapshot(self, prov_subj):
         query = """
             SELECT DISTINCT ?se WHERE {
-                GRAPH <%s>
-                {
-                  ?se %s <%s> .
-                  FILTER NOT EXISTS {?se %s ?ca }
-                }
+                ?se <%s> <%s> .
+                FILTER NOT EXISTS {?se <%s> ?ca }
             } LIMIT 1
-        """ % (str(prov_subj) + "/prov/",
-               ProvEntity.specialization_of, str(prov_subj),
+        """ % (ProvEntity.specialization_of, str(prov_subj),
                ProvEntity.was_invalidated_by)
         return self.__query(query)
 
@@ -169,3 +165,4 @@ class ResourceFinder(object):
         result = self.g.query(query)
         for res, in result:
             return res
+

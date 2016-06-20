@@ -4,14 +4,14 @@ __author__ = 'essepuntato'
 
 import json
 from crossref_processor import CrossrefProcessor
-from script.spacin.conf import *
+from conf_spacin import *
+from stopper import Stopper
+from support import move_file
 from resource_finder import ResourceFinder
 from orcid_finder import ORCIDFinder
 from graphlib import ProvSet
 from storer import Storer
 import os
-from script.stopper import Stopper
-from script.support import move_file
 import traceback
 from dataset_handler import DatasetHandler
 from datetime import datetime

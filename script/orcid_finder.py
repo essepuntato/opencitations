@@ -5,13 +5,11 @@ __author__ = 'essepuntato'
 import json
 import requests
 import argparse
-from script.reporter import Reporter
-from script.support import dict_get as dg
-from script.support import dict_add as da
-from script.support import normalise_ascii as na
-from script.support import get_data
-from time import sleep
-from requests.exceptions import ReadTimeout, ConnectTimeout
+from reporter import Reporter
+from support import dict_get as dg
+from support import dict_add as da
+from support import normalise_ascii as na
+from support import get_data
 from urllib import quote
 
 
@@ -63,7 +61,7 @@ class ORCIDFinder(object):
 
         records = self.get_orcid_records(doi_string, family_names)
         if records is not None:
-            rec_results = dg(json.loads(records), ["orcid-search-results", "orcid-search-result"])
+            rec_results = dg(records, ["orcid-search-results", "orcid-search-result"])
             if rec_results is not None:
                 for record in rec_results:
                     orcid_profile = dg(record, ["orcid-profile"])
