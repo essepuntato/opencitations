@@ -37,6 +37,7 @@ $def with ()
                 <nav>
                     <ul class="nav masthead-nav">
                         <li class="active"><a href="#">Home</a></li>
+                        <li><a href="#" data-toggle="modal" data-target="#documents">Documents</a></li>
                         <li><a href="#" data-toggle="modal" data-target="#publications">Publications</a></li>
                         <li><a href="#" data-toggle="modal" data-target="#contacts">Contacts</a></li>
                     </ul>
@@ -44,6 +45,21 @@ $def with ()
             </div>
 
             <!-- Modal -->
+            <div id="documents" class="modal fade" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">
+                                &times;
+                            </button>
+                            <h4 class="modal-title">Documents</h4>
+                        </div>
+                        <div class="modal-body left">
+                            <p><strong>Metadata document: </strong>Silvio Peroni, David Shotton (2016). Metadata for the OpenCitations Corpus. figshare. <a href="https://dx.doi.org/10.6084/m9.figshare.3443876">https://dx.doi.org/10.6084/m9.figshare.3443876</a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div id="publications" class="modal fade" role="dialog">
                 <div class="modal-dialog">
                     <div class="modal-content">
@@ -54,9 +70,9 @@ $def with ()
                             <h4 class="modal-title">Publications</h4>
                         </div>
                         <div class="modal-body left">
-                            <p>Silvio Peroni, Alexander Dutton, Tanya Gray, David Shotton. (2015).
+                            <p>Silvio Peroni, Alexander Dutton, Tanya Gray, David Shotton (2015).
 Setting our bibliographic references free: towards open citation data. Journal of Documentation, 71 (2): 253-277. <a href="http://dx.doi.org/10.1108/JD-12-2013-0166">http://dx.doi.org/10.1108/JD-12-2013-0166</a></p>
-                            <p>David Shotton. (2013). Open citations. Nature, 502 (7471): 295-297. <a href="http://dx.doi.org/10.1038/502295a">http://dx.doi.org/10.1038/502295a</a></p>
+                            <p>David Shotton (2013). Open citations. Nature, 502 (7471): 295-297. <a href="http://dx.doi.org/10.1038/502295a">http://dx.doi.org/10.1038/502295a</a></p>
                         </div>
                     </div>
                 </div>
@@ -83,7 +99,7 @@ Setting our bibliographic references free: towards open citation data. Journal o
                     <img id="logo" class="img-responsive center-block" src="/static/img/logo.png" alt="Open Citations logo" />
                 </h1>
                 <p class="lead"><span class="oc-purple">Open</span><span class="oc-blue">Citations</span> project will strike again very soon!</p>
-                <p>Its main output is the creation of the <em>Open Citations Corpus</em> (<em>OCC</em>), an open repository of scholarly citation data made available under a <a href="https://creativecommons.org/publicdomain/zero/1.0/">Creative Commons public domain</a> dedication, which provides in RDF accurate citation information (bibliographic references) harvested from the scholarly literature (described using the <a href="http://www.sparontologies.net">SPAR Ontologies</a>) that others may freely build upon, enhance and reuse for any purpose, without restriction under copyright or database law.</p>
+                <p>Its main output is the creation of the <em>Open Citations Corpus</em> (<em>OCC</em>), an open repository of scholarly citation data made available under a <a href="https://creativecommons.org/publicdomain/zero/1.0/">Creative Commons public domain</a> dedication, which provides in RDF accurate citation information (bibliographic references) harvested from the scholarly literature (described using the <a href="http://www.sparontologies.net">SPAR Ontologies</a> according to the <a href="https://dx.doi.org/10.6084/m9.figshare.3443876">OCC metadata document</a>) that others may freely build upon, enhance and reuse for any purpose, without restriction under copyright or database law.</p>
                 <p class="lead">Stay tuned!</p>
             </div>
         </div>
