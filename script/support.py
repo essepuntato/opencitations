@@ -139,7 +139,7 @@ def get_count(res):
     return re.sub("^.+/[a-z][a-z]/([0-9]+)$", "\\1", str(res))
 
 
-def get_data(max_iteration, sec_to_wait, get_url, headers, timeout, repok, reper):
+def get_data(max_iteration, sec_to_wait, get_url, headers, timeout, repok, reper, is_json=True):
     tentative = 0
     error_no_200 = False
     error_read = False
@@ -155,7 +155,10 @@ def get_data(max_iteration, sec_to_wait, get_url, headers, timeout, repok, reper
             response = requests.get(get_url, headers=headers, timeout=timeout)
             if response.status_code == 200:
                 repok.add_sentence("Data retrieved from '%s'." % get_url)
-                return json.loads(response.text)
+                if is_json:
+                    return json.loads(response.text)
+                else:
+                    return response.text
             else:
                 if not error_no_200:
                     error_no_200 = True

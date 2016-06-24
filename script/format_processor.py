@@ -26,6 +26,10 @@ class FormatProcessor(object):
             self.pmcid = entries["pmcid"]
         else:
             self.pmcid = None
+        if "url" in entries:
+            self.url = entries["url"].lower()
+        else:
+            self.url = None
         if "curator" in entries:
             self.curator = entries["curator"]
         else:

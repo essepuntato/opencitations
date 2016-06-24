@@ -4,6 +4,7 @@ import os
 import csv
 import json
 from support import normalise_id
+from datetime import datetime
 
 
 class BibliographicReferenceStorer(object):
@@ -37,35 +38,43 @@ class BibliographicReferenceStorer(object):
         self.error = False
 
     def add_reference(self, bib_entry=None, process_it=True,
-                      string_doi=None, string_pmid=None, string_pmcid=None):
-        if self.last_ref_list is not None:
+                      string_local_id=None, string_doi=None,
+                      string_pmid=None, string_pmcid=None, string_url=None):
+        if self.last_ref_list is not None and not self.error:
             cur_reference = {}
 
             if bib_entry is not None:
-                cur_reference["bibentry"] = bib_entry,
+                cur_reference["bibentry"] = bib_entry
                 cur_reference["process_entry"] = str(process_it)
+            if string_local_id is not None:
+                cur_reference["localid"] = string_local_id
             if string_doi is not None:
                 cur_reference["doi"] = string_doi
             if string_pmid is not None:
                 cur_reference["pmid"] = string_pmid
             if string_pmcid is not None:
                 cur_reference["pmcid"] = string_pmcid
+            if string_url is not None:
+                cur_reference["url"] = string_url
 
             if cur_reference:
                 self.last_ref_list += [cur_reference]
             else:
                 self.error = True
+                self.last_ref_list = []
 
             return True
         else:
             return False
 
-    def store(self, id_string, citing_doi=None, citing_pmid=None, citing_pmcid=None,
+    def store(self, id_string, citing_localid=None, citing_doi=None, citing_pmid=None, citing_pmcid=None,
               curator=None, source_provider=None, source=None):
         if self.last_ref_list is not None:
-            json_item = {
-                "references": self.last_ref_list
-            }
+            json_item = {}
+            if self.last_ref_list:
+                json_item["references"] = self.last_ref_list
+            if citing_localid is not None:
+                json_item["localid"] = citing_localid
             if citing_doi is not None:
                 json_item["doi"] = citing_doi
             if citing_pmid is not None:
@@ -79,14 +88,22 @@ class BibliographicReferenceStorer(object):
             if source is not None:
                 json_item["source"] = source
 
-            # The error variable is True if a reference in the reference list has no information at all
+            cur_time = datetime.now().strftime('%Y-%m-%d-%H-%M-%S-%f_')
+            local_file_name = cur_time + normalise_id(id_string) + ".json"
+
+            # The error variable is True if a reference in the reference list
+            # has no information at all
             if self.error:
-                new_file_path = self.err_dir + os.sep + normalise_id(id_string) + ".json"
+                new_file_path = self.err_dir + os.sep + local_file_name
+                if not os.path.exists(self.err_dir):
+                    os.makedirs(self.err_dir)
             else:
-                new_file_path = self.ref_dir + os.sep + normalise_id(id_string) + ".json"
+                new_file_path = self.ref_dir + os.sep + local_file_name
+                if not os.path.exists(self.ref_dir):
+                    os.makedirs(self.ref_dir)
 
             with open(new_file_path, "w") as f:
-                json.dump(json_item, f)
+                json.dump(json_item, f, indent=4)
 
             if id_string not in self.stored:
                 with open(self.csv_file, "a") as name_f:

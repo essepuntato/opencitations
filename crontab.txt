@@ -1,3 +1,7 @@
-# This is the line one should add to the crontab so as to check
-# that all the services are running correctly (it runs every 5 minutes)
+# The following lines should be added to the crontab so as to:
+
+# 1. check that all the services are running correctly (it runs every 5 minutes)
 */5 *   *   *   *   /home/essepuntato/OC/check-and-run.sh
+
+# 2. retrieve the updated statistics of the corpus (it runs every day at 4:15)
+15  4   *   *   *   /home/essepuntato/OC/statistics.sh

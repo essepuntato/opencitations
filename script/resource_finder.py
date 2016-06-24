@@ -53,9 +53,13 @@ class ResourceFinder(object):
         return self.__id_with_type(
             string, GraphEntity.pmid, "?res <%s> ?cited" % GraphEntity.cites)
 
-    def retrieve_citing_from_pmid(self, string):
+    def retrieve_citing_from_pmcid(self, string):
         return self.__id_with_type(
             string, GraphEntity.pmcid, "?res <%s> ?cited" % GraphEntity.cites)
+
+    def retrieve_citing_from_url(self, string):
+        return self.__id_with_type(
+            string.lower(), GraphEntity.url, "?res <%s> ?cited" % GraphEntity.cites)
 
     def retrieve_from_doi(self, string):
         return self.__id_with_type(string.lower(), GraphEntity.doi)

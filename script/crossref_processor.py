@@ -80,6 +80,10 @@ class CrossrefProcessor(FormatProcessor):
         existing_res = self.rf.retrieve_from_pmcid(pmcid)
         return self.process_existing_by_id(existing_res, self.id)
 
+    def process_url(self, url):
+        existing_res = self.rf.retrieve_from_url(url)
+        return self.process_existing_by_id(existing_res, self.id)
+
     def process_existing_by_id(self, existing_res, source_provider):
         if existing_res is not None:
             result = self.g_set.add_br(self.name, source_provider, self.source, existing_res)
@@ -95,6 +99,8 @@ class CrossrefProcessor(FormatProcessor):
                 citing_resource = self.rf.retrieve_citing_from_pmid(self.pmid)
             if citing_resource is None and self.pmcid is not None:
                 citing_resource = self.rf.retrieve_citing_from_pmcid(self.pmcid)
+            if citing_resource is None and self.url is not None:
+                citing_resource = self.rf.retrieve_citing_from_url(self.url)
 
             if citing_resource is None:
                 citing_entity = self.process_doi(self.doi, self.curator, self.source_provider)
@@ -147,6 +153,7 @@ class CrossrefProcessor(FormatProcessor):
             provided_doi = dg(full_entry, ["doi"])
             provided_pmid = dg(full_entry, ["pmid"])
             provided_pmcid = dg(full_entry, ["pmcid"])
+            provided_url = dg(full_entry, ["url"])
 
             extracted_doi = FormatProcessor.extract_doi(entry)
             extracted_doi_used = False
@@ -166,7 +173,7 @@ class CrossrefProcessor(FormatProcessor):
                     self.repok.add_sentence(
                         self.message("The entity has been found by means of the "
                                      "PMID provided as input by %s." % self.source_provider,
-                                     "PMID", self.pmid))
+                                     "PMID", provided_pmid))
 
             if cur_res is None and provided_pmcid is not None:
                 cur_res = self.process_pmcid(provided_pmcid)
@@ -174,7 +181,15 @@ class CrossrefProcessor(FormatProcessor):
                     self.repok.add_sentence(
                         self.message("The entity has been found by means of the "
                                      "PMCID provided as input by %s." % self.source_provider,
-                                     "PMCID", self.pmid))
+                                     "PMCID", provided_pmcid))
+
+            if cur_res is None and provided_url is not None:
+                cur_res = self.process_url(provided_url)
+                if cur_res is not None:
+                    self.repok.add_sentence(
+                        self.message("The entity has been found by means of the "
+                                     "URL provided as input by %s." % self.source_provider,
+                                     "URL", provided_url))
 
             if cur_res is None and entry is not None:
                 if do_process_entry:
@@ -220,6 +235,7 @@ class CrossrefProcessor(FormatProcessor):
                 self.__add_doi(cur_res, provided_doi, self.curator)
                 self.__add_pmid(cur_res, provided_pmid)
                 self.__add_pmcid(cur_res, provided_pmcid)
+                self.__add_url(cur_res, provided_url)
 
                 # Add any DOI extracted from the entry if it is not already included (and only if
                 # a resource has not been retrieved by a DOI specified in the entry explicitly, or
