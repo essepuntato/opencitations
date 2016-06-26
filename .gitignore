@@ -16,3 +16,6 @@ website/nohup.out
 test
 script/*.pyc
 script/conf.json
+script/spacin_log.txt
+script/bee_log.txt
+triplestore/run-local.sh

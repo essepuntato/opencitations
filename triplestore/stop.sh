@@ -1,2 +1,2 @@
 #!/bin/bash
-ps -ef | grep "blazegraph.jar" | awk '{print $2}' | xargs kill
+ps -ef | grep "[b]lazegraph.jar" | awk '{print $2}' | xargs kill
