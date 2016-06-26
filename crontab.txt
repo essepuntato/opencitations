@@ -1,13 +1,16 @@
 # The following lines should be added to the crontab so as to:
 
-# 1. check that all the services are running correctly (it runs every 5 minutes)
-*/5     *   *   *   *   /home/essepuntato/OC/check-and-run.sh
+# 1. check that all the website is running correctly (it runs every 5 minutes)
+*/5     *   *   *   *   /home/essepuntato/OC/website/check-and-run.sh
 
-# 2. retrieve the updated statistics of the corpus (it runs every day at 4:00)
+# 2. check that the triplestore is running correctly (it runs every 5 minutes)
+*/5     *   *   *   *   /home/essepuntato/OC/triplestore/check-and-run.sh
+
+# 3. retrieve the updated statistics of the corpus (it runs every day at 4:00)
 0       4   *   *   *   /home/essepuntato/OC/statistics.sh
 
-# 3. try to run SPACIN every 10 minutes
+# 4. try to run SPACIN every 10 minutes
 */10    *   *   *   *   /home/essepuntato/OC/script/spacin-check-and-run.sh
 
-# 4. try to run BEE at 4:15 every day
+# 5. try to run BEE at 4:15 every day
 15      4   *   *   *   /home/essepuntato/OC/script/bee-check-and-run.sh
