@@ -41,6 +41,10 @@ queries = [
     SELECT (count(DISTINCT ?author) as ?tot) {
         ?role pro:withRole pro:author ; pro:isHeldBy ?author .
         ?author datacite:hasIdentifier/datacite:usesIdentifierScheme datacite:orcid .
+    }""",
+    """
+    SELECT (count(?s) as ?tot) {
+        ?s ?p ?o
     }"""
 ]
 

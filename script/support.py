@@ -160,12 +160,17 @@ def get_data(max_iteration, sec_to_wait, get_url, headers, timeout, repok, reper
                 else:
                     return response.text
             else:
+                err_string = "We got an HTTP error when retrieving data (HTTP status code: %s)." % \
+                             str(response.status_code)
                 if not error_no_200:
                     error_no_200 = True
-                    errors += ["We got an HTTP error when retrieving data "
-                               "(HTTP status code: %s)." % str(response.status_code)]
                 if response.status_code == 404:
-                    break  # If the resource has not found, we can break the process immediately
+                    repok.add_sentence(err_string + " However, the process could continue anyway.")
+                    # If the resource has not found, we can break the process immediately,
+                    # by returning None so as to allow the callee to continue (or not) the process
+                    return None
+                else:
+                    errors += [err_string]
         except ReadTimeout as e:
             if not error_read:
                 error_read = True
