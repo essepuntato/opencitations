@@ -38,6 +38,7 @@ class EuropeanPubMedCentralProcessor(ReferenceProcessor):
         self.max_query_per_sec = max_query_per_sec
         self.query_count = 1
         self.sec_threshold = None
+        self.__last_xml_source = None
         super(EuropeanPubMedCentralProcessor, self).__init__(
             stored_file, reference_dir, error_dir, stopper, headers, sec_to_wait, max_iteration, timeout)
 
@@ -63,6 +64,8 @@ class EuropeanPubMedCentralProcessor(ReferenceProcessor):
                                 cur_doi = dg(paper, ["doi"])
                                 cur_pmid = dg(paper, ["pmid"])
                                 cur_pmcid = dg(paper, ["pmcid"])
+                                if cur_doi is None and cur_pmcid is not None:
+                                    cur_doi = self.__get_doi_from_xml_source(cur_pmcid)
                                 cur_localid = cur_source + "-" + cur_id
                                 id_list = [cur_doi, cur_pmid, cur_pmcid, cur_localid]
                                 if not self.rs.is_any_stored(id_list):
@@ -83,7 +86,8 @@ class EuropeanPubMedCentralProcessor(ReferenceProcessor):
                                             "References of '%s' have been stored." % cur_localid)
                                     else:
                                         self.reper.add_sentence(
-                                            "The article '%s' has no references." % cur_localid)
+                                            "The article '%s' has no references or its PubMed Central "
+                                            "ID is not defined." % cur_localid)
                                 else:
                                     self.repok.add_sentence(
                                         "The article '%s' has been already stored." % cur_localid)
@@ -172,9 +176,29 @@ class EuropeanPubMedCentralProcessor(ReferenceProcessor):
         else:
             return None
 
+    def __get_xml_source(self, cur_pmcid):
+        if cur_pmcid is not None:
+            xml_source_url = self.xml_source_api.replace("XXX", cur_pmcid)
+            return self.__get_data(xml_source_url, is_json=False)
+
+    def __get_doi_from_xml_source(self, cur_pmcid):
+        self.__last_xml_source = self.__get_xml_source(cur_pmcid)
+        if self.__last_xml_source is not None:
+            cur_xml = etree.fromstring(self.__last_xml_source)
+            doi = cur_xml.xpath("/article/front/article-meta/article-id[@pub-id-type='doi']")
+            if len(doi):
+                doi_string = u"" + etree.tostring(doi[0], method="text", encoding='UTF-8').strip()
+                if doi_string != "":
+                    return doi_string
+
     def __process_xml_source(self, cur_pmcid):
         xml_source_url = self.xml_source_api.replace("XXX", cur_pmcid)
-        xml_source = self.__get_data(xml_source_url, is_json=False)
+
+        if self.__last_xml_source is None:
+            xml_source = self.__get_xml_source(cur_pmcid)
+        else:
+            xml_source = self.__last_xml_source
+            self.__last_xml_source = None
 
         if xml_source is not None:
             cur_xml = etree.fromstring(xml_source)

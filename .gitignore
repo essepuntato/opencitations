@@ -18,5 +18,6 @@ script/*.pyc
 script/conf.json
 script/spacin_log.txt
 script/bee_log.txt
+script/test-bee.sh
 triplestore/run-local.sh
 website/run-local.sh
