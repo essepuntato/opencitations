@@ -5,7 +5,7 @@ if [ -z "$myv" ] || [[ $myv != *"results"* ]];
 then
     ./stop.sh
     sleep 2
-    java -server -Xmx4g -Dbigdata.propertyFile=occ.properties -Djetty.port=3000 -Djetty.host=127.0.0.1 -jar blazegraph.jar &
+    nohup java -server -Xmx4g -Dbigdata.propertyFile=occ.properties -Djetty.port=3000 -Djetty.host=127.0.0.1 -jar blazegraph.jar &
     exit 0
 fi
 

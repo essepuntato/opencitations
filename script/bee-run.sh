@@ -3,7 +3,7 @@
 myv=`ps -ef | grep "[p]ython bee.py"`
 
 if [[ -z "$myv" ]]; then
-    python bee.py &
+    nohup python bee.py &
     exit 0
 fi
 
