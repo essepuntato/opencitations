@@ -1,7 +1,5 @@
 {
   "@context": {
-    "@base": "https://w3id.org/oc/",
-    
     "gocc": "https://w3id.org/oc/corpus/",
     "gprov": "https://w3id.org/oc/corpus/prov/",
     "gpa": "https://w3id.org/oc/corpus/prov/pa/",
