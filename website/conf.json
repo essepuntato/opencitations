@@ -1,7 +1,7 @@
 {
   "html": "html-template",
-  "occ_base_path": "../test/corpus/",
-  "occ_base_url": "http://localhost:8000/corpus/",
-  "tmp_dir": "/Users/six/Desktop/",
-  "json_context_path": "../corpus/context.json"
+  "occ_base_path": "https://w3id.org/oc/corpus/",
+  "occ_base_url": "/srv/oc/corpus/",
+  "tmp_dir": "/srv/oc/corpus/",
+  "json_context_path": "/home/essepuntato/OC/corpus/context.json"
 }
