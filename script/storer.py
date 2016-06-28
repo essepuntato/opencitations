@@ -245,16 +245,24 @@ class Storer(object):
                         json_ld_file = json.load(f)
                         # Trick to force the use of a pre-loaded context if the format
                         # specified is JSON-LD
+                        context_json = None
                         if "@context" in json_ld_file:
                             cur_context = json_ld_file["@context"]
                             if cur_context in self.context_map:
-                                json_ld_file["@context"] = self.__get_context(cur_context)["@context"]
+                                context_json = self.__get_context(cur_context)["@context"]
+                                json_ld_file["@context"] = context_json
                         graph_id = None
 
                         # Note: the loading of the existing graph will work correctly if and only if
                         # the IRI of the graph is specified as identifier in the constructor
                         if "@graph" in json_ld_file and "iri" in json_ld_file:
                             graph_id = json_ld_file["iri"]
+                            if context_json is not None:
+                                if re.search("^.+:", graph_id) is not None:
+                                    cur_prefix = graph_id.split(":", 1)[0]
+                                    if cur_prefix in context_json:
+                                        graph_id = graph_id.replace(
+                                            cur_prefix + ":", context_json[cur_prefix])
                         if cur_graph is None:
                             current_graph = Graph(identifier=graph_id)
 
