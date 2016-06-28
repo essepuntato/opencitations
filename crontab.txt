@@ -4,7 +4,7 @@
 */5     *   *   *   *   /home/essepuntato/OC/website/check-and-run.sh
 
 # 2. check that the triplestore is running correctly (it runs every 5 minutes)
-*/5     *   *   *   *   /home/essepuntato/OC/triplestore/check-and-run.sh
+*/5     *   *   *   *   /srv/oc/triplestore/check-and-run.sh
 
 # 3. retrieve the updated statistics of the corpus (it runs every day at 4:00)
 0       4   *   *   *   /home/essepuntato/OC/statistics.sh
