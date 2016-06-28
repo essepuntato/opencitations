@@ -8,6 +8,7 @@ from support import dict_get as dg
 from support import dict_list_get_by_value_ascii as dgt
 from support import string_list_close_match as slc
 from support import get_data
+from support import encode_url
 
 
 class CrossrefProcessor(FormatProcessor):
@@ -59,7 +60,8 @@ class CrossrefProcessor(FormatProcessor):
             self.__process_entity(entry_cleaned, self.crossref_api_search))
         if cur_json is not None:
             return self.process_crossref_json(
-                cur_json, self.crossref_api_search + entry_cleaned, self.name, self.id, self.source)
+                cur_json, self.crossref_api_search + entry_cleaned,
+                self.name, self.id, self.source)
 
     def process_doi(self, doi, doi_curator, doi_source_provider):
         existing_res = self.rf.retrieve_from_doi(doi)
@@ -67,7 +69,7 @@ class CrossrefProcessor(FormatProcessor):
             cur_json = self.get_crossref_item(self.__process_entity(doi, self.crossref_api_works))
             if cur_json is not None:
                 return self.process_crossref_json(
-                    cur_json, self.crossref_api_works + doi, doi_curator,
+                    cur_json, self.crossref_api_works + encode_url(doi), doi_curator,
                     doi_source_provider, self.source)
         else:
             return self.process_existing_by_id(existing_res, self.id)
@@ -154,6 +156,11 @@ class CrossrefProcessor(FormatProcessor):
             provided_pmid = dg(full_entry, ["pmid"])
             provided_pmcid = dg(full_entry, ["pmcid"])
             provided_url = dg(full_entry, ["url"])
+
+            # This is useful if additional data are stored in the field URL, e.g.:
+            # 'http://pub.stat.ee/px/web.2001/dialog/statfile1.asp. Accessed on 2009'
+            if provided_url is not None:
+                provided_url = FormatProcessor.extract_url(provided_url)
 
             extracted_doi = FormatProcessor.extract_doi(entry)
             extracted_doi_used = False

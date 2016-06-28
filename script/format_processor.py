@@ -1,11 +1,11 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 __author__ = 'essepuntato'
-from urllib import quote
 import re
 from reporter import Reporter
 from graphlib import GraphSet
 from support import normalise_ascii as sa
+from urllib import quote
 
 
 class FormatProcessor(object):

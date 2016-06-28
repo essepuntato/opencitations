@@ -9,6 +9,7 @@ import os
 from rdflib import Graph, BNode
 import shutil
 import json
+from datetime import datetime
 
 
 class Storer(object):
@@ -60,9 +61,9 @@ class Storer(object):
                                          "The statements of in the JSON-LD file '%s' were not "
                                          "uploaded into the triplestore." % file_path)
         else:  # All the files have been stored
-            self.upload_all(self.g, triplestore_url)
+            self.upload_all(self.g, triplestore_url, base_dir)
 
-    def __query(self, query_string, triplestore_url, n_statements):
+    def __query(self, query_string, triplestore_url, n_statements, base_dir=None):
         if query_string != "":
             try:
                 tp = SPARQLWrapper(triplestore_url)
@@ -79,23 +80,43 @@ class Storer(object):
                 self.reperr.add_sentence("[1] "
                                          "Graph was not loaded into the "
                                          "triplestore due to communication problems: %s" % str(e))
+                if base_dir is not None:
+                    tp_err_dir = base_dir + os.sep + "tp_err"
+                    if not os.path.exists(tp_err_dir):
+                        os.makedirs(tp_err_dir)
+                    cur_file_err = tp_err_dir + os.sep + \
+                                   datetime.now().strftime('%Y-%m-%d-%H-%M-%S-%f_not_uploaded.txt')
+                    with open(cur_file_err, "w") as f:
+                        f.write(query_string)
 
         return False
 
-    def upload_all(self, all_g, triplestore_url):
+    def upload_all(self, all_g, triplestore_url, base_dir):
+        result = True
+
         self.repok.new_article()
         self.reperr.new_article()
 
-        query_string = ""
-        total_new_statements = 0
+        query_string = None
+        total_new_statements = None
+
         for idx, cur_g in enumerate(all_g):
-            if idx > 0:
+            cur_idx = idx % 10
+            if cur_idx == 0:
+                if query_string is not None:
+                    result &= self.__query(query_string, triplestore_url, total_new_statements, base_dir)
+                query_string = ""
+                total_new_statements = 0
+            else:
                 query_string += " ; "
+                total_new_statements += len(cur_g)
 
             query_string += self.get_preface_query(cur_g) + Storer._make_insert_query(cur_g)
 
-            total_new_statements += len(cur_g)
-        return self.__query(query_string, triplestore_url, total_new_statements)
+        if query_string is not None and query_string != "":
+            result &= self.__query(query_string, triplestore_url, total_new_statements, base_dir)
+
+        return result
 
     def upload(self, cur_g, triplestore_url):
         self.repok.new_article()

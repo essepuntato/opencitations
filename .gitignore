@@ -13,11 +13,15 @@ triplestore/log.txt
 triplestore/nohup.out
 website/log.txt
 website/nohup.out
+website/*_remote.json
+website/*_local.json
 test
 script/*.pyc
 script/conf.json
 script/spacin_log.txt
 script/bee_log.txt
 script/test-bee.sh
+script/*_local.py
+script/*_remote.py
 triplestore/run-local.sh
 website/run-local.sh

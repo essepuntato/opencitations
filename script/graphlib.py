@@ -9,7 +9,7 @@ from reporter import Reporter
 import re
 import os
 from datetime import datetime
-from support import is_string_empty, create_literal, create_type, get_short_name, get_count
+from support import is_string_empty, create_literal, create_type, get_short_name, get_count, encode_url
 
 
 class GraphEntity(object):
@@ -280,7 +280,7 @@ class GraphEntity(object):
             re.sub("–", "-", string), GraphEntity.isbn)
 
     def create_url(self, string):
-        return self._associate_identifier_with_scheme(string.lower(), GraphEntity.url)
+        return self._associate_identifier_with_scheme(encode_url(string.lower()), GraphEntity.url)
 
     def has_id(self, id_res):
         self.g.add((self.res, GraphEntity.has_identifier, URIRef(str(id_res))))
@@ -600,8 +600,6 @@ class ProvEntity(GraphEntity):
     def has_role_in(self, ca_res):
         ca_res.g.add((URIRef(str(ca_res)), ProvEntity.associated_agent, self.res))
 
-    def has_source(self, any_res):
-        self.g.add((self.res, ProvEntity.had_primary_source, URIRef(str(any_res))))
     # /END Composite Attributes
 
 

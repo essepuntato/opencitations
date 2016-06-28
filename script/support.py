@@ -13,6 +13,11 @@ from nltk.metrics import binary_distance as lev
 from rdflib import Literal, RDF
 from time import sleep
 import requests
+from urllib import quote
+
+
+def encode_url(u):
+    return quote(u, "://")
 
 
 def dict_get(d, key_list):

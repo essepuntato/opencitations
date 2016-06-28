@@ -9,6 +9,7 @@ from datetime import datetime
 from time import sleep
 import re
 from lxml import etree
+from support import encode_url
 
 
 class EuropeanPubMedCentralProcessor(ReferenceProcessor):
@@ -81,7 +82,7 @@ class EuropeanPubMedCentralProcessor(ReferenceProcessor):
                                         self.rs.store(
                                             next(item for item in id_list if item is not None),
                                             cur_localid, cur_doi, cur_pmid, cur_pmcid, self.name,
-                                            self.provider, ref_list_url)
+                                            self.provider, encode_url(ref_list_url))
                                         self.repok.add_sentence(
                                             "References of '%s' have been stored." % cur_localid)
                                     else:

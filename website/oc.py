@@ -18,6 +18,7 @@ import web
 import json
 from src.wl import WebLogger
 from src.rrh import RewriteRuleHandler
+from src.ldd import LinkedDataDirector
 
 # Load the configuration file
 with open("conf.json") as f:
@@ -25,7 +26,10 @@ with open("conf.json") as f:
 
 # For redirecting to classes
 urls = (
-    "/", "WorkInProgress"
+    "/", "WorkInProgress",
+    "/corpus/(.+)", "Corpus",
+    "/corpus/", "Corpus",
+    "/sparql?(.+)", "Sparql"
 )
 
 # For rendering
@@ -52,7 +56,6 @@ web_logger = WebLogger("opencitations.net", "opencitations_log.txt", [
                         # or CGI (relative to the document root)
     ],
     {"REMOTE_ADDR": ["130.136.2.47", "127.0.0.1"]}  # uncomment this for real app
-    # {"REMOTE_ADDR": ["127.0.0.1"]}  # uncomment this for test
 )
 
 
@@ -66,6 +69,32 @@ class WorkInProgress:
     def GET(self):
         web_logger.mes()
         return render.wip()
+
+
+class Sparql:
+    def GET(self, u):
+        pass
+
+
+class Corpus:
+    def GET(self, file_path=None):
+        director = LinkedDataDirector(
+            c["occ_base_path"], c["html"], c["occ_base_url"], c["json_context_path"],
+            label_conf={
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": "is a",
+                "http://xmlns.com/foaf/0.1/givenName": "given name",
+                "http://xmlns.com/foaf/0.1/familyName": "family name",
+                "http://prismstandard.org/namespaces/basic/2.0/startingPage": "first page",
+                "http://prismstandard.org/namespaces/basic/2.0/endingPage": "last page"
+            },
+            tmp_dir=c["tmp_dir"])
+        cur_page = director.redirect(file_path)
+        if cur_page is None:
+            raise web.notfound()
+        else:
+            web_logger.mes()
+            return cur_page
+
 
 
 if __name__ == "__main__":

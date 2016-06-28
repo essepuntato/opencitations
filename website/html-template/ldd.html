@@ -1,0 +1,124 @@
+$def with (data, keys, label_iri)
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="/static/favicon.ico">
+
+
+    <title>OCC $data["label"][0]</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="/static/js/html5shiv.min.js"></script>
+      <script src="/static/js/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- Custom styles for this template -->
+    <link href="/static/css/oc.css" rel="stylesheet">
+  </head>
+<!-- NAVBAR
+================================================== -->
+  <body>
+    <!-- Wrap the rest of the page in another container to center all the content. -->
+
+    <div class="container-fluid marketing additional-margin">
+
+      <!-- START THE FEATURETTES -->
+
+      <div about="$data['__entityiri']" class="featurette">
+          <h1 class="featurette-heading">
+              <span property="$label_iri['label']">$data["label"][0]</span> <br /> <span class="small">$data["__entityiri"]</span>
+          </h1>
+          <dl>
+              <dt class="bg-info">is a</dt>
+              <dd>
+                  <ul class="list-unstyled" rel="$label_iri['is a']">
+                      $for idx, type in enumerate(data["is a"]):
+                        <li>
+                          $if 'label' in type:
+                            <a href="$type['__entityiri']"
+                               title="$type['__entityiri']">
+                                $type['label'][0]</a>
+                          $else:
+                            <a href="$type['__entityiri']">
+                                $type['__entityiri']</a>
+                        </li>
+                  </ul>
+              </dd>
+
+              $if 'title' in data:
+                  <dt class="bg-info">title</dt>
+                  <dd>
+                      <ul class="list-unstyled">
+                        <li property="$label_iri['title']">$data["title"][0]</li>
+                      </ul>
+                  </dd>
+
+              $if 'subtitle' in data:
+                  <dt class="bg-info">subtitle</dt>
+                  <dd>
+                      <ul class="list-unstyled">
+                          <li property="$label_iri['subtitle']">$data["subtitle"][0]</li>
+                      </ul>
+                  </dd>
+
+              $if 'year' in data:
+                  <dt class="bg-info">publication year</dt>
+                  <dd>
+                      <ul class="list-unstyled">
+                          <li property="$label_iri['year']">$data["year"][0]</li>
+                      </ul>
+                  </dd>
+
+              $for key in keys:
+                $if key not in ['is a', 'iri', 'label', '__entityiri', 'title', 'subtitle', 'year']:
+                    <dt class="bg-info">$key</dt>
+                    <dd>
+                        <ul class="list-unstyled" rel="$label_iri[key]">
+                            $for value in data[key]:
+                                <li>
+                                  $if 'label' in value:
+                                    <a href="$value['__entityiri']"
+                                       title="$value['__entityiri']">
+                                        $value['label'][0]</a>
+                                  $elif '__entityiri' in value:
+                                    <a href="$value['__entityiri']">
+                                        $value['__entityiri']</a>
+                                  $else:
+                                    $value
+                                </li>
+                        </ul>
+                    </dd>
+          </dl>
+      </div>
+
+      <hr class="featurette-divider" />
+
+      <!-- FOOTER -->
+      <footer>
+        <p>Get it in another format: <a href="$''.join([data['__entityiri'],'.rdf'])">RDF/XML</a>, <a href="$''.join([data['__entityiri'],'.ttl'])">Turtle</a>, <a href="$''.join([data['__entityiri'],'.json'])">JSON-LD</a></p>
+        <p>All these data (independently from the particular representation used) are licensed under a <a about="" property="$label_iri['license']" href="https://creativecommons.org/publicdomain/zero/1.0/legalcode">Creative Commons CC0 1.0 Universal</a>.</p>
+      </footer>
+
+    </div><!-- /.container -->
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="/static/js/ie10-viewport-bug-workaround.js"></script>
+  </body>
+</html>

@@ -128,6 +128,7 @@
     "number": "fabio:hasSequenceIdentifier",
     "pub_date": { "@id": "dcterms:issued", "@type": "xsd:dateTime" },
     "content": "c4o:hasContent",
+    "subtitle": "fabio:hasSubtitle",
     "title": "dcterms:title",
     "year": { "@id": "fabio:hasPublicationYear", "@type": "xsd:gYear" },
     "update_action": "oco:hasUpdateQuery",

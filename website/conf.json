@@ -1,3 +1,7 @@
 {
-  "html": "html-template"
+  "html": "html-template",
+  "occ_base_path": "../test/corpus/",
+  "occ_base_url": "http://localhost:8000/corpus/",
+  "tmp_dir": "/Users/six/Desktop/",
+  "json_context_path": "../corpus/context.json"
 }

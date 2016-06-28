@@ -1,9 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 from reporter import Reporter
-import csv
 from reference_storer import BibliographicReferenceStorer
-import os
 
 
 class ReferenceProcessor(object):

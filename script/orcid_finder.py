@@ -3,7 +3,6 @@
 __author__ = 'essepuntato'
 
 import json
-import requests
 import argparse
 from reporter import Reporter
 from support import dict_get as dg
