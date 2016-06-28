@@ -6,7 +6,7 @@ import codecs
 class Reporter:
     """This class is used as a metaphoric agent being a reporter"""
 
-    def __init__(self, print_sentences=True, prefix=""):
+    def __init__(self, print_sentences=False, prefix=""):
         self.articles = []
         self.last_article = None
         self.last_sentence = None
