@@ -149,15 +149,13 @@ class LinkedDataDirector(object):
 
         cur_full_dir = self.basepath + os.sep + cur_dir
         if os.path.isdir(cur_full_dir):
-            for item in os.listdir(self.basepath + os.sep + cur_dir):
+            for item in os.listdir(cur_full_dir):
                 item_no_extension = re.sub("\.[^.]+$", "", item)
                 if item_no_extension == cur_name and item.endswith(self.__extensions):
                     cur_file_ex = item
 
             if cur_file_ex is not None:
-                cur_graph = self.load_graph(
-                    self.basepath + os.sep + cur_dir + os.sep + cur_file_ex,
-                    self.tmp_dir)
+                cur_graph = self.load_graph(cur_full_dir + os.sep + cur_file_ex, self.tmp_dir)
                 if len(cur_graph):
                     if url.endswith(".rdf"):
                         LinkedDataDirector.__add_license(cur_graph)
@@ -270,6 +268,10 @@ class LinkedDataDirector(object):
             # the IRI of the graph is specified as identifier in the constructor
             if "@graph" in json_ld_file and "iri" in json_ld_file:
                 graph_id = json_ld_file["iri"]
+                if re.search("^.+:", graph_id) is not None:
+                    cur_prefix = graph_id.split(":", 1)[0]
+                    if cur_prefix in self.jsonld_context:
+                        graph_id = graph_id.replace(cur_prefix + ":", self.jsonld_context[cur_prefix])
             else:
                 graph_id = None
             current_graph = rdflib.Graph(identifier=graph_id)
