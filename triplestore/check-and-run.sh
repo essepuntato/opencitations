@@ -1,7 +1,7 @@
 #!/bin/bash
 CUR_DIR="${pwd}"
 
-cd /home/essepuntato/OC/triplestore
+cd /srv/oc/triplestore
 ./run.sh
 if [ "$?" = "0" ]; then
     date >> log.txt
