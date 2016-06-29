@@ -10,6 +10,8 @@ from rdflib import Graph, BNode
 import shutil
 import json
 from datetime import datetime
+import argparse
+import io
 
 
 class Storer(object):
@@ -63,7 +65,7 @@ class Storer(object):
         else:  # All the files have been stored
             self.upload_all(self.g, triplestore_url, base_dir)
 
-    def __query(self, query_string, triplestore_url, n_statements, base_dir=None):
+    def __query(self, query_string, triplestore_url, n_statements=None, base_dir=None):
         if query_string != "":
             try:
                 tp = SPARQLWrapper(triplestore_url)
@@ -71,8 +73,12 @@ class Storer(object):
                 tp.setQuery(query_string)
                 tp.query()
 
-                self.repok.add_sentence(
-                    "Triplestore updated with %s more RDF statements." % n_statements)
+                if n_statements is None:
+                    self.repok.add_sentence(
+                        "Triplestore updated by means of a SPARQL Update query.")
+                else:
+                    self.repok.add_sentence(
+                        "Triplestore updated with %s more RDF statements." % n_statements)
 
                 return True
 
@@ -86,7 +92,7 @@ class Storer(object):
                         os.makedirs(tp_err_dir)
                     cur_file_err = tp_err_dir + os.sep + \
                                    datetime.now().strftime('%Y-%m-%d-%H-%M-%S-%f_not_uploaded.txt')
-                    with open(cur_file_err, "w") as f:
+                    with io.open(cur_file_err, "w", encoding="utf-8") as f:
                         f.write(query_string)
 
         return False
@@ -105,10 +111,10 @@ class Storer(object):
             if cur_idx == 0:
                 if query_string is not None:
                     result &= self.__query(query_string, triplestore_url, total_new_statements, base_dir)
-                query_string = ""
+                query_string = u""
                 total_new_statements = 0
             else:
-                query_string += " ; "
+                query_string += u" ; "
                 total_new_statements += len(cur_g)
 
             query_string += self.get_preface_query(cur_g) + Storer._make_insert_query(cur_g)
@@ -117,6 +123,12 @@ class Storer(object):
             result &= self.__query(query_string, triplestore_url, total_new_statements, base_dir)
 
         return result
+
+    def execute_upload_query(self, query_string, triplestore_url):
+        self.repok.new_article()
+        self.reperr.new_article()
+
+        return self.__query(query_string, triplestore_url)
 
     def upload(self, cur_g, triplestore_url):
         self.repok.new_article()
@@ -132,18 +144,18 @@ class Storer(object):
     def get_preface_query(self, cur_g):
         if self.preface_query != "":
             if type(cur_g.identifier) is BNode:
-                return "CLEAR DEFAULT ; "
+                return u"CLEAR DEFAULT ; "
             else:
-                return "WITH <%s> " % str(cur_g.identifier) + self.preface_query + " ; "
+                return u"WITH <%s> " % str(cur_g.identifier) + self.preface_query + " ; "
         else:
             return ""
 
     @staticmethod
     def _make_insert_query(cur_g):
         if type(cur_g.identifier) is BNode:
-            return "INSERT DATA { %s }" % cur_g.serialize(format="nt")
+            return u"INSERT DATA { %s }" % cur_g.serialize(format="nt")
         else:
-            return "INSERT DATA { GRAPH <%s> { %s } }" % \
+            return u"INSERT DATA { GRAPH <%s> { %s } }" % \
                    (str(cur_g.identifier), cur_g.serialize(format="nt"))
 
     def store(self, cur_g, base_dir, base_iri, context_path, tmp_dir=None, override=False):
@@ -275,3 +287,16 @@ class Storer(object):
 
         raise IOError("1", "It was impossible to handle the format used for storing the file '%s'%s" %
                       (file_path, errors))
+
+if __name__ == "__main__":
+    arg_parser = argparse.ArgumentParser("storer.py")
+    arg_parser.add_argument("-s", "--sparql_endpoint", dest="sparql_url", required=True,
+                            help="The URL of the SPARQL endpoint to query")
+    arg_parser.add_argument("-q", "--query_file", dest="query_file", required=True,
+                            help="The file containing the query to execute")
+    args = arg_parser.parse_args()
+
+    storer = Storer(repok=Reporter(True), reperr=Reporter(True))
+    with io.open(args.query_file, "r", encoding="utf-8") as f:
+        query_string = f.read()
+        storer.execute_upload_query(query_string, args.sparql_url)

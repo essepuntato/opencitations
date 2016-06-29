@@ -705,13 +705,13 @@ class ProvSet(GraphSet):
 
     @staticmethod
     def _create_citation_query(cur_subj_g):
-        query_string = "INSERT DATA { GRAPH <%s> { " % cur_subj_g.identifier
+        query_string = u"INSERT DATA { GRAPH <%s> { " % cur_subj_g.identifier
         is_first = True
         for s, p, o in cur_subj_g.triples((None, None, None)):
             if not is_first:
                 query_string += ". "
             is_first = False
-            query_string += "<%s> <%s> <%s> " % (str(s), str(p), str(o))
+            query_string += u"<%s> <%s> <%s> " % (str(s), str(p), str(o))
 
         return query_string + "} }"
 

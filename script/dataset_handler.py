@@ -60,7 +60,7 @@ class DatasetHandler(object):
         self.st = Storer(context_map={context_path: context_file_path},
                          repok=self.repok, reperr=self.reperr)
         self.st.set_preface_query(
-            "DELETE { ?res <%s> ?date } WHERE { ?res a <%s> ; <%s> ?date }" %
+            u"DELETE { ?res <%s> ?date } WHERE { ?res a <%s> ; <%s> ?date }" %
             (str(DatasetHandler.modified), str(DatasetHandler.dataset), str(DatasetHandler.modified)))
 
     # /START Create Literal
