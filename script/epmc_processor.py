@@ -193,68 +193,70 @@ class EuropeanPubMedCentralProcessor(ReferenceProcessor):
                     return doi_string
 
     def __process_xml_source(self, cur_pmcid):
-        xml_source_url = self.xml_source_api.replace("XXX", cur_pmcid)
+        if cur_pmcid is not None:
+            xml_source_url = self.xml_source_api.replace("XXX", cur_pmcid)
 
-        if self.__last_xml_source is None:
-            xml_source = self.__get_xml_source(cur_pmcid)
-        else:
-            xml_source = self.__last_xml_source
-            self.__last_xml_source = None
+            if self.__last_xml_source is None:
+                xml_source = self.__get_xml_source(cur_pmcid)
+            else:
+                xml_source = self.__last_xml_source
+                self.__last_xml_source = None
 
-        if xml_source is not None:
-            cur_xml = etree.fromstring(xml_source)
+            if xml_source is not None:
+                cur_xml = etree.fromstring(xml_source)
 
-            references = cur_xml.xpath("//ref-list/ref")
-            if len(references):
-                self.rs.new_ref_list()
-                for reference in references:
-                    entry_text = self.__create_entry_xml(reference)
-                    process_entry_text = None if entry_text is None else True
+                references = cur_xml.xpath("//ref-list/ref")
+                if len(references):
+                    self.rs.new_ref_list()
+                    for reference in references:
+                        entry_text = self.__create_entry_xml(reference)
+                        process_entry_text = None if entry_text is None else True
 
-                    ref_pmid = None
-                    ref_doi = None
-                    ref_pmcid = None
-                    ref_url = None
+                        ref_pmid = None
+                        ref_doi = None
+                        ref_pmcid = None
+                        ref_url = None
 
-                    ref_pmid_el = reference.xpath(".//pub-id[@pub-id-type='pmid']")
-                    if len(ref_pmid_el):
-                        ref_pmid = etree.tostring(ref_pmid_el[0], method="text", encoding='UTF-8').strip()
-                        if ref_pmid != "":
-                            ref_paper_ids = self.__get_paper_data("MED", ref_pmid)
-                            ref_doi = ref_paper_ids["doi"]
-                            ref_pmcid = ref_paper_ids["pmcid"]
-                        else:
-                            ref_pmid = None
+                        ref_pmid_el = reference.xpath(".//pub-id[@pub-id-type='pmid']")
+                        if len(ref_pmid_el):
+                            ref_pmid = etree.tostring(
+                                ref_pmid_el[0], method="text", encoding='UTF-8').strip()
+                            if ref_pmid != "":
+                                ref_paper_ids = self.__get_paper_data("MED", ref_pmid)
+                                ref_doi = ref_paper_ids["doi"]
+                                ref_pmcid = ref_paper_ids["pmcid"]
+                            else:
+                                ref_pmid = None
 
-                    if ref_doi is None:
-                        ref_doi_el = reference.xpath(".//pub-id[@pub-id-type='doi']")
-                        if len(ref_doi_el):
-                            ref_doi = etree.tostring(
-                                ref_doi_el[0], method="text", encoding='UTF-8').lower().strip()
-                            if ref_doi == "":
-                                ref_doi = None
+                        if ref_doi is None:
+                            ref_doi_el = reference.xpath(".//pub-id[@pub-id-type='doi']")
+                            if len(ref_doi_el):
+                                ref_doi = etree.tostring(
+                                    ref_doi_el[0], method="text", encoding='UTF-8').lower().strip()
+                                if ref_doi == "":
+                                    ref_doi = None
 
-                    if ref_pmcid is None:
-                        ref_pmcid_el = reference.xpath(".//pub-id[@pub-id-type='pmcid']")
-                        if len(ref_pmcid_el):
-                            ref_pmcid = etree.tostring(
-                                ref_pmcid_el[0], method="text", encoding='UTF-8').strip()
-                            if ref_pmcid == "":
-                                ref_pmcid = None
-                            elif not ref_pmcid.startswith("PMC"):
-                                ref_pmcid = "PMC" + ref_pmcid
+                        if ref_pmcid is None:
+                            ref_pmcid_el = reference.xpath(".//pub-id[@pub-id-type='pmcid']")
+                            if len(ref_pmcid_el):
+                                ref_pmcid = etree.tostring(
+                                    ref_pmcid_el[0], method="text", encoding='UTF-8').strip()
+                                if ref_pmcid == "":
+                                    ref_pmcid = None
+                                elif not ref_pmcid.startswith("PMC"):
+                                    ref_pmcid = "PMC" + ref_pmcid
 
-                    ref_url_el = reference.xpath(".//ext-link")
-                    if len(ref_url_el):
-                        ref_url = etree.tostring(
-                            ref_url_el[0], method="text", encoding='UTF-8').strip()
-                        if not ref_url.startswith("http"):
-                            ref_url = None
+                        ref_url_el = reference.xpath(".//ext-link")
+                        if len(ref_url_el):
+                            ref_url = etree.tostring(
+                                ref_url_el[0], method="text", encoding='UTF-8').strip()
+                            if not ref_url.startswith("http"):
+                                ref_url = None
 
-                    self.rs.add_reference(entry_text, process_entry_text,
-                                          None, ref_doi, ref_pmid, ref_pmcid, ref_url)
+                        self.rs.add_reference(entry_text, process_entry_text,
+                                              None, ref_doi, ref_pmid, ref_pmcid, ref_url)
 
-                return xml_source_url
+                    return xml_source_url
 
     def __process_references(self, cur_source, cur_id):
         ref_list_url = self.ref_list_api.replace(
