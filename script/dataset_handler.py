@@ -45,7 +45,7 @@ class DatasetHandler(object):
     scholary_communication = DBR.Scholarly_communication
     citations = DBR.Citation
 
-    def __init__(self, triplestore_url, context_path, context_file_path,
+    def __init__(self, triplestore_url, tp_url_real, context_path, context_file_path,
                  base_iri, base_dir, info_dir, dataset_home, tmp_dir):
         self.tp_url = triplestore_url
         self.base_iri = base_iri
@@ -54,7 +54,7 @@ class DatasetHandler(object):
         self.context_path = context_path
         self.dataset_home = URIRef(dataset_home)
         self.tmp_dir = tmp_dir
-        self.tp_res = URIRef(triplestore_url)
+        self.tp_res = URIRef(tp_url_real)
         self.repok = Reporter(prefix="[DatasetHandler: INFO] ")
         self.reperr = Reporter(prefix="[DatasetHandler: ERROR] ")
         self.st = Storer(context_map={context_path: context_file_path},
