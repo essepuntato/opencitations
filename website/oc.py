@@ -19,6 +19,9 @@ import json
 from src.wl import WebLogger
 from src.rrh import RewriteRuleHandler
 from src.ldd import LinkedDataDirector
+import requests
+import urlparse
+import re
 
 # Load the configuration file
 with open("conf.json") as f:
@@ -29,7 +32,7 @@ urls = (
     "/", "WorkInProgress",
     "/corpus/(.+)", "Corpus",
     "/corpus/", "Corpus",
-    "/sparql?(.+)", "Sparql"
+    "/sparql", "Sparql"
 )
 
 # For rendering
@@ -72,8 +75,29 @@ class WorkInProgress:
 
 
 class Sparql:
-    def GET(self, u):
-        pass
+    def GET(self):
+        web.header('Access-Control-Allow-Origin', '*')
+        web.header('Access-Control-Allow-Credentials', 'true')
+        query_string = web.ctx.env.get("QUERY_STRING")
+        parsed_query = urlparse.parse_qs(query_string)
+        if query_string is None or query_string.strip() == "":
+            web_logger.mes()
+            return render.sparql()
+        if re.search("updates?", query_string, re.IGNORECASE) is None:
+            if "query" in parsed_query:
+                req = requests.get("%s?%s" % (c["sparql_endpoint"], query_string))
+                if req.status_code == 200:
+                    web_logger.mes()
+                    return req.text
+                else:
+                    raise web.HTTPError(
+                        str(req.status_code), {"Content-Type": req.headers["content-type"]}, req.text)
+            else:
+                raise web.redirect("/sparql")
+        else:
+            raise web.HTTPError(
+                "403", {"Content-Type": "text/plain"}, "SPARQL Update queries are not permitted.")
+
 
 
 class Corpus:

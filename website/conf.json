@@ -3,5 +3,6 @@
   "occ_base_path": "/srv/oc/corpus/",
   "occ_base_url": "https://w3id.org/oc/corpus/",
   "tmp_dir": "/srv/oc/corpus/",
-  "json_context_path": "/home/essepuntato/OC/corpus/context.json"
+  "json_context_path": "/home/essepuntato/OC/corpus/context.json",
+  "sparql_endpoint": "http://localhost:3000/blazegraph/sparql"
 }

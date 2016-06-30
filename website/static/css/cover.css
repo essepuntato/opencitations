@@ -140,6 +140,15 @@ footer .row div {
   color: darkgrey; /* IE8 proofing */
 }
 
+.masthead {
+    background-color: white !important;
+    z-index: 10 !important;
+}
+
+#yasqe, #yasr, .CodeMirror-hints {
+    text-align: left !important;
+}
+
 
 /*
  * Affix and center
