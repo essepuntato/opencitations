@@ -5,7 +5,8 @@ import csv
 import json
 from support import normalise_id
 from datetime import datetime
-
+import argparse
+import re
 
 class BibliographicReferenceStorer(object):
     def __init__(self, stored_file, reference_dir, error_dir):
@@ -115,3 +116,33 @@ class BibliographicReferenceStorer(object):
 
         return False
 
+    @staticmethod
+    def correct_entries(input_dir):
+        for cur_dir, cur_subdir, cur_files in os.walk(input_dir):
+            for cur_file in cur_files:
+                if cur_file.endswith(".json"):
+                    entry_file = cur_dir + os.sep + cur_file
+                    json_item = None
+
+                    with open(entry_file) as f:
+                        entries_json = json.load(f)
+                        if "references" in entries_json:
+                            for ref in entries_json["references"]:
+                                if "bibentry" in ref:
+                                    cur_bibtext = ref["bibentry"]
+                                    sub_bibtext = re.sub("\(\. ?", "(", cur_bibtext)
+                                    ref["bibentry"] = sub_bibtext
+                                    if cur_bibtext != sub_bibtext and json_item is None:
+                                        json_item = entries_json
+
+                    if json_item is not None:
+                        with open(entry_file, "w") as f:
+                            json.dump(json_item, f, indent=4)
+                            print "File '%s' updated." % entry_file
+
+if __name__ == "__main__":
+    arg_parser = argparse.ArgumentParser("reference_storer.py")
+    arg_parser.add_argument("-i", "--input-dir", dest="input_dir", required=True,
+                            help="The dir containing the references.")
+    args = arg_parser.parse_args()
+    BibliographicReferenceStorer.correct_entries(args.input_dir)
