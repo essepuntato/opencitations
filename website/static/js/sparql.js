@@ -1,7 +1,7 @@
 var yasqe = YASQE(document.getElementById("yasqe"), {
 	sparql: {
 		showQueryButton: true,
-		endpoint: "http://localhost:8000/sparql",
+		endpoint: "https://w3id.org/oc/sparql",
 		requestMethod: "GET"
 	}
 });
