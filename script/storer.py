@@ -12,6 +12,7 @@ import json
 from datetime import datetime
 import argparse
 import io
+from conf_spacin import *
 
 
 class Storer(object):
@@ -38,8 +39,7 @@ class Storer(object):
             self.reperr = reperr
         self.preface_query = ""
 
-    def upload_and_store(self, base_dir, triplestore_url, base_iri, context_path,
-                         tmp_dir=None, g_set=[], override=False):
+    def store_all(self, base_dir, base_iri, context_path, tmp_dir=None, g_set=[], override=False):
         for g in g_set:
             self.g += [g]
 
@@ -51,6 +51,13 @@ class Storer(object):
         stored_graph_path = []
         for idx, cur_g in enumerate(self.g):
             stored_graph_path += [self.store(cur_g, base_dir, base_iri, context_path, tmp_dir, override)]
+
+        return stored_graph_path
+
+    def upload_and_store(self, base_dir, triplestore_url, base_iri, context_path,
+                         tmp_dir=None, g_set=[], override=False):
+
+        stored_graph_path = self.store_all(base_dir, base_iri, context_path, tmp_dir, g_set, override)
 
         # Some graphs were not stored properly, then no one will be updloaded to the triplestore
         # but we highlights those ones that could be added in principle, by mentioning them
@@ -290,13 +297,29 @@ class Storer(object):
 
 if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser("storer.py")
-    arg_parser.add_argument("-s", "--sparql_endpoint", dest="sparql_url", required=True,
-                            help="The URL of the SPARQL endpoint to query")
-    arg_parser.add_argument("-q", "--query_file", dest="query_file", required=True,
-                            help="The file containing the query to execute")
+    arg_parser.add_argument("-i", "--input", dest="input", required=True,
+                            help="The file containing the query to execute, the JSON-LD to upload, "
+                                 "or a directory containing several files with both queries and RDF.")
     args = arg_parser.parse_args()
 
-    storer = Storer(repok=Reporter(True), reperr=Reporter(True))
-    with io.open(args.query_file, "r", encoding="utf-8") as f:
-        query_string = f.read()
-        storer.execute_upload_query(query_string, args.sparql_url)
+    storer = Storer(repok=Reporter(True), reperr=Reporter(True),
+                    context_map={context_path: context_file_path})
+
+    all_files = []
+    if os.path.isdir(args.input):
+        for cur_dir, cur_subdir, cur_files in os.walk(args.input):
+                for cur_file in cur_files:
+                    full_path = cur_dir + os.sep + cur_file
+                    if re.search(os.sep + "prov" + os.sep, full_path) is None:
+                        all_files += [full_path]
+    else:
+        all_files += [args.input]
+
+    for cur_file in all_files:
+        if not os.path.basename(cur_file).startswith("index"):
+            if cur_file.endswith(".txt"):
+                with io.open(cur_file, "r", encoding="utf-8") as f:
+                    query_string = f.read()
+                    storer.execute_upload_query(query_string, args.sparql_url)
+            elif cur_file.endswith(".json"):
+                storer.upload(storer.load(cur_file, tmp_dir=temp_dir_for_rdf_loading), triplestore_url)

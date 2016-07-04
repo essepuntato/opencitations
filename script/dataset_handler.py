@@ -45,8 +45,8 @@ class DatasetHandler(object):
     scholary_communication = DBR.Scholarly_communication
     citations = DBR.Citation
 
-    def __init__(self, triplestore_url, tp_url_real, context_path, context_file_path,
-                 base_iri, base_dir, info_dir, dataset_home, tmp_dir):
+    def __init__(self, tp_url_real, context_path, context_file_path,
+                 base_iri, base_dir, info_dir, dataset_home, tmp_dir, triplestore_url=None):
         self.tp_url = triplestore_url
         self.base_iri = base_iri
         self.base_dir = base_dir
@@ -145,9 +145,14 @@ class DatasetHandler(object):
             all_graphs += [cur_occ]
 
         if all_graphs:  # Store everything and upload to triplestore
-            self.st.upload_and_store(
-                self.base_dir, self.tp_url, self.base_iri, self.context_path,
-                self.tmp_dir, all_graphs, True)
+            if self.tp_url is None:
+                self.st.store_all(
+                    self.base_dir, self.base_iri, self.context_path,
+                    self.tmp_dir, all_graphs, True)
+            else:
+                self.st.upload_and_store(
+                    self.base_dir, self.tp_url, self.base_iri, self.context_path,
+                    self.tmp_dir, all_graphs, True)
 
     def get_dataset_graph(self, res, cur_time):
         dataset_path = self.get_metadata_path_from_resource(res)

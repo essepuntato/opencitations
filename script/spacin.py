@@ -46,11 +46,11 @@ try:
                                     temp_dir_for_rdf_loading)
 
                                 prov_storer = Storer(prov, context_map={context_path: context_file_path})
-                                prov_storer.upload_and_store(
-                                    base_dir, triplestore_url, base_iri, context_path,
+                                prov_storer.store_all(
+                                    base_dir, base_iri, context_path,
                                     temp_dir_for_rdf_loading)
 
-                                dset_handler = DatasetHandler(triplestore_url, triplestore_url_real,
+                                dset_handler = DatasetHandler(triplestore_url_real,
                                                               context_path,
                                                               context_file_path, base_iri,
                                                               base_dir, info_dir, dataset_home,
