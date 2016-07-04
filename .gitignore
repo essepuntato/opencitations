@@ -24,4 +24,4 @@ script/test-bee.sh
 script/*_local.py
 script/*_remote.py
 triplestore/run-local.sh
-website/run-local.sh
+website/*-local.sh

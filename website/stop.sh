@@ -1,3 +1,3 @@
 #!/bin/bash
-ps -ef | grep "[p]ython oc.py" | awk '{print $2}' | xargs kill
+/etc/init.d/lighttpd stop
 exit 0
