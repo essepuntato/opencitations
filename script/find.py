@@ -56,7 +56,6 @@ if __name__ == "__main__":
     for rdf_path in all_files:
         cur_g = s.load(rdf_path, tmp_dir=temp_dir_for_rdf_loading)
         try:
-            cur_g.objects(None, GraphEntity.cites).next()
             for o in cur_g.objects(None, GraphEntity.has_identifier):
                 o_local_path = str(o).replace(base_iri, base_dir) + ".json"
                 id_g = s.load(o_local_path, tmp_dir=temp_dir_for_rdf_loading)
