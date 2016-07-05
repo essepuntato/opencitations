@@ -363,7 +363,6 @@ class CrossrefProcessor(FormatProcessor):
                                 cur_orcid_record = orcid_with_such_family[0]
                             elif given_name_string is not None and \
                                  len(orcid_with_such_family) >= 1 and len(author_with_such_family) >= 1:
-
                                 # From the previous lists of ORCID/author record, get the list
                                 # of all the given name defined
                                 orcid_given_with_such_family = dg(orcid_with_such_family, ["given"])
@@ -377,8 +376,11 @@ class CrossrefProcessor(FormatProcessor):
                                     slc(author_given_with_such_family, given_name_string)
                                 if len(closest_orcid_matches_idx) == 1 and \
                                    len(closest_author_matches_idx) == 1:
-                                    cur_orcid_record = \
-                                        orcid_with_such_family[closest_orcid_matches_idx[0]]
+                                    closest_author_orcid_matches_idx = slc(
+                                        author_given_with_such_family, orcid_given_with_such_family[0])
+                                    if closest_author_orcid_matches_idx == closest_author_matches_idx:
+                                        cur_orcid_record = \
+                                            orcid_with_such_family[closest_orcid_matches_idx[0]]
 
                         # An ORCID has been found to match with such author record, and we try to
                         # see if such orcid (and thus, the author) has been already added in the
@@ -472,22 +474,26 @@ class CrossrefProcessor(FormatProcessor):
                     cur_type = crossref_json["type"]
 
                     container_ids = self.__get_ids_for_container(crossref_json)
+                    cur_issue_id = crossref_json["issue"] if "issue" in crossref_json else None
+                    cur_volume_id = crossref_json["volume"] if "volume" in crossref_json else None
                     if cur_type == "journal-article":
-                        cur_issue_id = crossref_json["issue"] if "issue" in crossref_json else None
                         if cur_issue_id is None:
-                            cur_volume_id = crossref_json["volume"] if "volume" in crossref_json else None
                             if cur_volume_id is None:
-                                retrieved_container = \
-                                    self.rf.retrieve(container_ids)
+                                retrieved_container = self.rf.retrieve(container_ids)
                             else:
                                 retrieved_container = \
                                     self.rf.retrieve_volume_from_journal(container_ids, cur_volume_id)
                         else:
+                            retrieved_container = self.rf.retrieve_issue_from_journal(
+                                container_ids, cur_issue_id, cur_volume_id)
+                    elif cur_type == "journal-issue":
+                        if cur_volume_id is None:
+                            retrieved_container = self.rf.retrieve(container_ids)
+                        else:
                             retrieved_container = \
-                                self.rf.retrieve_issue_from_journal(container_ids, cur_issue_id)
+                                self.rf.retrieve_volume_from_journal(container_ids, cur_volume_id)
                     else:
-                        retrieved_container = \
-                            self.rf.retrieve(container_ids)
+                        retrieved_container = self.rf.retrieve(container_ids)
 
                     if retrieved_container is not None:
                         cont_br = self.g_set.add_br(
@@ -524,66 +530,105 @@ class CrossrefProcessor(FormatProcessor):
                             elif cur_type == "component":
                                 cur_container_type = "component"
                                 cont_br.create_expression_collection()
+                                cont_br.create_title(cur_container_title)
                             elif cur_type == "dataset":
                                 cur_container_type = "dataset"
                                 cont_br.create_expression_collection()
+                                cont_br.create_title(cur_container_title)
                             elif cur_type == "journal-article":
                                 if "issue" not in crossref_json and "volume" not in crossref_json:
                                     cur_container_type = "journal"
                                     jou_br = cont_br
+                                    self.__add_journal_data(jou_br, cur_container_title)
                                 else:
-                                    jou_br = self.g_set.add_br(self.name, self.id, crossref_source)
-                                    self.__associate_issn(jou_br, crossref_json, crossref_source)
-
-                                self.__add_journal_data(jou_br, cur_container_title, crossref_json)
-
-                                if "issue" in crossref_json:
-                                    cur_container_type = "issue"
-                                    cont_br.create_issue()
-                                    cont_br.create_number(crossref_json["issue"])
-                                    if "volume" not in crossref_json:
-                                        jou_br.has_part(cont_br)
-
-                                if "volume" in crossref_json:
-                                    if "issue" in crossref_json:
-                                        vol_br = self.g_set.add_br(self.name, self.id, crossref_source)
-                                        vol_br.has_part(cont_br)
+                                    # If we have an issue or a volume specified, the journal may have
+                                    # been already added to the corpus in the past. Thus, check it
+                                    # before creating a new object for that journal
+                                    retrieved_journal = self.rf.retrieve(container_ids)
+                                    if retrieved_journal is None:
+                                        jou_br = self.g_set.add_br(self.name, self.id, crossref_source)
+                                        self.__associate_issn(jou_br, crossref_json, crossref_source)
+                                        self.__add_journal_data(
+                                            jou_br, cur_container_title)
                                     else:
-                                        cur_container_type = "volume"
-                                        vol_br = cont_br
+                                        jou_br = self.g_set.add_br(
+                                            self.name, self.id, crossref_source, retrieved_journal)
 
-                                    self.__add_volume_data(vol_br, crossref_json["volume"])
+                                    if "issue" in crossref_json:
+                                        cur_container_type = "issue"
+                                        cont_br.create_issue()
+                                        cont_br.create_number(crossref_json["issue"])
+                                        if "volume" not in crossref_json:
+                                            jou_br.has_part(cont_br)
 
-                                    jou_br.has_part(vol_br)
+                                    if "volume" in crossref_json:
+                                        cur_volume_id = crossref_json["volume"]
+                                        if "issue" in crossref_json:
+                                            # If we have an issue specified, the volume may have
+                                            # been already added to the corpus in the past. Thus, check it
+                                            # before creating a new object for that volume
+                                            retrieved_volume = self.rf.retrieve_volume_from_journal(
+                                                container_ids, cur_volume_id)
+                                            if retrieved_volume is None:
+                                                vol_br = self.g_set.add_br(
+                                                    self.name, self.id, crossref_source)
+                                                self.__add_volume_data(vol_br, cur_volume_id)
+                                                jou_br.has_part(vol_br)
+                                            else:
+                                                vol_br = self.g_set.add_br(
+                                                    self.name, self.id, crossref_source, retrieved_volume)
+                                            vol_br.has_part(cont_br)
+                                        else:
+                                            cur_container_type = "volume"
+                                            vol_br = cont_br
+                                            self.__add_volume_data(vol_br, cur_volume_id)
+                                            jou_br.has_part(vol_br)
                             elif cur_type == "journal-issue":
                                 cur_container_type = "journal"
                                 if "volume" in crossref_json:
                                     cur_container_type = "volume"
                                     self.__add_volume_data(cont_br, crossref_json["volume"])
-                                    jou_br = self.g_set.add_br(self.name, self.id, crossref_source)
+                                    # If we have a volume specified, the journal may have
+                                    # been already added to the corpus in the past. Thus, check it
+                                    # before creating a new object for that journal
+                                    retrieved_journal = self.rf.retrieve(container_ids)
+                                    if retrieved_journal is None:
+                                        jou_br = self.g_set.add_br(self.name, self.id, crossref_source)
+                                        self.__associate_issn(jou_br, crossref_json, crossref_source)
+                                        self.__add_journal_data(
+                                            jou_br, cur_container_title)
+                                    else:
+                                        jou_br = self.g_set.add_br(
+                                            self.name, self.id, crossref_source, retrieved_journal)
+
                                     jou_br.has_part(cont_br)
                                 else:
                                     jou_br = cont_br
-
-                                self.__add_journal_data(jou_br, cur_container_title, crossref_json)
+                                    self.__add_journal_data(jou_br, cur_container_title)
 
                             elif cur_type == "journal-volume":
                                 cur_container_type = "volume"
-                                self.__add_journal_data(cont_br, cur_container_title, crossref_json)
+                                self.__add_journal_data(cont_br, cur_container_title)
+                                self.__associate_issn(cont_br, crossref_json, crossref_source)
                             elif cur_type == "other":
                                 cont_br.create_expression_collection()
+                                cont_br.create_title(cur_container_title)
                             elif cur_type == "proceedings-article":
                                 cur_container_type = "proceedings"
                                 cont_br.create_proceedings()
+                                cont_br.create_title(cur_container_title)
                             elif cur_type == "reference-entry":
                                 cur_container_type = "reference-book"
                                 cont_br.create_expression_collection()
+                                cont_br.create_title(cur_container_title)
                             elif cur_type == "report":
                                 cur_container_type = "report-series"
                                 cont_br.create_expression_collection()
+                                cont_br.create_title(cur_container_title)
                             elif cur_type == "standard":
                                 cur_container_type = "standard-series"
                                 cont_br.create_expression_collection()
+                                cont_br.create_title(cur_container_title)
 
                             # If the current type is in any of the ISSN or ISBN list
                             # add the identifier to the resource
@@ -620,7 +665,7 @@ class CrossrefProcessor(FormatProcessor):
                     elif cur_type == "edited-book":
                         cur_br.create_edited_book()
                     elif cur_type == "journal":
-                        self.__add_journal_data(cur_br, cur_title, crossref_json)
+                        self.__add_journal_data(cur_br, cur_title)
                     elif cur_type == "journal-article":
                         cur_br.create_journal_article()
                     elif cur_type == "journal-issue":
@@ -734,7 +779,7 @@ class CrossrefProcessor(FormatProcessor):
             result += [crossref_data["DOI"]]
         return result
 
-    def __add_journal_data(self, jou, title, crossref_data):
+    def __add_journal_data(self, jou, title):
         jou.create_journal()
         jou.create_title(title)
 

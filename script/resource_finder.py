@@ -5,12 +5,19 @@ __author__ = 'essepuntato'
 from rdflib import Graph
 from graphlib import GraphEntity, ProvEntity
 from rdflib import ConjunctiveGraph
+from storer import Storer
+import os
 
 
 class ResourceFinder(object):
 
-    def __init__(self, g_set=None, ts_url=None):
+    def __init__(self, g_set=None, ts_url=None, base_dir=None, base_iri=None,
+                 tmp_dir=None, context_map={}):
         self.g = Graph()
+        self.base_dir = base_dir
+        self.base_iri = base_iri
+        self.storer = Storer(context_map=context_map)
+        self.tmp_dir = tmp_dir
         self.name = "SPACIN " + self.__class__.__name__
         if g_set is not None:
             self.update_graph_set(g_set)
@@ -20,10 +27,34 @@ class ResourceFinder(object):
             self.ts = ConjunctiveGraph('SPARQLUpdateStore')
             self.ts.open((ts_url, ts_url))
 
-    def update_graph_set(self, g_set):
-        for g in g_set.graphs():
+    def add_triples_in_filesystem(self, res_iri):
+        if self.base_dir is not None and self.base_iri is not None:
+            cur_path = res_iri.replace(self.base_iri, self.base_dir)
+
+            if os.path.exists(cur_path):
+                file_list = []
+
+                if os.path.isdir(cur_path):
+                    for cur_dir, cur_subdir, cur_files in os.walk(cur_path):
+                        for cur_file in cur_files:
+                            if cur_file.endswith(".json"):
+                                file_list += [cur_dir + os.sep + cur_file]
+                else:
+                    file_list += [cur_path]
+
+                for file_path in file_list:
+                    cur_g = self.storer.load(file_path, tmp_dir=self.tmp_dir)
+                    self.add_triples_in_graph(cur_g)
+
+
+    def add_triples_in_graph(self, g):
+        if g is not None:
             for s, p, o in g.triples((None, None, None)):
                 self.g.add((s, p, o))
+
+    def update_graph_set(self, g_set):
+        for g in g_set.graphs():
+            self.add_triples_in_graph(g)
 
     def retrieve(self, id_dict):
         for id_type in id_dict:
@@ -79,8 +110,22 @@ class ResourceFinder(object):
     def retrieve_from_isbn(self, string):
         return self.__id_with_type(string, GraphEntity.isbn)
 
-    def retrieve_issue_from_journal(self, id_dict, issue_id):
-        return self.__retrieve_from_journal(id_dict, GraphEntity.journal_issue, issue_id)
+    def retrieve_issue_from_journal(self, id_dict, issue_id, volume_id):
+        if volume_id is None:
+            return self.__retrieve_from_journal(id_dict, GraphEntity.journal_issue, issue_id)
+        else:
+            retrieved_volume = self.retrieve_volume_from_journal(id_dict, volume_id)
+            if retrieved_volume is not None:
+                query = """
+                    SELECT DISTINCT ?br WHERE {
+                        ?br a <%s> ;
+                            <%s> <%s> ;
+                            <%s> "%s"
+                    } LIMIT 1
+                """ % (GraphEntity.journal_issue,
+                       GraphEntity.part_of, str(retrieved_volume),
+                       GraphEntity.has_sequence_identifier, issue_id)
+                return self.__query(query)
 
     def retrieve_volume_from_journal(self, id_dict, volume_id):
         return self.__retrieve_from_journal(id_dict, GraphEntity.journal_volume, volume_id)

@@ -82,7 +82,7 @@ class FormatProcessor(object):
             if result:
                 result = re.sub("(\.|,)?$", "", result)
 
-        return result
+            return result
 
     @staticmethod
     def extract_url(string):

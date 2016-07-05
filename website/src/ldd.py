@@ -105,8 +105,19 @@ class LinkedDataDirector(object):
         return final_graph.serialize(format=format)
 
     def redirect(self, url):
-        if url.endswith(self.__extensions):
-            return self.get_representation(url)
+        if url is None:
+            raise web.seeother(self.baseurl + "index")
+        elif url.endswith(self.__extensions):
+            cur_extension = "." + url.split(".")[-1]
+            no_extension = url.replace(cur_extension, "")
+            if no_extension == "" or no_extension.endswith("/"):
+                raise web.seeother(self.baseurl + no_extension + "index" + cur_extension)
+            else:
+                return self.get_representation(url)
+        elif url.endswith("/prov/"):
+            pass  # TODO: it must be handled somehow
+        elif url.endswith("/"):
+            raise web.seeother(self.baseurl + url + "index")
         else:
             content_type = web.ctx.env.get("HTTP_ACCEPT")
             if content_type:

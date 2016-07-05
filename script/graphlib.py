@@ -639,10 +639,16 @@ class ProvSet(GraphSet):
         time_string = '%Y-%m-%dT%H:%M:%S'
         cur_time = datetime.now().strftime(time_string)
 
+        # Add all existing information for provenance agents
+        self.rf.add_triples_in_filesystem(self.base_iri + "prov/")
+
         # The 'all_subjects' set includes only the subject of the created graphs that
         # have at least some new triples to add
         for prov_subject in self.all_subjects:
             cur_subj = self.prov_g.get_entity(prov_subject)
+
+            # Load all provenance data for that subject on resource finder
+            self.rf.add_triples_in_filesystem(str(prov_subject) + "/prov/")
 
             last_snapshot = None
             last_snapshot_res = self.rf.retrieve_last_snapshot(prov_subject)

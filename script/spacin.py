@@ -23,7 +23,7 @@ s = Stopper(reference_dir)
 try:
     for cur_dir, cur_subdir, cur_files in os.walk(reference_dir):
         if s.can_proceed():
-            for cur_file in cur_files:
+            for cur_file in sorted(cur_files):
                 if s.can_proceed():
                     if cur_file.endswith(".json"):
                         cur_file_path = cur_dir + os.sep + cur_file
@@ -37,7 +37,10 @@ try:
                             result = crp.process()
                             if result is not None:
                                 prov = ProvSet(result, base_iri, context_path, info_dir,
-                                               ResourceFinder(ts_url=triplestore_url))
+                                               ResourceFinder(base_dir=base_dir, base_iri=base_iri,
+                                                              tmp_dir=temp_dir_for_rdf_loading,
+                                                              context_map=
+                                                              {context_path: context_file_path}))
                                 prov.generate_provenance()
 
                                 res_storer = Storer(result, context_map={context_path: context_file_path})

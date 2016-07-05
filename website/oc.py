@@ -109,7 +109,9 @@ class Corpus:
                 "http://xmlns.com/foaf/0.1/givenName": "given name",
                 "http://xmlns.com/foaf/0.1/familyName": "family name",
                 "http://prismstandard.org/namespaces/basic/2.0/startingPage": "first page",
-                "http://prismstandard.org/namespaces/basic/2.0/endingPage": "last page"
+                "http://prismstandard.org/namespaces/basic/2.0/endingPage": "last page",
+                "http://purl.org/dc/terms/issued": "publication date",
+                "http://purl.org/dc/terms/modified": "modification date",
             },
             tmp_dir=c["tmp_dir"])
         cur_page = director.redirect(file_path)

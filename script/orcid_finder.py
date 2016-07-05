@@ -41,11 +41,14 @@ class ORCIDFinder(object):
         cur_query = "digital-object-ids:\"%s\"" % doi_string
         if family_names:
             cur_query += " AND ("
-
+            first_name = True
             for idx, family_name in enumerate(family_names):
-                if idx > 0:
-                    cur_query += " OR "
-                cur_query += "family-name:\"%s\"" % na(family_name)
+                if family_name is not None:
+                    if first_name:
+                        first_name = False
+                    else:
+                        cur_query += " OR "
+                    cur_query += "family-name:\"%s\"" % na(family_name)
 
             cur_query += ")"
 
@@ -53,7 +56,6 @@ class ORCIDFinder(object):
 
         return get_data(self.max_iteration, self.sec_to_wait, self.__last_query_done,
                         self.headers, self.timeout, self.repok, self.reper)
-        # TODO: store error somewhere
 
     def get_orcid_ids(self, doi_string, family_names=[]):
         result = []
