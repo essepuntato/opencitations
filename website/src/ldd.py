@@ -116,8 +116,6 @@ class LinkedDataDirector(object):
                 return self.get_representation(url)
         elif url.endswith("/prov/"):
             pass  # TODO: it must be handled somehow
-        elif url.endswith("/"):
-            raise web.seeother(self.baseurl + url + "index")
         else:
             content_type = web.ctx.env.get("HTTP_ACCEPT")
             if content_type:
@@ -165,8 +163,9 @@ class LinkedDataDirector(object):
                 if item_no_extension == cur_name and item.endswith(self.__extensions):
                     cur_file_ex = item
 
-            if cur_file_ex is not None:
-                cur_graph = self.load_graph(cur_full_dir + os.sep + cur_file_ex, self.tmp_dir)
+            cur_file_path = cur_full_dir + os.sep + cur_name + ".json"
+            if os.path.exists(cur_file_path):
+                cur_graph = self.load_graph(cur_file_path, self.tmp_dir)
                 if len(cur_graph):
                     if url.endswith(".rdf"):
                         LinkedDataDirector.__add_license(cur_graph)
