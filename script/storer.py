@@ -300,6 +300,7 @@ if __name__ == "__main__":
     arg_parser.add_argument("-i", "--input", dest="input", required=True,
                             help="The file containing the query to execute, the JSON-LD to upload, "
                                  "or a directory containing several files with both queries and RDF.")
+
     args = arg_parser.parse_args()
 
     storer = Storer(repok=Reporter(True), reperr=Reporter(True),
@@ -320,6 +321,6 @@ if __name__ == "__main__":
             if cur_file.endswith(".txt"):
                 with io.open(cur_file, "r", encoding="utf-8") as f:
                     query_string = f.read()
-                    storer.execute_upload_query(query_string, args.sparql_url)
+                    storer.execute_upload_query(query_string, triplestore_url)
             elif cur_file.endswith(".json"):
                 storer.upload(storer.load(cur_file, tmp_dir=temp_dir_for_rdf_loading), triplestore_url)
