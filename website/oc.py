@@ -103,7 +103,8 @@ class Sparql:
 class Corpus:
     def GET(self, file_path=None):
         director = LinkedDataDirector(
-            c["occ_base_path"], c["html"], c["occ_base_url"], c["json_context_path"],
+            c["occ_base_path"], c["html"], c["oc_base_url"],
+            c["json_context_path"], c["corpus_local_url"],
             label_conf={
                 "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": "is a",
                 "http://xmlns.com/foaf/0.1/givenName": "given name",

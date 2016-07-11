@@ -1,20 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-model href="./rash.rng" type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0"?>
-<!-- 
-Jailbreaking your reference lists: the OpenCitations project strikes again
-by Silvio Peroni, David Shotton, Fabio Vitali
-
-This work is licensed under a Creative Commons Attribution 4.0 International License (http://creativecommons.org/licenses/by/4.0/).
-You are free to:
-* Share - copy and redistribute the material in any medium or format
-* Adapt - remix, transform, and build upon the material
-for any purpose, even commercially.
-
-The licensor cannot revoke these freedoms as long as you follow the license terms.
-
-Under the following terms:
-* Attribution - You must give appropriate credit, provide a link to the license, and indicate if changes were made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use.
--->
 <html xmlns="http://www.w3.org/1999/xhtml"
       prefix="schema: http://schema.org/ prism: http://prismstandard.org/namespaces/basic/2.0/">
    <head>
@@ -26,7 +11,7 @@ Under the following terms:
       <script src="js/bootstrap.min.js"> </script>
       <script src="js/rash.js"> </script>
       <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"> </script>
-      <title>Jailbreaking your reference lists: the OpenCitations project strikes again</title>
+      <title>Jailbreaking your reference lists:OpenCitations strike again</title>
       <meta about="#affiliation-1"
             property="schema:name"
             content="DASPLab, DISI, University of Bologna, Bologna, Italy"/>
@@ -72,7 +57,7 @@ Under the following terms:
    <body>
       <section role="doc-abstract">
          <h1>Abstract</h1>
-         <p>In this poster paper we provide an overview of the OpenCitations project and of its main outcome, the OpenCitations Corpus, which is an open repository of scholarly citation data made available under a Creative Commons public domain dedication, which provides in RDF accurate citation information harvested from the scholarly literature.</p>
+         <p>In this poster paper we provide an overview of the OpenCitations project and of its main outcome, the OpenCitations Corpus, which is an open repository of scholarly citation data made available under a Creative Commons public domain dedication, providing in RDF accurate citation information harvested from the scholarly literature.</p>
          <p>
             <strong>RASH version:</strong> 
             <a href="http://bit.ly/29qsRwe">http://bit.ly/29qsRwe</a> 
@@ -80,45 +65,47 @@ Under the following terms:
       </section>
       <section>
          <h1>Introduction</h1>
-         <p>Reference lists from academic articles are the core elements of scholarly communication, since they permit the attribution of credit and integrate our independent research endeavours – and the cruel reality is that they are not freely available at all. For instance, UK research universities each pay tens of thousands of pounds annually for having granted the access to Scopus and Web of Science. In the current age where Open Access is considered a necessary practice in research, as also endorsed by institutions such as the European Union in its Horizon 2020 programme, <q>citation data now needs to be recognized as a part of the Commons – those works that are freely and legally available for sharing – and placed in an open repository, where they should be stored in appropriate machine-readable formats so as to be easily reused by machines to assist people in producing novel services</q> 
-            <a href="#__RefNumPara__293_1852566440"> </a>.</p>
-         <p>These are the main premises for the OpenCitations project (OC) and for the establishment of its Corpus (OCC), i.e. an open repository of scholarly citation data harvested from the scholarly literature. Along with other complementary initiatives recently proposed within our community – e.g. the <a href="http://semanticlancet.eu/">Semantic Lancet</a> Project <a href="#__RefNumPara__69_1852566440"> </a>, <a href="https://www.openaire.eu/">OpenAIRE</a> 
+         <p>Reference lists from academic articles are the core elements of scholarly communication, since they both permit the attribution of credit and integrate our independent research endeavours. But the cruel reality is that they are not freely available. For instance, UK research universities each pay tens of thousands of pounds annually for access to commercial sources of scholarly citations - Scopus and Web of Science. In the current age where Open Access is considered a necessary practice in research, it is a scandal that reference lists from journal articles are not readily and freely available for use by all scholars. As we have already stated in a previous work <a href="#__RefNumPara__293_1852566440"> </a>: </p>
+         <blockquote>
+            <p>Citation data now needs to be recognized as a part of the Commons – those works that are freely and legally available for sharing – and placed in an open repository, where they should be stored in appropriate machine-readable formats so as to be easily reused by machines to assist people in producing novel services.</p>
+         </blockquote>
+         <p>This is the main premise behind the OpenCitations (OC) project and a number of other complementary initiatives including the <a href="http://semanticlancet.eu/">Semantic Lancet</a> Project <a href="#__RefNumPara__69_1852566440"> </a>, <a href="https://www.openaire.eu/">OpenAIRE</a> 
             <a href="#__RefNumPara__71_1852566440"> </a> and <a href="http://www.scholarlydata.org/">Scholarly Data</a> 
-            <a href="#__RefNumPara__75_1852566440"> </a> – the current instantiation of the OCC has started to process reference lists of scholarly papers available in <a href="http://europepmc.org/">Europe PubMed Central</a> since the beginning of July. In this paper we provide a brief overview of the OC main components that make possible the extraction and description of such reference lists into RDF.</p>
+            <a href="#__RefNumPara__75_1852566440"> </a>. Since the beginning of July, the OCC has started to ingest and process the reference lists of scholarly papers available in <a href="http://europepmc.org/">Europe PubMed Central</a>. In this paper we provide a brief overview of the OCC's main components that make possible the extraction and description of such reference lists in RDF.</p>
       </section>
       <section>
          <h1>OpenCitations and its Corpus</h1>
-         <p>OpenCitations (<a href="http://opencitations.net/">http://opencitations.net</a>) is a project which aims at creating an open dataset of citation data, accompanied by specifications and other browsing tools – SPARQL endpoint, browsing interfaces, etc. – for supporting data consumers. Its main output is the creation of the Open Citations Corpus (OCC), an open repository of scholarly citation data made available under a Creative Commons public domain dedication (CC0), which provides accurate bibliographic references harvested from the scholarly literature (described using the <a href="http://www.sparontologies.net/">SPAR Ontologies</a> 
-            <a href="#__RefNumPara__17_1852566440"> </a> according to the OCC metadata document <a href="#__RefNumPara__19_1852566440"> </a>) that others may freely build upon, enhance and reuse for any purpose, without restriction under copyright or database law.</p>
-         <p>The OCC stores metadata relevant to these citations in RDF, encoded as JSON-LD, and makes them available through a SPARQL endpoint (and, in the near future, as downloadable datasets). It includes six different kinds of bibliographic entities:</p>
+         <p>The OpenCitations project (<a href="http://opencitations.net/">http://opencitations.net</a>) is creating an open dataset of citation data integrated with a <a href="https://w3id.org/oc/sparql">SPARQL endpoint</a> and a browsing interface to support data consumers. Its main output is the Open Citations Corpus (OCC), an open repository of scholarly citation data made available under a Creative Commons public domain dedication (CC0), which provides accurate bibliographic references harvested from the scholarly literature, described using the <a href="http://www.sparontologies.net/">SPAR Ontologies</a> 
+            <a href="#__RefNumPara__17_1852566440"> </a> according to the OCC metadata document <a href="#__RefNumPara__19_1852566440"> </a>, that others may freely build upon, enhance and reuse for any purpose, without restriction under copyright or database law.</p>
+         <p>The OCC stores metadata relevant to these citations in RDF, encoded as JSON-LD, and makes them available through a SPARQL endpoint (and, in the near future, as downloadable datasets). It includes information about six different kinds of bibliographic entity:</p>
          <ul>
             <li>
-               <p>bibliographic resources (br) – resources that cites/are cited by another bibliographic resource (e.g. journal article), or that contains citing/cited resources (e.g. journals);</p>
+               <p>bibliographic resources (br) – resources that citesare cited by other bibliographic resources (e.g. journal articles), or that contain such citing/cited resources (e.g. journals);</p>
             </li>
             <li>
-               <p>resource embodiments (re) – physical or digital formats in which bibliographic resources were made available by its publisher;</p>
+               <p>resource embodiments (re) – details of the physical or digital forms in which the bibliographic resources are made available by their publishers;</p>
             </li>
             <li>
-               <p>bibliographic entries (be) – textual bibliographic entries occurring in the reference list within a bibliographic resource, that reference other bibliographic resources;</p>
+               <p>bibliographic entries (be) – the literal textual bibliographic entries occurring in the reference lists within bibliographic resources, that reference other bibliographic resources;</p>
             </li>
             <li>
-               <p>responsible agents (ra) – agents having a certain role with respect to a bibliographic resource (e.g. authors, editors, publishers);</p>
+               <p>responsible agents (ra) – names of agents having certain roles with respect to bibliographic resources (i.e. names of authors, editors, publishers, etc.);</p>
             </li>
             <li>
-               <p>agent roles (ar) – roles held by an agent with respect to a bibliographic resource;</p>
+               <p>agent roles (ar) – roles held by agents with respect to bibliographic resources (e.g. author, editor, publisher);</p>
             </li>
             <li>
-               <p>identifiers (id) – an external identifier (e.g. DOI , ORCID , PubMedID ) associated with the bibliographic entity.</p>
+               <p>identifiers (id) – external identifiers (e.g. DOI, ORCID, PubMedID) associated with the bibliographic entities.</p>
             </li>
          </ul>
-         <p>The corpus URL (<a href="https://w3id.org/oc/corpus/">https://w3id.org/oc/corpus/</a>) identifies the main aggregated dataset of the OCC. It is split in several sub-datasets, one for each of the aforementioned kind of entities included in the corpus, having a URL composed by the corpus URL plus the two-letter short name for the class of items (e.g. <q>be</q> for a bibliographic entry) followed by an oblique slash (e.g. <a href="https://w3id.org/oc/corpus/be/">https://w3id.org/oc/corpus/be/</a>). Each dataset is described appropriately by means of the <a href="https://www.w3.org/TR/vocab-dcat/">Data Catalog Vocabulary</a> and the <a href="https://www.w3.org/TR/void/">VoID Vocabulary</a>, and a <a href="http://w3id.org/oc/sparql">SPARQL endpoint</a> has been also made available with all the entities included in the OCC.</p>
-         <p>A URL is assigned to each entity of each sub-dataset upon initial curation into the OCC, and all of them can be accessed in different formats (i.e., HTML, RDF/XML, Turtle, and JSON-LD) via URL dereferencing. Each entity URL is composed by the sub-dataset URL plus a number assigned to each resource, unique among resources of the same type, which increments for each new entry in that resource class. For instance, the resource <a href="https://w3id.org/oc/corpus/be/537">https://w3id.org/oc/corpus/be/537</a> is the 537<sup>th</sup> bibliographic entry created in the OCC. Each of these entities have also associated metadata describing their provenance by means of <a href="https://www.w3.org/TR/prov-o/">PROV-O</a> and its <a href="https://www.w3.org/TR/prov-dc/">PROV-DC extension</a> (e.g. <a href="https://w3id.org/oc/corpus/be/537/prov/se/1">https://w3id.org/oc/corpus/be/537/prov/se/1</a>). In particular, we keep track of the curatorial activities related to each OCC entity, as well as the agents involved in such activities and their role. Additional information about all the data handled and the way they are represented in RDF are detailed in the official OCC Metadata Document <a href="#__RefNumPara__19_1852566440"> </a>.</p>
-         <p>The creation of the data included in the OCC is handled by two Python scripts called <em>Bibliographic Entries Extractor</em> (<em>BEE</em>) and the <em>SPAR Citation Indexer</em> (<em>SPACIN</em>), available in the GitHub repository of the project. As shown in <a href="#refIllustration0"> </a>, BEE is responsible for the creation of JSON files containing information about the articles in the OA subset of PubMed Central (retrieved by using the <a href="https://europepmc.org/RestfulWebService">Europe PubMed Central API</a>). Each of these JSON files also includes the complete reference list of the paper in consideration. Then, SPACIN processes each JSON file, retrieves metadata information about all the citing/cited articles described in it by querying the <a href="http://api.crossref.org/">Crossref API</a> and the <a href="http://members.orcid.org/api/">ORCID API</a>, and stores all the generated RDF resources in the file system in JSON-LD format and on the OCC triplestore. It is worth noticing that the triplestore includes all the data about the curated entities except the provenance data and the description of the datasets, that are accessible only via HTTP.</p>
-         <p>The workflow introduced in <a href="#refIllustration0"> </a> is a process that runs until no more JSON file can be produced by BEE. Thus, the current instance of the OCC is actually evolving dynamically in time, and can be easily extended so as to interact with additional REST API so as to gather article metadata and their related references from different sources.</p>
-         <p>Each new resource introduced in the OCC by SPACIN occupies between 0.3 and 4 kb, plus additional 32 kb dedicated to store its provenance data. Every day the aforementioned workflow adds to the corpus about 2 millions triples, which include more than 20000 new citing/cited bibliographic resources and about 100000 new authors – 5% of those is usually disambiguated through ORCID ids.</p>
+         <p>The corpus URL (<a href="https://w3id.org/oc/corpus/">https://w3id.org/oc/corpus/</a>) identifies the entire OCC, which is composed of several sub-datasets, one for each of the aforementioned bibliographic entities included in the corpus. Each of these has a URL composed by suffixing the corpus URL with the two-letter short name for the class of entity (e.g. <q>be</q> for a bibliographic entry) followed by an oblique slash (e.g. <a href="https://w3id.org/oc/corpus/be/">https://w3id.org/oc/corpus/be/</a>). Each dataset is described appropriately by means of the <a href="https://www.w3.org/TR/vocab-dcat/">Data Catalog Vocabulary</a> and the <a href="https://www.w3.org/TR/void/">VoID Vocabulary</a>, and a <a href="http://w3id.org/oc/sparql">SPARQL endpoint</a> is made available for all the entities included in the entire OCC.</p>
+         <p>Upon initial curation into the OCC, a URL is assigned to each entity within each sub-dataset, all of which can be accessed in different formats (HTML, RDF/XML, Turtle, and JSON-LD) via URL dereferencing. Each entity URL is composed by suffixing the sub-dataset URL with a number assigned to each resource, unique among resources of the same type, which increments for each new entry in that resource class. For instance, the resource <a href="https://w3id.org/oc/corpus/be/537">https://w3id.org/oc/corpus/be/537</a> is the 537<sup>th</sup> bibliographic entry recorded within the OCC. Each of these entities has associated metadata describing its provenance by means of <a href="https://www.w3.org/TR/prov-o/">PROV-O</a> and its <a href="https://www.w3.org/TR/prov-dc/">PROV-DC extension</a> (e.g. <a href="https://w3id.org/oc/corpus/be/537/prov/se/1">https://w3id.org/oc/corpus/be/537/prov/se/1</a>). In particular, we keep track of the curatorial activities related to each OCC entity, the curatorial agents involved, and their roles. Additional information about OCC's handling of citation the data, and the way they are represented in RDF, are detailed in the official OCC Metadata Document <a href="#__RefNumPara__19_1852566440"> </a>.</p>
+         <p>The ingestion of citation data into the OCC is handled by two Python scripts called <em>Bibliographic Entries Extractor</em> (<em>BEE</em>) and the <em>SPAR Citation Indexer</em> (<em>SPACIN</em>), available in the <a href="https://github.com/essepuntato/opencitations">OCC's GitHub repository</a>. As shown <a href="#refIllustration0"> </a>, BEE is responsible for the creation of JSON files containing information about the articles in the OA subset of PubMed Central (retrieved by using the <a href="https://europepmc.org/RestfulWebService">Europe PubMed Central API</a>). Each of these JSON files also includes the complete reference list of the paper under consideration. Then, SPACIN processes each JSON file, retrieves metadata information about all the citing/cited articles described in it by querying the <a href="http://api.crossref.org/">Crossref API</a> and the <a href="http://members.orcid.org/api/">ORCID API</a>, and stores all the generated RDF resources in the file system in JSON-LD format and within the OCC triplestore. It is worth noting that the triplestore includes all the data about the curated entities except their provenance data and the descriptions of the datasets, that are accessible only via HTTP.</p>
+         <p>The workflow introduced in <a href="#refIllustration0"> </a> is a process that runs until no more JSON files can be produced by BEE. Thus, the current instance of the OCC is evolving dynamically in time, and can be easily extended so as to interact with additional REST APIs from different sources, so as to gather additional article metadata and their related references.</p>
+         <p>Each new resource recorded within the OCC by SPACIN occupies between 0.3 and 4 kb, plus an additional 32 kb dedicated to storage of its provenance data. Each day the workflow adds about 2 million triples to the corpus, describing more than 20,000 new citing/cited bibliographic resources and about 100,000 new authors, about 5% of whom are disambiguated through their ORCID ids.</p>
          <figure id="refIllustration0">
             <p>
-               <img src="img/1000020100000956000004DA5D885411.png"
+               <img src="img/1000020100000948000004D0192123CB.png"
                     alt="The steps involving BEE and SPACIN, and their related Python classes, in the production of the OpenCitations Corpus."/>
             </p>
             <figcaption>The steps involving BEE and SPACIN, and their related Python classes, in the production of the OpenCitations Corpus.</figcaption>
@@ -126,8 +113,8 @@ Under the following terms:
       </section>
       <section>
          <h1>Conclusions</h1>
-         <p>In this poster paper we have introduced OpenCitations, which is a projects that aims at creating an open repository of scholarly citation data, which provides accurate bibliographic references harvested from the scholarly literature: the OpenCitations Corpus (OCC). The new instance of the OCC has just been set up, and it is already populated with millions of triples – a number that is going to grow quickly in the next months considering the continuous workflow developed that adds new data dynamically starting from authoritative source.</p>
-         <p>We are currently working on three different aspects. First of all, we are developing tools for linking the resources in the OCC with those ones included in other datasets, e.g. Scholarly Data. In addition, we are experimenting on the use multiple and parallel instantiations of SPACIN so as to increase the amount of new daily information processed. Finally, we are studying some mechanisms for allowing authors of papers to add their reference lists to the corpus directly, so as to include fresh and new information related to papers that may not be published on the usual channels (e.g. publishers) yet.</p>
+         <p>In this poster paper we have introduced the OpenCitations project, which is involved in creating an open repository of accurate bibliographic references harvested from the scholarly literature: the OpenCitations Corpus (OCC). The new instance of the OCC has just been established, and is already populated with data describing 117824 references (as of July 2016) – a number that will grow quickly over the coming months as the continuous workflow adds new data dynamically from Europe PubMed Central and other authoritative sources. The OCC SPARQL endpoint is presently available for use, and distributions of the OCC will shortly be made openly available for bulk download – the first of these by the end of August 2016, with subsequent incremental additions.</p>
+         <p>We are currently working on two different aspects. First of all, we are developing tools for linking the resources within the OCC with those included in other datasets, e.g. Scholarly Data. In addition, we are experimenting with the use of multiple parallel instantiations of SPACIN, so as to increase the amount of new information that can be processed daily. </p>
       </section>
       <section role="doc-bibliography">
          <h1>References</h1>
@@ -149,7 +136,7 @@ Under the following terms:
                </p>
             </li>
             <li id="__RefNumPara__17_1852566440" role="doc-biblioentry">
-               <p>Peroni, S. (2014). The Semantic Publishing and Referencing Ontologies. In Semantic Web Technologies and Legal Scholarly Publishing: 121–193. <a href="http://dx.doi.org/10.1007/978-3-319-04777-5_5">http://dx.doi.org/10.1007/978-3-319-04777-5_5</a> 
+               <p>Peroni, S. (2014). The Semantic Publishing and Referencing Ontologies. In Semantic Web Technologies and Legal Scholarly Publishing: 121–193. <a href="http://dx.doi.org/10.1007/978-3-319-04777-5_5">http://dx.doi.org/10.1007/978-3-319-04777-5_5</a>
                </p>
             </li>
             <li id="__RefNumPara__75_1852566440" role="doc-biblioentry">

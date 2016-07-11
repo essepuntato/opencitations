@@ -23,9 +23,10 @@ class LinkedDataDirector(object):
     __entityiri = "__entityiri"
 
     def __init__(self, file_basepath, template_path, baseurl, jsonld_context_path,
-                 label_conf=None, tmp_dir=None):
+                 corpus_local_url, label_conf=None, tmp_dir=None):
         self.basepath = file_basepath
-        self.baseurl = baseurl
+        self.baseurl = baseurl + corpus_local_url
+        self.corpus_local_url = corpus_local_url
 
         with open(jsonld_context_path) as f:
             self.jsonld_context = json.load(f)["@context"]
@@ -106,12 +107,12 @@ class LinkedDataDirector(object):
 
     def redirect(self, url):
         if url is None:
-            raise web.seeother(self.baseurl + "index")
+            raise web.seeother(self.corpus_local_url + "index")
         elif url.endswith(self.__extensions):
             cur_extension = "." + url.split(".")[-1]
             no_extension = url.replace(cur_extension, "")
             if no_extension == "" or no_extension.endswith("/"):
-                raise web.seeother(self.baseurl + no_extension + "index" + cur_extension)
+                return self.get_representation(no_extension + "index" + cur_extension)
             else:
                 return self.get_representation(url)
         elif url.endswith("/prov/"):
@@ -128,13 +129,13 @@ class LinkedDataDirector(object):
                         cur_url = url
 
                     if any(mime in accept_types for mime in self.__rdfxml):
-                        raise web.seeother(self.baseurl + cur_url + ".rdf")
+                        raise web.seeother(self.corpus_local_url + cur_url + ".rdf")
                     elif any(mime in accept_types for mime in self.__turtle):
-                        raise web.seeother(self.baseurl + cur_url + ".ttl")
+                        raise web.seeother(self.corpus_local_url + cur_url + ".ttl")
                     elif any(mime in accept_types for mime in self.__jsonld):
-                        raise web.seeother(self.baseurl + cur_url + ".json")
+                        raise web.seeother(self.corpus_local_url + cur_url + ".json")
                     else:  # HTML
-                        raise web.seeother(self.baseurl + cur_url + ".html")
+                        raise web.seeother(self.corpus_local_url + cur_url + ".html")
 
     @staticmethod
     def __add_license(g):
