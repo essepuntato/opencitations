@@ -155,15 +155,8 @@ class LinkedDataDirector(object):
             cur_dir = "."
             cur_name = local_file
 
-        cur_file_ex = None
-
         cur_full_dir = self.basepath + os.sep + cur_dir
         if os.path.isdir(cur_full_dir):
-            for item in os.listdir(cur_full_dir):
-                item_no_extension = re.sub("\.[^.]+$", "", item)
-                if item_no_extension == cur_name and item.endswith(self.__extensions):
-                    cur_file_ex = item
-
             cur_file_path = cur_full_dir + os.sep + cur_name + ".json"
             if os.path.exists(cur_file_path):
                 cur_graph = self.load_graph(cur_file_path, self.tmp_dir)
