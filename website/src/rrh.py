@@ -34,7 +34,7 @@ class RewriteRuleHandler(object):
                 self.add_rule(r[0], r[1], r[2])
             else:
                 self.add_rule(r[0], r[1])
-            self.urls += ("(" + r[0] + ")", self.class_name)
+            self.urls = ("(" + r[0] + ")", self.class_name) + self.urls
 
     def rewrite(self, u):
         res = u
