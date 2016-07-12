@@ -57,7 +57,6 @@
     "merging": "prov:Replace",
     "metadata_snapshot": "prov:Entity",
     "document": "fabio:Expression",
-    "monograph": "fabio:Book",
     "occ_dataset": "dcat:Dataset",
     "occ_distribution": "dcat:Distribution",
     "patent": "fabio:PatentDocument",

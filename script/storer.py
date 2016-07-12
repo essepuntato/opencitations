@@ -300,8 +300,18 @@ if __name__ == "__main__":
     arg_parser.add_argument("-i", "--input", dest="input", required=True,
                             help="The file containing the query to execute, the JSON-LD to upload, "
                                  "or a directory containing several files with both queries and RDF.")
+    arg_parser.add_argument("-c", "--conf", dest="conf",
+                            help="The name of the module with particular service configuration to "
+                                 "import. If it is left unspecified, the script will use the "
+                                 "default one ('i.e. conf_spacin').")
 
     args = arg_parser.parse_args()
+
+    if args.conf is not None:
+        my_conf = __import__(args.conf)
+        for attr in dir(my_conf):
+            if not attr.startswith("__"):
+                globals()[attr] = getattr(my_conf, attr)
 
     storer = Storer(repok=Reporter(True), reperr=Reporter(True),
                     context_map={context_path: context_file_path})
@@ -311,7 +321,8 @@ if __name__ == "__main__":
         for cur_dir, cur_subdir, cur_files in os.walk(args.input):
                 for cur_file in cur_files:
                     full_path = cur_dir + os.sep + cur_file
-                    if re.search(os.sep + "prov" + os.sep, full_path) is None:
+                    if re.search(os.sep + "prov" + os.sep, full_path) is None and \
+                       not full_path.endswith("index.json"):
                         all_files += [full_path]
     else:
         all_files += [args.input]
