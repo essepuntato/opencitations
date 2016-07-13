@@ -25,3 +25,4 @@ script/*_local.py
 script/*_remote.py
 triplestore/run-local.sh
 website/*-local.sh
+ontology/catalog-v001.xml
