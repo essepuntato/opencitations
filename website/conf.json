@@ -5,5 +5,9 @@
   "tmp_dir": "/srv/oc/corpus/",
   "json_context_path": "/home/essepuntato/OC/corpus/context.json",
   "sparql_endpoint": "http://localhost:3000/blazegraph/sparql",
-  "corpus_local_url": "/corpus/"
+  "corpus_local_url": "/corpus/",
+  "ontology_base_url": "https://w3id.org/oc/",
+  "documentation_base_path": "ontology/",
+  "ontology_url": "../ontology/ontology.owl",
+  "onto_acronym": "ontology"
 }

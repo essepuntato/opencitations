@@ -22,6 +22,7 @@ from src.ldd import LinkedDataDirector
 import requests
 import urlparse
 import re
+from src.oh import OntologyHandler
 
 # Load the configuration file
 with open("conf.json") as f:
@@ -32,7 +33,8 @@ urls = (
     "/", "WorkInProgress",
     "/corpus/(.+)", "Corpus",
     "/corpus/", "Corpus",
-    "/sparql", "Sparql"
+    "/sparql", "Sparql",
+    "/ontology(.+)?", "Ontology"
 )
 
 # For rendering
@@ -122,6 +124,20 @@ class Corpus:
             web_logger.mes()
             return cur_page
 
+
+class Ontology:
+    def GET(self, ext):
+        cur_extension = "" if ext is None else ext
+        ontology_handler = OntologyHandler(
+            c["ontology_base_url"], c["documentation_base_path"],
+            {c["onto_acronym"]: c["ontology_url"]}, c["tmp_dir"])
+        cur_page = ontology_handler.redirect(
+            c["ontology_base_url"] + c["onto_acronym"] + cur_extension)
+        if cur_page is None:
+            raise web.notfound()
+        else:
+            web_logger.mes()
+            return cur_page
 
 
 if __name__ == "__main__":

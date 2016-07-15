@@ -2,11 +2,10 @@
 __author__ = 'essepuntato'
 
 import os
-from hashformat import *
 import requests
 import codecs
 import argparse
-import json
+import re
 
 
 class StaticLODE(object):
@@ -18,18 +17,6 @@ class StaticLODE(object):
         self.imported_url = imported_url
         self.onto_map = onto_map
         self.repl = repl
-
-    @staticmethod
-    def get_ontology_url(base_dir):
-        result = {}
-
-        for cur_dir, cur_subdir, cur_files in os.walk(base_dir):
-            for cur_file in cur_files:
-                if cur_file.endswith(".txt"):
-                    cur_hash = process_hashformat(cur_dir + os.sep + cur_file)[0]
-                    result[cur_file.replace(".txt", "")] = cur_hash["url"]
-
-        return result
 
     def create_documentation(self):
         for acronym in self.onto_map:
@@ -52,7 +39,7 @@ class StaticLODE(object):
 
 if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser("static_lode.py")
-    arg_parser.add_argument("-pu", "--prefix-url", dest="prefurl",
+    arg_parser.add_argument("-pu", "--prefix-url", dest="prefurl", required=True,
                             help="The prefix followed by a ':' plus the URL of the ontology to convert.")
     arg_parser.add_argument("-o", "--output-dir", dest="output_dir", required=True,
                             help="The directory where to store the documentation files created.")
@@ -70,15 +57,8 @@ if __name__ == "__main__":
     args = arg_parser.parse_args()
 
     all_ontologies_url = {}
-    if args.prefurl is not None:
-        split_input = args.prefurl.split(":", 1)
-        all_ontologies_url.update({split_input[0]: split_input[1]})
-    elif args.input_dir is not None and os.path.exists(args.input_dir):
-        all_ontologies_url.update(StaticLODE.get_ontology_url(args.input_dir))
-
-    if args.conf_file is not None and os.path.exists(args.conf_file):
-        with open(args.conf_file) as f:
-            all_ontologies_url.update(json.load(f))
+    split_input = args.prefurl.split(":", 1)
+    all_ontologies_url.update({split_input[0]: split_input[1]})
 
     sl = StaticLODE(args.output_dir, all_ontologies_url, args.language,
                     args.source_material_url, args.lode_url, args.string_replace)
@@ -86,4 +66,4 @@ if __name__ == "__main__":
     sl.create_documentation()
 
     # How to call it for a specific ontology:
-    # python sl.py -pu fabio:http://purl.org/spar/fabio -o spar/ontology_documentations -s /static/lode
+    # python static_lode.py -pu fabio:http://purl.org/spar/fabio -o spar/ontology_documentations -s /static/lode
