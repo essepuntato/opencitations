@@ -1,1 +1,12 @@
-<html><head><title>LODE error</title></head><body><h2>LODE error</h2><p><strong>Reason: </strong>http://opencitations.net/ontology</p></body></html>
+<?xml version="1.0" encoding="UTF-8"?><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><link href="/static/lode/owl.css" rel="stylesheet" type="text/css" /><link href="/static/lode/Primer.css" rel="stylesheet" type="text/css" /><link href="/static/lode/rec.css" rel="stylesheet" type="text/css" /><link href="/static/lode/extra.css" rel="stylesheet" type="text/css" /><link rel="shortcut icon" href="/static/lode/favicon.ico" /><script src="/static/lode/jquery.js"></script><script src="/static/lode/jquery.scrollTo.js"></script><script src="/static/js/marked.min.js"></script><script>
+                $(document).ready(
+                    function () {
+                    	jQuery(".markdown").each(function(el){
+							jQuery(this).after(marked(jQuery(this).text())).remove()});
+                        var list = $('a[name="https://w3id.org/oc/ontology"]');
+                        if (list.size() != 0) {
+                        	var element = list.first();
+                        	$.scrollTo(element);
+                        }
+                    });
+        </script></head><body><div class="head"></div><hr /><div id="toc"><h2>Table of Content</h2><ol><li><a href="#namespacedeclarations">Namespace Declarations</a></li></ol></div><div id="namespacedeclarations"><h2>Namespace Declarations <span class="backlink"> back to <a href="#toc">ToC</a></span></h2><dl><dt><em>default namespace</em></dt><dd>http://www.w3.org/2002/07/owl#</dd><dt>owl</dt><dd>http://www.w3.org/2002/07/owl#</dd><dt>rdf</dt><dd>http://www.w3.org/1999/02/22-rdf-syntax-ns#</dd><dt>rdfs</dt><dd>http://www.w3.org/2000/01/rdf-schema#</dd><dt>xsd</dt><dd>http://www.w3.org/2001/XMLSchema#</dd></dl></div><p class="endnote">This HTML document was obtained by processing the OWL ontology source code through <a href="http://www.essepuntato.it/lode">LODE</a>, <em>Live OWL Documentation Environment</em>, developed by <a href="http://www.essepuntato.it">Silvio Peroni</a>.</p></body></html>
