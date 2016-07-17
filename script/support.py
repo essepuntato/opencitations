@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+from OpenSSL.SSL import SysCallError
 from requests.exceptions import ReadTimeout, ConnectTimeout
 import json
 
@@ -150,6 +151,7 @@ def get_data(max_iteration, sec_to_wait, get_url, headers, timeout, repok, reper
     error_read = False
     error_connection = False
     error_generic = False
+    error_syscall = False
     errors = []
     while tentative < max_iteration:
         if tentative != 0:
@@ -186,6 +188,11 @@ def get_data(max_iteration, sec_to_wait, get_url, headers, timeout, repok, reper
                 error_connection = True
                 errors += ["A timeout error happened when connecting to the API "
                            "when retrieving data. %s" % e]
+        except SysCallError:
+            if not error_syscall:
+                error_syscall = True
+                errors += ["A system call error happened when connecting to the API "
+                           "when retrieving data."]
         except Exception as e:
             if not error_generic:
                 error_generic = True
