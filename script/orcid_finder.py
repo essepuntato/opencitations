@@ -48,7 +48,7 @@ class ORCIDFinder(object):
                         first_name = False
                     else:
                         cur_query += " OR "
-                    cur_query += "family-name:\"%s\"" % na(family_name)
+                    cur_query += "family-name:\"%s\"" % na(u"" + family_name)
 
             cur_query += ")"
 
