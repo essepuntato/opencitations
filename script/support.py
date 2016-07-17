@@ -180,17 +180,17 @@ def get_data(max_iteration, sec_to_wait, get_url, headers, timeout, repok, reper
             if not error_read:
                 error_read = True
                 errors += ["A timeout error happened when reading results from the API "
-                           "when retrieving data. %s" % str(e)]
+                           "when retrieving data. %s" % e]
         except ConnectTimeout as e:
             if not error_connection:
                 error_connection = True
                 errors += ["A timeout error happened when connecting to the API "
-                           "when retrieving data. %s" % str(e)]
+                           "when retrieving data. %s" % e]
         except Exception as e:
             if not error_generic:
                 error_generic = True
                 errors += ["A generic error happened when trying to use the API "
-                           "when retrieving data. %s" % str(e)]
+                           "when retrieving data. %s" % e]
 
     # If the process comes here, no valid result has been returned
     reper.add_sentence(" | ".join(errors) + "\n\tRequested URL: " + get_url)
