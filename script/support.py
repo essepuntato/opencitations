@@ -14,6 +14,7 @@ from rdflib import Literal, RDF
 from time import sleep
 import requests
 from urllib import quote
+import sys
 
 
 def encode_url(u):
@@ -150,7 +151,6 @@ def get_data(max_iteration, sec_to_wait, get_url, headers, timeout, repok, reper
     error_read = False
     error_connection = False
     error_generic = False
-    error_syscall = False
     errors = []
     while tentative < max_iteration:
         if tentative != 0:
@@ -187,16 +187,11 @@ def get_data(max_iteration, sec_to_wait, get_url, headers, timeout, repok, reper
                 error_connection = True
                 errors += ["A timeout error happened when connecting to the API "
                            "when retrieving data. %s" % e]
-        except TypeError:
-            if not error_syscall:
-                error_syscall = True
-                errors += ["A system call error happened when connecting to the API "
-                           "when retrieving data."]
         except Exception as e:
             if not error_generic:
                 error_generic = True
                 errors += ["A generic error happened when trying to use the API "
-                           "when retrieving data. %s" % e]
+                           "when retrieving data. %s" % sys.exc_info()[0]]
 
     # If the process comes here, no valid result has been returned
     reper.add_sentence(" | ".join(errors) + "\n\tRequested URL: " + get_url)
