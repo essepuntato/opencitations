@@ -10,8 +10,9 @@ queries = [
     """
     PREFIX fabio: <http://purl.org/spar/fabio/>
     PREFIX cito: <http://purl.org/spar/cito/>
-    SELECT (count(DISTINCT ?citing) as ?tot) {
-        ?citing a fabio:Expression ; cito:cites | ^cito:cites ?cited
+    SELECT (count(?citing) as ?tot) {
+      ?citing a fabio:Expression .
+      FILTER EXISTS {?citing cito:cites | ^cito:cites [] }
     }""",
     """
     PREFIX cito: <http://purl.org/spar/cito/>
@@ -32,15 +33,15 @@ queries = [
     }""",
     """
     PREFIX pro: <http://purl.org/spar/pro/>
-    SELECT (count(DISTINCT ?author) as ?tot) {
+    SELECT (count(?author) as ?tot) {
         ?role pro:withRole pro:author ; pro:isHeldBy ?author
     }""",
     """
     PREFIX datacite: <http://purl.org/spar/datacite/>
     PREFIX pro: <http://purl.org/spar/pro/>
+    PREFIX foaf: <http://xmlns.com/foaf/0.1/>
     SELECT (count(DISTINCT ?author) as ?tot) {
-        ?role pro:withRole pro:author ; pro:isHeldBy ?author .
-        ?author datacite:hasIdentifier/datacite:usesIdentifierScheme datacite:orcid .
+      ?author a foaf:Agent ; datacite:hasIdentifier []
     }""",
     """
     SELECT (count(?s) as ?tot) {
