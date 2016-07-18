@@ -12,7 +12,14 @@ queries = [
     PREFIX cito: <http://purl.org/spar/cito/>
     SELECT (count(?citing) as ?tot) {
       ?citing a fabio:Expression .
-      FILTER EXISTS {?citing cito:cites | ^cito:cites [] }
+      FILTER EXISTS { ?citing cito:cites [] }
+    }""",
+    """
+    PREFIX fabio: <http://purl.org/spar/fabio/>
+    PREFIX cito: <http://purl.org/spar/cito/>
+    SELECT (count(?cited) as ?tot) {
+      ?cited a fabio:Expression .
+      FILTER EXISTS { ?cited ^cito:cites [] }
     }""",
     """
     PREFIX cito: <http://purl.org/spar/cito/>
