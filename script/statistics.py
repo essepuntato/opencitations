@@ -51,9 +51,7 @@ res = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
 for query in queries:
     tp.setQuery(query)
     tp.setReturnFormat(JSON)
-    tp_result = tp.query().convert()
-    print "RES:", tp_result
-    results = json.loads(tp_result)
+    results = tp.query().convert()
 
     for result in results["results"]["bindings"]:
         res += "," + result["tot"]["value"]
