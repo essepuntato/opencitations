@@ -49,10 +49,6 @@ queries = [
     PREFIX foaf: <http://xmlns.com/foaf/0.1/>
     SELECT (count(DISTINCT ?author) as ?tot) {
       ?author a foaf:Agent ; datacite:hasIdentifier []
-    }""",
-    """
-    SELECT (count(?s) as ?tot) {
-        ?s ?p ?o
     }"""
 ]
 
