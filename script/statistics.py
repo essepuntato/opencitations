@@ -1,7 +1,5 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-from scipy.special.tests.test_orthogonal import test_p_roots
-
 __author__ = 'essepuntato'
 
 import json
