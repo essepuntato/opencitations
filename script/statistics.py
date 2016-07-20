@@ -1,5 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+from scipy.special.tests.test_orthogonal import test_p_roots
+
 __author__ = 'essepuntato'
 
 import json
@@ -49,10 +51,11 @@ tp.setMethod('GET')
 
 res = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
 for query in queries:
-    print "WRAP", query
     tp.setQuery(query)
     tp.setReturnFormat(JSON)
-    results = json.loads(tp.query().convert())
+    tp_result = tp.query().convert()
+    print "RES:", tp_result
+    results = json.loads(tp_result)
 
     for result in results["results"]["bindings"]:
         res += "," + result["tot"]["value"]
