@@ -13,11 +13,13 @@ from datetime import datetime
 import argparse
 import io
 from conf_spacin import *
+from support import find_paths
 
 
 class Storer(object):
 
-    def __init__(self, graph_set=None, repok=None, reperr=None, context_map={}):
+    def __init__(self, graph_set=None, repok=None, reperr=None, context_map={}, dir_split=0):
+        self.dir_split = dir_split
         self.context_map = context_map
         for context_url in context_map:
             context_file_path = context_map[context_url]
@@ -169,16 +171,10 @@ class Storer(object):
         self.repok.new_article()
         self.reperr.new_article()
 
-        cur_subject = set(cur_g.subjects(None, None)).pop()
-        if Storer.is_dataset(cur_subject):
-            cur_dir_path = base_dir + re.sub("^%s(.*)$" % base_iri, "\\1", str(cur_subject))
-            cur_file_path = cur_dir_path + "index.json"
-        else:
-            cur_dir_path = base_dir + re.sub("^%s(.+)/[0-9]+$" % base_iri, "\\1", str(cur_subject))
-            cur_file_path = cur_dir_path + os.sep + \
-                            re.sub("^.+/([0-9]+)$", "\\1", str(cur_subject)) + ".json"
-
         if len(cur_g) > 0:
+            cur_subject = set(cur_g.subjects(None, None)).pop()
+            cur_dir_path, cur_file_path = find_paths(
+                str(cur_subject), base_dir, base_iri, self.dir_split)
             try:
                 if not os.path.exists(cur_dir_path):
                     os.makedirs(cur_dir_path)
@@ -200,10 +196,6 @@ class Storer(object):
                                          (cur_file_path, str(e)))
 
         return None
-
-    @staticmethod
-    def is_dataset(res):
-        return re.search("^.+/[0-9]+$", str(res)) is None
 
     def __get_context(self, context_url):
         if context_url in self.context_map:

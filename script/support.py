@@ -195,3 +195,47 @@ def get_data(max_iteration, sec_to_wait, get_url, headers, timeout, repok, reper
 
     # If the process comes here, no valid result has been returned
     reper.add_sentence(" | ".join(errors) + "\n\tRequested URL: " + get_url)
+
+
+def is_dataset(string_iri):
+    return re.search("^.+/[0-9]+$", string_iri) is None
+
+
+def find_paths(string_iri, base_dir, base_iri, dir_split=0):
+    res_regex = "(.+/)([0-9]+)$"
+    prov_regex = "(.+/)([0-9]+)(/prov/.+)/([0-9]+)$"
+
+    if is_dataset(string_iri):
+        cur_dir_path = base_dir + re.sub("^%s(.*)$" % base_iri, "\\1", string_iri)
+        cur_file_path = cur_dir_path + "index.json"
+    else:
+        if dir_split and not string_iri.startswith(base_iri + "prov/"):
+            is_prov = "/prov/" in string_iri
+            cur_split = 0
+            if is_prov:
+                cur_number = long(re.sub(prov_regex, "\\2", string_iri))
+            else:
+                cur_number = long(re.sub(res_regex, "\\2", string_iri))
+
+            if not cur_split:
+                while True:
+                    if cur_number > cur_split:
+                        cur_split += dir_split
+                    else:
+                        break
+
+            if is_prov:
+                cur_dir_path = base_dir + os.sep + \
+                               re.sub(("^%s" + prov_regex) % base_iri, "\\1", string_iri) + \
+                               str(cur_split) + os.sep + \
+                               re.sub(("^%s" + prov_regex) % base_iri, "\\2\\3", string_iri)
+            else:
+                cur_dir_path = base_dir + os.sep + \
+                               re.sub(("^%s" + res_regex) % base_iri, "\\1", string_iri) + \
+                               os.sep + str(cur_split)
+        else:
+            cur_dir_path = base_dir + re.sub(("^%s" + res_regex) % base_iri, "\\1", string_iri)
+
+        cur_file_path = cur_dir_path + os.sep + re.sub(res_regex, "\\2", string_iri) + ".json"
+
+    return cur_dir_path, cur_file_path

@@ -23,6 +23,7 @@ script/bee_log.txt
 script/test-bee.sh
 script/*_local.py
 script/*_remote.py
+script/nohup.out
 triplestore/run-local.sh
 website/*-local.sh
 ontology/catalog-v001.xml

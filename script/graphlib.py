@@ -9,7 +9,9 @@ from reporter import Reporter
 import re
 import os
 from datetime import datetime
-from support import is_string_empty, create_literal, create_type, get_short_name, get_count, encode_url
+from support import is_string_empty, create_literal, create_type, get_short_name, \
+    get_count, encode_url, find_paths
+from conf_spacin import dir_split_number
 
 
 class GraphEntity(object):
@@ -724,9 +726,12 @@ class ProvSet(GraphSet):
     def _add_prov(self, short_name, prov_type, res, resp_agent, prov_subject=None):
         if prov_subject is None:
             g_prov = self.base_iri + "prov/"
+            prov_info_path = g_prov.replace(self.base_iri, self.info_dir) + short_name + ".txt"
         else:
             g_prov = str(prov_subject) + "/prov/"
-        prov_info_path = g_prov.replace(self.base_iri, self.info_dir) + short_name + ".txt"
+            res_file_path = \
+                find_paths(str(prov_subject), self.info_dir, self.base_iri, dir_split_number)[1][:-5]
+            prov_info_path = res_file_path + "/prov/" + short_name + ".txt"
         return self._add(g_prov, prov_type, res, resp_agent, None, None,
                          prov_info_path, short_name, [] if prov_subject is None else [prov_subject])
 

@@ -43,12 +43,16 @@ try:
                                                               {context_path: context_file_path}))
                                 prov.generate_provenance()
 
-                                res_storer = Storer(result, context_map={context_path: context_file_path})
+                                res_storer = Storer(result,
+                                                    context_map={context_path: context_file_path},
+                                                    dir_split=dir_split_number)
                                 res_storer.upload_and_store(
                                     base_dir, triplestore_url, base_iri, context_path,
                                     temp_dir_for_rdf_loading)
 
-                                prov_storer = Storer(prov, context_map={context_path: context_file_path})
+                                prov_storer = Storer(prov,
+                                                     context_map={context_path: context_file_path},
+                                                     dir_split=dir_split_number)
                                 prov_storer.store_all(
                                     base_dir, base_iri, context_path,
                                     temp_dir_for_rdf_loading)
