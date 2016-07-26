@@ -23,7 +23,8 @@ class LinkedDataDirector(object):
     __entityiri = "__entityiri"
 
     def __init__(self, file_basepath, template_path, baseurl, jsonld_context_path,
-                 corpus_local_url, label_conf=None, tmp_dir=None):
+                 corpus_local_url, label_conf=None, tmp_dir=None, dir_split_number=0):
+        self.dir_split_number = dir_split_number
         self.basepath = file_basepath
         self.baseurl = baseurl + corpus_local_url
         self.corpus_local_url = corpus_local_url
@@ -114,7 +115,7 @@ class LinkedDataDirector(object):
             if no_extension == "" or no_extension.endswith("/"):
                 return self.get_representation(no_extension + "index" + cur_extension)
             else:
-                return self.get_representation(url)
+                return self.get_representation(url, True)
         elif url.endswith("/prov/"):
             pass  # TODO: it must be handled somehow
         else:
@@ -144,7 +145,7 @@ class LinkedDataDirector(object):
             rdflib.URIRef("http://purl.org/dc/terms/license"),
             rdflib.URIRef("https://creativecommons.org/publicdomain/zero/1.0/legalcode")))
 
-    def get_representation(self, url):
+    def get_representation(self, url, is_resource=False):
         local_file = ".".join(url.split(".")[:-1])
 
         if "/" in local_file:
@@ -154,8 +155,33 @@ class LinkedDataDirector(object):
         else:
             cur_dir = "."
             cur_name = local_file
+        print cur_dir
+        if is_resource and self.dir_split_number and re.search("^/?prov/?.*$", cur_dir) is None:
+            is_prov = "/prov/" in cur_dir
+            prov_regex = "(.+/)([0-9]+)(/prov/.+)$"
+            cur_split = 0
+            if is_prov:
+                cur_number = long(re.sub(prov_regex, "\\2", cur_dir))
+            else:
+                cur_number = long(cur_name)
 
-        cur_full_dir = self.basepath + os.sep + cur_dir
+            while True:
+                if cur_number > cur_split:
+                    cur_split += self.dir_split_number
+                else:
+                    break
+
+            print cur_dir, cur_name, cur_split
+
+            if is_prov:
+                cur_full_dir = self.basepath + os.sep + \
+                               re.sub(prov_regex, "\\1", cur_dir) + \
+                               str(cur_split) + os.sep + \
+                               re.sub(prov_regex, "\\2\\3", cur_dir)
+            else:
+                cur_full_dir = self.basepath + os.sep + cur_dir + os.sep + str(cur_split)
+        else:
+            cur_full_dir = self.basepath + os.sep + cur_dir
         if os.path.isdir(cur_full_dir):
             cur_file_path = cur_full_dir + os.sep + cur_name + ".json"
             if os.path.exists(cur_file_path):

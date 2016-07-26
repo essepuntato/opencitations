@@ -217,12 +217,11 @@ def find_paths(string_iri, base_dir, base_iri, dir_split=0):
             else:
                 cur_number = long(re.sub(res_regex, "\\2", string_iri))
 
-            if not cur_split:
-                while True:
-                    if cur_number > cur_split:
-                        cur_split += dir_split
-                    else:
-                        break
+            while True:
+                if cur_number > cur_split:
+                    cur_split += dir_split
+                else:
+                    break
 
             if is_prov:
                 cur_dir_path = base_dir + os.sep + \

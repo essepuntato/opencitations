@@ -9,5 +9,6 @@
   "ontology_base_url": "https://w3id.org/oc/",
   "documentation_base_path": "ontology/",
   "ontology_url": "../ontology/ontology.owl",
-  "onto_acronym": "ontology"
+  "onto_acronym": "ontology",
+  "dir_split_number": "10000"
 }
