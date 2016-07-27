@@ -22,7 +22,9 @@ for d in */ ; do
     CUR_DIR=${d%?}
     CMD="ssh 130.136.2.21 -l oc -t -t 'nc -l -p 5000 | dar_xform -s 500M -w -n - /mnt/backup/oc/$BACKUP_DATE-corpus_ar_$CUR_DIR' &"
     eval $CMD
+    sleep 2
     dar -c - -R $CUR_DIR | nc -w 1 130.136.2.21 5000
+    sleep 3
 done
 cd ..
 
