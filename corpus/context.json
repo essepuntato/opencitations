@@ -42,7 +42,7 @@
     "article": "fabio:JournalArticle",
     "book": "fabio:Book",
     "book_part": "doco:Part",
-    "book_section": "fabio:ExpressionCollection",
+    "collection": "fabio:ExpressionCollection",
     "book_series": "fabio:BookSeries",
     "book_set": "fabio:BookSet",
     "creation": "prov:Create",
