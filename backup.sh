@@ -77,9 +77,10 @@ cd /srv/oc
 #
 #cd ..
 
-echo ssh 130.136.2.21 -l oc 'nc -l -p 5000 | dar_xform -s 500M -w -n - /mnt/backup/oc/"$BACKUP_DATE"-corpus' &
+CMD="ssh 130.136.2.21 -l oc 'nc -l -p 5000 | dar_xform -s 500M -w -n - /mnt/backup/oc/$BACKUP_DATE-corpus' &"
+eval $CMD
 sleep 2
-# dar -c - -R corpus | nc -w 1 130.136.2.21 5000
+dar -c - -R corpus | nc -w 1 130.136.2.21 5000
 sleep 5
 
 #CMD="ssh 130.136.2.21 -l oc 'nc -l -p 5000 | dar_xform -s 500M -w -n - /mnt/backup/oc/$BACKUP_DATE-id-counter' &"
