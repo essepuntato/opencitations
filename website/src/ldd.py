@@ -1,4 +1,18 @@
 # -*- coding: utf-8 -*-
+# Copyright (c) 2016, Silvio Peroni <essepuntato@gmail.com>
+#
+# Permission to use, copy, modify, and/or distribute this software for any purpose
+# with or without fee is hereby granted, provided that the above copyright notice
+# and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+# REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+# FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
+# OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE,
+# DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS
+# ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
+# SOFTWARE.
+
 __author__ = 'essepuntato'
 
 from xml.sax import SAXParseException
@@ -115,7 +129,8 @@ class LinkedDataDirector(object):
             if no_extension == "" or no_extension.endswith("/"):
                 return self.get_representation(no_extension + "index" + cur_extension)
             else:
-                return self.get_representation(url, True)
+                is_resource = "index" not in url
+                return self.get_representation(url, is_resource)
         elif url.endswith("/prov/"):
             pass  # TODO: it must be handled somehow
         else:
@@ -155,7 +170,6 @@ class LinkedDataDirector(object):
         else:
             cur_dir = "."
             cur_name = local_file
-        print cur_dir
         if is_resource and self.dir_split_number and re.search("^/?prov/?.*$", cur_dir) is None:
             is_prov = "/prov/" in cur_dir
             prov_regex = "(.+/)([0-9]+)(/prov/.+)$"
@@ -171,8 +185,6 @@ class LinkedDataDirector(object):
                 else:
                     break
 
-            print cur_dir, cur_name, cur_split
-
             if is_prov:
                 cur_full_dir = self.basepath + os.sep + \
                                re.sub(prov_regex, "\\1", cur_dir) + \
@@ -182,6 +194,7 @@ class LinkedDataDirector(object):
                 cur_full_dir = self.basepath + os.sep + cur_dir + os.sep + str(cur_split)
         else:
             cur_full_dir = self.basepath + os.sep + cur_dir
+        print cur_full_dir
         if os.path.isdir(cur_full_dir):
             cur_file_path = cur_full_dir + os.sep + cur_name + ".json"
             if os.path.exists(cur_file_path):
