@@ -1,0 +1,113 @@
+$def with (pages, active)
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+        <link rel="icon" href="/static/favicon.ico" />
+        <title>OpenCitations - Publications</title>
+
+        <!-- Bootstrap core CSS -->
+        <link href="/static/css/bootstrap.min.css" rel="stylesheet" />
+
+        <!-- Font Awesome -->
+        <link href="/static/css/font-awesome.min.css" rel="stylesheet" />
+
+        <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+        <link href="/static/css/ie10-viewport-bug-workaround.css" rel="stylesheet" />
+
+        <!-- Custom styles for this template -->
+        <link href="/static/css/cover.css" rel="stylesheet" />
+
+        <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+            <script src="/static/js/html5shiv.min.js"><![CDATA[ ]]></script>
+            <script src="/static/js/respond.min.js"><![CDATA[ ]]></script>
+        <![endif]-->
+    </head>
+    <body>
+        <div class="cover-container">
+            <div class="masthead clearfix">
+                <h3 class="masthead-brand">
+                    <a href="/"><span class="oc-purple">Open</span><span class="oc-blue">Citations</span></a>
+                </h3>
+                <nav>
+                    <ul class="nav masthead-nav">
+                        $for page in pages:
+                            $if page == active:
+                                <li class="active">
+                            $else:
+                                <li>
+                            <a href="$page">
+                                $if page == "/":
+                                    Home
+                                $else:
+                                    $page.title()
+                            </a>
+                            </li>
+                    </ul>
+                </nav>
+            </div>
+
+            <div class="cover left">
+                 <h3>$active.title()</h3>
+                 <dl>
+                     <dt>Main publication</dt>
+                     <dd>
+                         <p><em>Silvio Peroni, Alexander Dutton, Tanya Gray, David Shotton (2015).
+Setting our bibliographic references free: towards open citation data. Journal of Documentation, 71 (2): 253-277. <a href="http://dx.doi.org/10.1108/JD-12-2013-0166">http://dx.doi.org/10.1108/JD-12-2013-0166</a>, OA at <a href="http://speroni.web.cs.unibo.it/publications/peroni-2015-setting-bibliographic-references.pdf">http://speroni.web.cs.unibo.it/publications/peroni-2015-setting-bibliographic-references.pdf</a></em></p>
+                         <p>This is the main article about <span class="oc-purple">Open</span><span class="oc-blue">Citations</span>, which includes several background information and the main ideas and works supporting the whole project, the Corpus, and some possible future developments in terms of new kinds of data to be included, e.g. citation functions.</p>
+                     </dt>
+                     <dt class="mt-more">Nature comment</dt>
+                     <dd>
+                         <p><em>David Shotton (2013). Open citations. Nature, 502 (7471): 295-297. <a href="http://dx.doi.org/10.1038/502295a">http://dx.doi.org/10.1038/502295a</a></em></p>
+                         <p>The first scholarly article, published in Nature as a short comment, which introduces the <span class="oc-purple">Open</span><span class="oc-blue">Citations</span> Corpus.</p>
+                     </dt>
+                     <dt class="mt-more">New instance</dt>
+                     <dd>
+                         <p><em>Silvio Peroni, David Shotton, Fabio Vitali (2016). Freedom for bibliographic references: OpenCitations arise. To appear in Proceedings of 2016 International Workshop on Linked Data for Information Extraction (LD4IE 2016). <a href="http://rawgit.com/essepuntato/opencitations/master/paper/occ-lisc2016.html">http://rawgit.com/essepuntato/opencitations/master/paper/occ-lisc2016.html</a></em></p>
+                         <p>A workshop paper, recently accepted at LD4IE 2016, that introduces the new instance of the <span class="oc-purple">Open</span><span class="oc-blue">Citations</span> Corpus hosted by Department of Computer Science and Engineering (DISI) at the University of Bologna (see the <a href="about"><q>About</q> page</a> for more information about the history of <span class="oc-purple">Open</span><span class="oc-blue">Citations</span>.</p>
+                     </dt>
+                     <dt class="mt-more">Poster</dt>
+                     <dd>
+                         <p><em>Silvio Peroni, David Shotton, Fabio Vitali (2016). Jailbreaking your reference lists: OpenCitations strike again. To appear in Proceedings of Poster and Demo track of the 15th International Semantic Web Conference (ISWC 2016). <a href="http://rawgit.com/essepuntato/opencitations/master/paper/occ-poster-iswc2016.html">http://rawgit.com/essepuntato/opencitations/master/paper/occ-poster-iswc2016.html</a></em></p>
+                         <p>A short paper, recently accepted at the poster session of the forthcoming ISWC 2016, that briefly introduce the last updates of the <span class="oc-purple">Open</span><span class="oc-blue">Citations</span> project.</p>
+                     </dt>
+                 </dl>
+            </div>
+        </div>
+
+        <footer>
+            <div class="container">
+                <div class="row">
+                    <div id="disi" class="col-xs-12 col-sm-4">
+                        <p><a href="http://www.cse.unibo.it"><img src="/static/img/disi-unibo.png" /></a></p>
+                    </div>
+                    <div id="ox" class="col-xs-12 col-sm-4">
+                        <p><a href="http://www.ox.ac.uk"><img src="/static/img/uniox.png" /></a></p>
+                    </div>
+                    <div id="is4oa" class="col-xs-12 col-sm-4">
+                        <p><a href="https://is4oa.org"><img src="/static/img/is4oa.png" /></a></p>
+                    </div>
+                </div>
+            </div>
+            <p>
+                <a class="social oc-purple" href="mailto:contact@opencitations.net"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+                <a class="social oc-purple" href="http://www.twitter.com/opencitations"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+                <a class="social oc-blue" href="http://github.com/essepuntato/opencitations"><i class="fa fa-github" aria-hidden="true"></i></a>
+            </p>
+        </footer>
+
+        <!-- Bootstrap core JavaScript
+        ================================================== -->
+        <!-- Placed at the end of the document so the pages load faster -->
+        <script src="/static/js/jquery.min.js"><![CDATA[ ]]></script>
+        <script>window.jQuery || document.write('<script src="/static/js/jquery.min.js"><\/script>')</script>
+        <script src="/static/js/bootstrap.min.js"><![CDATA[ ]]></script>
+        <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+        <script src="/static/js/ie10-viewport-bug-workaround.js"><![CDATA[ ]]></script>
+    </body>
+</html>
