@@ -8,7 +8,7 @@ $def with (pages, active)
 
 
         <link rel="icon" href="/static/favicon.ico" />
-        <title>OpenCitations - SPARQL endpoint GUI</title>
+        <title>OpenCitations - About</title>
 
         <!-- Bootstrap core CSS -->
         <link href="/static/css/bootstrap.min.css" rel="stylesheet" />
@@ -18,9 +18,6 @@ $def with (pages, active)
 
         <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
         <link href="/static/css/ie10-viewport-bug-workaround.css" rel="stylesheet" />
-
-        <!-- YASGUI CSS -->
-        <link href='/static/css/yasgui.css' rel='stylesheet' type='text/css' />
 
         <!-- Custom styles for this template -->
         <link href="/static/css/cover.css" rel="stylesheet" />
@@ -55,12 +52,11 @@ $def with (pages, active)
                 </nav>
             </div>
 
-            <div class="cover">
-                <h2 class="cover-heading">
-                    <span class="oc-purple">O</span><span class="oc-blue">C</span>C SPARQL endpoint GUI
-                </h2>
-                <div id="yasqe"></div>
-                <div id="yasr"></div>
+            <div class="cover left">
+                 <h3>$active.title()</h3>
+                 <p>The <span class="oc-purple">Open</span><span class="oc-blue">Citations</span> has formally started in 2010 as a one-year project funded <a href="http://www.jisc.ac.uk/whatwedo/programmes/inf11/jiscexpo/jiscopencitation.aspx">by JISC</a> (and extended for an additional half year), with David Shotton as director, who at that time was working in the Department of Zoology at the University of Oxford. The project was global in scope, and was designed to change the face of scientific publishing and scholarly communication, since it aimed to publish bibliographic citation information in RDF and to make citation links as easy to traverse as Web links. The main deliverable of the project, among <a href="https://opencitations.wordpress.com/2011/07/01/jisc-open-citations-project-–-final-project-blog-post/">several outcomes</a>, was the release of an open repository of scholarly citation data described using the <a href="http://www.sparontologies.net/">SPAR (Semantic Publishing and Referencing) Ontologies</a>, namely the <span class="oc-purple">Open</span><span class="oc-blue">Citations</span> Corpus (OCC), initially populated with the citations from journal articles within the <a href="http://www.ncbi.nlm.nih.gov/pmc/tools/openftlist/">Open Access Subset of PubMed Central</a>.</p>
+                 <p>In May 2014, <span class="oc-purple">Open</span><span class="oc-blue">Citations</span> was <a href="https://is4oa.org/services/open-citations-corpus/">adopted by the Infrastructure Services for Open Access (IS4OA)</a> as one of its academic Open Access services. IS4OA is UK-based not-for-profit charitable company that aims to provide benefit to the global community of research information users by acting as an umbrella organisation that supports openly accessible information and discovery services relating to academic information, research results and scholarly publications, by providing business structure and expertise and a means of channelling financial support to these services.</p>
+                 <p>At the end of 2015 Silvio Peroni joined the <span class="oc-purple">Open</span><span class="oc-blue">Citations</span> project as co-director, with the aim of setting up a new instantiation of the Corpus based on a new metadata schema and employing several new technologies to automate the ingestion of fresh citation metadata from authoritative sources. The current instantiation of the OCC is hosted by the Department of Computer Science and Engineering (DISI) at the University of Bologna, and since the beginning of July has started to ingest, process and publish reference lists of scholarly papers available in <a href="http://europepmc.org/">Europe PubMed Central</a>.</p>
             </div>
         </div>
 
@@ -93,10 +89,5 @@ $def with (pages, active)
         <script src="/static/js/bootstrap.min.js"><![CDATA[ ]]></script>
         <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
         <script src="/static/js/ie10-viewport-bug-workaround.js"><![CDATA[ ]]></script>
-
-        <!-- SPARQL GUI -->
-        <script src='/static/js/yasr.bundled.min.js'></script>
-        <script src='/static/js/yasqe.bundled.min.js'></script>
-        <script src="/static/js/sparql.js"></script>
     </body>
 </html>

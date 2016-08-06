@@ -149,6 +149,21 @@ footer .row div {
     text-align: left !important;
 }
 
+blockquote {
+    font-size: 100%;
+}
+
+figure img {
+    max-weight: 90% !important;
+}
+
+.center {
+    text-align: center;
+}
+
+.mt-more {
+    margin-top: 3%;
+}
 
 /*
  * Affix and center

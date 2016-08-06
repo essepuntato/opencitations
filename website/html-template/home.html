@@ -1,4 +1,4 @@
-$def with (pages, active)
+$def with (pages, active, date, tot, cit)
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
     <head>
@@ -8,7 +8,7 @@ $def with (pages, active)
 
 
         <link rel="icon" href="/static/favicon.ico" />
-        <title>OpenCitations - SPARQL endpoint GUI</title>
+        <title>OpenCitations - Home</title>
 
         <!-- Bootstrap core CSS -->
         <link href="/static/css/bootstrap.min.css" rel="stylesheet" />
@@ -18,9 +18,6 @@ $def with (pages, active)
 
         <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
         <link href="/static/css/ie10-viewport-bug-workaround.css" rel="stylesheet" />
-
-        <!-- YASGUI CSS -->
-        <link href='/static/css/yasgui.css' rel='stylesheet' type='text/css' />
 
         <!-- Custom styles for this template -->
         <link href="/static/css/cover.css" rel="stylesheet" />
@@ -56,11 +53,14 @@ $def with (pages, active)
             </div>
 
             <div class="cover">
-                <h2 class="cover-heading">
-                    <span class="oc-purple">O</span><span class="oc-blue">C</span>C SPARQL endpoint GUI
-                </h2>
-                <div id="yasqe"></div>
-                <div id="yasr"></div>
+                <h1 class="cover-heading">
+                    <img id="logo" class="img-responsive center-block" src="/static/img/logo.png" alt="Open Citations logo" />
+                </h1>
+                <p class="lead">Welcome to the <span class="oc-purple">Open</span><span class="oc-blue">Citations</span> project homepage!</p>
+                <p>Its main output is the creation of the <a href="corpus">Open Citations Corpus (OCC)</a>, an open repository of scholarly citation data made available under a <a href="https://creativecommons.org/publicdomain/zero/1.0/">Creative Commons public domain</a> dedication, which provides in RDF accurate citation information (bibliographic references) harvested from the scholarly literature (described using the <a href="http://www.sparontologies.net">SPAR Ontologies</a> according to the <a href="model">OCC metadata model</a>) that others may freely build upon, enhance and reuse for any purpose, without restriction under copyright or database law.</p>
+                <p class="lead">As of $date, the OCC contains<br />$tot citing/cited bibliographic resources<br />for a total number of $cit citation links.</p>
+                <p>The whole <a href="corpus">OCC</a> is now available for <a href="sparql">querying (via SPARQL)</a> and browsing by means of a very simple interface that allows one to show only the data about specific particular bibliographic entities (e.g. <a href="https://w3id.org/oc/corpus/br/1">https://w3id.org/oc/corpus/br/1</a>). Additional and more user-friendly interfaces will be available in the next months and advertised in this page.</p>
+                <p>Please do not forget to follow us on <a href="http://www.twitter.com/opencitations">Twitter</a> for being updated about all the news related to the <span class="oc-purple">Open</span><span class="oc-blue">Citations</span> project!</p>
             </div>
         </div>
 
@@ -93,10 +93,5 @@ $def with (pages, active)
         <script src="/static/js/bootstrap.min.js"><![CDATA[ ]]></script>
         <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
         <script src="/static/js/ie10-viewport-bug-workaround.js"><![CDATA[ ]]></script>
-
-        <!-- SPARQL GUI -->
-        <script src='/static/js/yasr.bundled.min.js'></script>
-        <script src='/static/js/yasqe.bundled.min.js'></script>
-        <script src="/static/js/sparql.js"></script>
     </body>
 </html>

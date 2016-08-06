@@ -24,17 +24,26 @@ import requests
 import urlparse
 import re
 from src.oh import OntologyHandler
+import csv
+from datetime import datetime
 
 # Load the configuration file
 with open("conf.json") as f:
     c = json.load(f)
 
+pages = ["/", "about", "corpus", "model", "sparql", "publications", "contacts"]
+
 # For redirecting to classes
 urls = (
-    "/", "WorkInProgress",
+    "(/)", "Home",
+    "/(about)", "About",
+    "/(model)", "Model",
+    "/(corpus)", "CorpusIntro",
     "/corpus/(.+)", "Corpus",
     "/corpus/", "Corpus",
-    "/sparql", "Sparql",
+    "/(sparql)", "Sparql",
+    "/(publications)", "Publications",
+    "/(contacts)", "Contacts",
     "/ontology(.+)?", "Ontology"
 )
 
@@ -77,15 +86,63 @@ class WorkInProgress:
         return render.wip()
 
 
+class Home:
+    def GET(self, active):
+        web_logger.mes()
+        cur_date = ""
+        cur_tot = ""
+        cur_cit = ""
+
+        with open(c["statistics"]) as f:
+            lastrow = None
+            for lastrow in csv.reader(f): pass
+            cur_date = datetime.strptime(
+                lastrow[0], "%Y-%m-%dT%H:%M:%S").strftime("%B %d, %Y, at %H:%M:%S")
+            cur_tot = lastrow[1]
+            cur_cit = lastrow[2]
+
+        return render.home(pages, active, cur_date, cur_tot, cur_cit)
+
+
+class About:
+    def GET(self, active):
+        web_logger.mes()
+        return render.about(pages, active)
+
+
+class CorpusIntro:
+    def GET(self, active):
+        web_logger.mes()
+        return render.corpus(pages, active)
+
+
+class Model:
+    def GET(self, active):
+        web_logger.mes()
+        return render.model(pages, active)
+
+
+class Publications:
+    def GET(self, active):
+        web_logger.mes()
+        return render.publications(pages, active)
+
+
+class Contacts:
+    def GET(self, active):
+        web_logger.mes()
+        return render.contacts(pages, active)
+
+
 class Sparql:
-    def GET(self):
+    def GET(self, active):
         web.header('Access-Control-Allow-Origin', '*')
         web.header('Access-Control-Allow-Credentials', 'true')
         query_string = web.ctx.env.get("QUERY_STRING")
         parsed_query = urlparse.parse_qs(query_string)
         if query_string is None or query_string.strip() == "":
             web_logger.mes()
-            return render.sparql()
+            return render.sparql(pages, active)
         if re.search("updates?", query_string, re.IGNORECASE) is None:
             if "query" in parsed_query:
                 req = requests.get("%s?%s" % (c["sparql_endpoint"], query_string))

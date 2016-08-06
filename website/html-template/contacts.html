@@ -8,7 +8,7 @@ $def with (pages, active)
 
 
         <link rel="icon" href="/static/favicon.ico" />
-        <title>OpenCitations - SPARQL endpoint GUI</title>
+        <title>OpenCitations - Contacts</title>
 
         <!-- Bootstrap core CSS -->
         <link href="/static/css/bootstrap.min.css" rel="stylesheet" />
@@ -18,9 +18,6 @@ $def with (pages, active)
 
         <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
         <link href="/static/css/ie10-viewport-bug-workaround.css" rel="stylesheet" />
-
-        <!-- YASGUI CSS -->
-        <link href='/static/css/yasgui.css' rel='stylesheet' type='text/css' />
 
         <!-- Custom styles for this template -->
         <link href="/static/css/cover.css" rel="stylesheet" />
@@ -55,12 +52,11 @@ $def with (pages, active)
                 </nav>
             </div>
 
-            <div class="cover">
-                <h2 class="cover-heading">
-                    <span class="oc-purple">O</span><span class="oc-blue">C</span>C SPARQL endpoint GUI
-                </h2>
-                <div id="yasqe"></div>
-                <div id="yasr"></div>
+            <div class="cover left">
+                 <h3>$active.title()</h3>
+                 <p>The <span class="oc-purple">Open</span><span class="oc-blue">Citations</span> project is run by <a href="https://twitter.com/dshotton">David Shotton</a> and <a href="https://twitter.com/essepuntato">Silvio Peroni</a> - the Co-Directors of the project.</p>
+                 <p>Please do not hesitate to contact us for comments, questions, and further information at <a href="mailto:contact@opencitations.net">contact@opencitations.net</a>.</p>
+                 <p>You can also follow us on <a href="http://www.twitter.com/opencitations">Twitter</a> and <a href="http://github.com/essepuntato/opencitations">GitHub</a>.</p>
             </div>
         </div>
 
@@ -93,10 +89,5 @@ $def with (pages, active)
         <script src="/static/js/bootstrap.min.js"><![CDATA[ ]]></script>
         <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
         <script src="/static/js/ie10-viewport-bug-workaround.js"><![CDATA[ ]]></script>
-
-        <!-- SPARQL GUI -->
-        <script src='/static/js/yasr.bundled.min.js'></script>
-        <script src='/static/js/yasqe.bundled.min.js'></script>
-        <script src="/static/js/sparql.js"></script>
     </body>
 </html>
