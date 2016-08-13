@@ -186,6 +186,7 @@ class EuropeanPubMedCentralProcessor(ReferenceProcessor):
         entry_string = re.sub(u"([\-–––]) ", "\\1", entry_string)
         entry_string = re.sub(u"[\-–––,\.!\?;:] ?([\-–––,\.!\?;:])", "\\1", entry_string)
         entry_string = re.sub("(\(\. ?)+", "(", entry_string)
+        entry_string = re.sub("(\( +)", "(", entry_string)
 
         if entry_string is not None and entry_string != "":
             return entry_string
