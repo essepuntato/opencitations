@@ -335,6 +335,8 @@ if __name__ == "__main__":
 
     for cur_file in all_files:
         if not os.path.basename(cur_file).startswith("index"):
+            storer.repok.new_article()
+            storer.repok.add_sentence("Processing file '%s'" % cur_file)
             if cur_file.endswith(".txt"):
                 with io.open(cur_file, "r", encoding="utf-8") as f:
                     query_string = f.read()
