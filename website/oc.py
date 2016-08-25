@@ -44,7 +44,8 @@ urls = (
     "/(sparql)", "Sparql",
     "/(publications)", "Publications",
     "/(contacts)", "Contacts",
-    "/ontology(.+)?", "Ontology"
+    "/ontology(.+)?", "Ontology",
+    "(/paper/.+)", "RawGit"
 )
 
 # For rendering
@@ -72,6 +73,12 @@ web_logger = WebLogger("opencitations.net", "opencitations_log.txt", [
     ],
     {"REMOTE_ADDR": ["130.136.2.47", "127.0.0.1"]}  # uncomment this for real app
 )
+
+
+class RawGit:
+    def GET(self, u):
+        web_logger.mes()
+        raise web.seeother("http://rawgit.com/essepuntato/opencitations/master" + u)
 
 
 class Redirect:
@@ -173,6 +180,7 @@ class Corpus:
                 "http://prismstandard.org/namespaces/basic/2.0/endingPage": "last page",
                 "http://purl.org/dc/terms/issued": "publication date",
                 "http://purl.org/dc/terms/modified": "modification date",
+                "http://purl.org/spar/biro/references": "references"
             },
             tmp_dir=c["tmp_dir"], dir_split_number=int(c["dir_split_number"]))
         cur_page = director.redirect(file_path)
