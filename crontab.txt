@@ -1,6 +1,6 @@
 # The following lines should be added to the crontab so as to:
 
-# 1. check that all the website is running correctly (it runs every 5 minutes)
+# 1. check that all the website is running correctly (it runs every 5 minutes, root only)
 */5     *   *   *   *   /home/essepuntato/OC/website/check-and-run.sh
 
 # 2. check that the triplestore is running correctly (it runs every 5 minutes)
@@ -14,3 +14,9 @@
 
 # 5. try to run BEE at 4:15 every day
 15      4   *   *   *   /home/essepuntato/OC/script/bee-check-and-run.sh
+
+# 6. safely re-run the triplestore (it runs at 16:00 everyday)
+0       16  *   *   *   /srv/oc/triplestore/safe-run-again.sh
+
+# 7. backup everything (it runs the first day of the month at 00:15, root only)
+15      0	1   *   *   /home/essepuntato/OC/backup.sh
