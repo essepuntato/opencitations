@@ -16,7 +16,7 @@
 
 CUR_DIR="${pwd}"
 
-# Wait until a previous run of this script finish
+# Wait until a previous run of this script finishes
 while ps -ef | grep "[s]afe-run-again.sh" > /dev/null; do
     # If some of the processes is still active, wait for 60 seconds and check again
     sleep 60
@@ -26,7 +26,7 @@ done
 /home/essepuntato/OC/script/gently-stop.sh
 
 # Wait until the statistics, backup, BEE and SPACIN finish
-while ps -ef | grep "[s]tatistics.py" > /dev/null || ps -ef | grep "[b]ackup.sh" > /dev/null || ps -ef | grep "[p]ython bee.py" > /dev/null || ps -ef | grep "[p]ython spacin.py" > /dev/null; do
+while ps -ef | grep "[p]ython statistics.py" > /dev/null || ps -ef | grep "[b]ackup.sh" > /dev/null || ps -ef | grep "[p]ython bee.py" > /dev/null || ps -ef | grep "[p]ython spacin.py" > /dev/null; do
     # If some of the processes is still active, wait for 60 seconds and check again
     sleep 60
 done
