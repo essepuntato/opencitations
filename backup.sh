@@ -14,7 +14,7 @@
 # SOFTWARE.
 
 
-CUR_DIR="${pwd}"
+INITIAL_DIR="${pwd}"
 BACKUP_DATE="$(date -I)"
 
 # Gently stop all the processes
@@ -34,10 +34,26 @@ cd corpus
 cd ar
 for d in */ ; do
     CUR_DIR=${d%?}
+
+    # backup data
     CMD="ssh 130.136.2.21 -l oc -t -t 'nc -l -p 5000 | dar_xform -s 500M -w -n - /mnt/backup/oc/$BACKUP_DATE-corpus_ar_$CUR_DIR' &"
     eval $CMD
     sleep 2
-    dar -c - -R $CUR_DIR | nc -w 1 130.136.2.21 5000
+    dar -c - -R $CUR_DIR -X index.json -P "./[0-9]*/" | nc -w 1 130.136.2.21 5000
+    sleep 3
+
+    # backup provenance
+    PROV_DIRS=""
+    for p in $CUR_DIR/*/ ; do
+        PROV_DIR=$(echo ${p%?} | rev | cut -d/ -f1)
+        PROV_DIRS="$PROV_DIRS -g '$PROV_DIR/'"
+    done
+    echo $PROV_DIRS
+    CMD="ssh 130.136.2.21 -l oc -t -t 'nc -l -p 5000 | dar_xform -s 500M -w -n - /mnt/backup/oc/$BACKUP_DATE-prov_corpus_ar_$CUR_DIR' &"
+    eval $CMD
+    sleep 2
+    DAR="dar -c - -R $CUR_DIR $PROV_DIRS | nc -w 1 130.136.2.21 5000"
+    eval $DAR
     sleep 3
 done
 cd ..
@@ -45,10 +61,26 @@ cd ..
 cd be
 for d in */ ; do
     CUR_DIR=${d%?}
+
+    # backup data
     CMD="ssh 130.136.2.21 -l oc -t -t 'nc -l -p 5000 | dar_xform -s 500M -w -n - /mnt/backup/oc/$BACKUP_DATE-corpus_be_$CUR_DIR' &"
     eval $CMD
     sleep 2
-    dar -c - -R $CUR_DIR | nc -w 1 130.136.2.21 5000
+    dar -c - -R $CUR_DIR -X index.json -P "./[0-9]*/" | nc -w 1 130.136.2.21 5000
+    sleep 3
+
+    # backup provenance
+    PROV_DIRS=""
+    for p in $CUR_DIR/*/ ; do
+        PROV_DIR=$(echo ${p%?} | rev | cut -d/ -f1)
+        PROV_DIRS="$PROV_DIRS -g '$PROV_DIR/'"
+    done
+    echo $PROV_DIRS
+    CMD="ssh 130.136.2.21 -l oc -t -t 'nc -l -p 5000 | dar_xform -s 500M -w -n - /mnt/backup/oc/$BACKUP_DATE-prov_corpus_be_$CUR_DIR' &"
+    eval $CMD
+    sleep 2
+    DAR="dar -c - -R $CUR_DIR $PROV_DIRS | nc -w 1 130.136.2.21 5000"
+    eval $DAR
     sleep 3
 done
 cd ..
@@ -56,10 +88,26 @@ cd ..
 cd br
 for d in */ ; do
     CUR_DIR=${d%?}
+
+    # backup data
     CMD="ssh 130.136.2.21 -l oc -t -t 'nc -l -p 5000 | dar_xform -s 500M -w -n - /mnt/backup/oc/$BACKUP_DATE-corpus_br_$CUR_DIR' &"
     eval $CMD
     sleep 2
-    dar -c - -R $CUR_DIR | nc -w 1 130.136.2.21 5000
+    dar -c - -R $CUR_DIR -X index.json -P "./[0-9]*/" | nc -w 1 130.136.2.21 5000
+    sleep 3
+
+    # backup provenance
+    PROV_DIRS=""
+    for p in $CUR_DIR/*/ ; do
+        PROV_DIR=$(echo ${p%?} | rev | cut -d/ -f1)
+        PROV_DIRS="$PROV_DIRS -g '$PROV_DIR/'"
+    done
+    echo $PROV_DIRS
+    CMD="ssh 130.136.2.21 -l oc -t -t 'nc -l -p 5000 | dar_xform -s 500M -w -n - /mnt/backup/oc/$BACKUP_DATE-prov_corpus_br_$CUR_DIR' &"
+    eval $CMD
+    sleep 2
+    DAR="dar -c - -R $CUR_DIR $PROV_DIRS | nc -w 1 130.136.2.21 5000"
+    eval $DAR
     sleep 3
 done
 cd ..
@@ -67,10 +115,26 @@ cd ..
 cd id
 for d in */ ; do
     CUR_DIR=${d%?}
+
+    # backup data
     CMD="ssh 130.136.2.21 -l oc -t -t 'nc -l -p 5000 | dar_xform -s 500M -w -n - /mnt/backup/oc/$BACKUP_DATE-corpus_id_$CUR_DIR' &"
     eval $CMD
     sleep 2
-    dar -c - -R $CUR_DIR | nc -w 1 130.136.2.21 5000
+    dar -c - -R $CUR_DIR -X index.json -P "./[0-9]*/" | nc -w 1 130.136.2.21 5000
+    sleep 3
+
+    # backup provenance
+    PROV_DIRS=""
+    for p in $CUR_DIR/*/ ; do
+        PROV_DIR=$(echo ${p%?} | rev | cut -d/ -f1)
+        PROV_DIRS="$PROV_DIRS -g '$PROV_DIR/'"
+    done
+    echo $PROV_DIRS
+    CMD="ssh 130.136.2.21 -l oc -t -t 'nc -l -p 5000 | dar_xform -s 500M -w -n - /mnt/backup/oc/$BACKUP_DATE-prov_corpus_id_$CUR_DIR' &"
+    eval $CMD
+    sleep 2
+    DAR="dar -c - -R $CUR_DIR $PROV_DIRS | nc -w 1 130.136.2.21 5000"
+    eval $DAR
     sleep 3
 done
 cd ..
@@ -78,10 +142,26 @@ cd ..
 cd ra
 for d in */ ; do
     CUR_DIR=${d%?}
+
+    # backup data
     CMD="ssh 130.136.2.21 -l oc -t -t 'nc -l -p 5000 | dar_xform -s 500M -w -n - /mnt/backup/oc/$BACKUP_DATE-corpus_ra_$CUR_DIR' &"
     eval $CMD
     sleep 2
-    dar -c - -R $CUR_DIR | nc -w 1 130.136.2.21 5000
+    dar -c - -R $CUR_DIR -X index.json -P "./[0-9]*/" | nc -w 1 130.136.2.21 5000
+    sleep 3
+
+    # backup provenance
+    PROV_DIRS=""
+    for p in $CUR_DIR/*/ ; do
+        PROV_DIR=$(echo ${p%?} | rev | cut -d/ -f1)
+        PROV_DIRS="$PROV_DIRS -g '$PROV_DIR/'"
+    done
+    echo $PROV_DIRS
+    CMD="ssh 130.136.2.21 -l oc -t -t 'nc -l -p 5000 | dar_xform -s 500M -w -n - /mnt/backup/oc/$BACKUP_DATE-prov_corpus_ra_$CUR_DIR' &"
+    eval $CMD
+    sleep 2
+    DAR="dar -c - -R $CUR_DIR $PROV_DIRS | nc -w 1 130.136.2.21 5000"
+    eval $DAR
     sleep 3
 done
 cd ..
@@ -89,15 +169,31 @@ cd ..
 cd re
 for d in */ ; do
     CUR_DIR=${d%?}
+
+    # backup data
     CMD="ssh 130.136.2.21 -l oc -t -t 'nc -l -p 5000 | dar_xform -s 500M -w -n - /mnt/backup/oc/$BACKUP_DATE-corpus_re_$CUR_DIR' &"
     eval $CMD
     sleep 2
-    dar -c - -R $CUR_DIR | nc -w 1 130.136.2.21 5000
+    dar -c - -R $CUR_DIR -X index.json -P "./[0-9]*/" | nc -w 1 130.136.2.21 5000
+    sleep 3
+
+    # backup provenance
+    PROV_DIRS=""
+    for p in $CUR_DIR/*/ ; do
+        PROV_DIR=$(echo ${p%?} | rev | cut -d/ -f1)
+        PROV_DIRS="$PROV_DIRS -g '$PROV_DIR/'"
+    done
+    echo $PROV_DIRS
+    CMD="ssh 130.136.2.21 -l oc -t -t 'nc -l -p 5000 | dar_xform -s 500M -w -n - /mnt/backup/oc/$BACKUP_DATE-prov_corpus_re_$CUR_DIR' &"
+    eval $CMD
+    sleep 2
+    DAR="dar -c - -R $CUR_DIR $PROV_DIRS | nc -w 1 130.136.2.21 5000"
+    eval $DAR
     sleep 3
 done
 cd ..
 
-CMD="ssh 130.136.2.21 -l oc -t -t 'nc -l -p 5000 | dar_xform -s 500M -w -n - /mnt/backup/oc/$BACKUP_DATE-corpus_prov' &"
+CMD="ssh 130.136.2.21 -l oc -t -t 'nc -l -p 5000 | dar_xform -s 500M -w -n - /mnt/backup/oc/$BACKUP_DATE-prov_corpus' &"
 eval $CMD
 sleep 2
 dar -c - -R prov | nc -w 1 130.136.2.21 5000
@@ -116,7 +212,7 @@ eval $CMD
 sleep 2
 dar -c - -R triplestore -X "log.txt" -X "nohup.out" | nc -w 1 130.136.2.21 5000
 
-# Gently sun all the processes
+# Gently run all the processes
 /home/essepuntato/OC/script/gently-run.sh
 
-cd $CUR_DIR
+cd $INITIAL_DIR
