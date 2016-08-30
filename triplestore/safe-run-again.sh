@@ -16,12 +16,6 @@
 
 CUR_DIR="${pwd}"
 
-# Wait until a previous run of this script finishes
-while ps -ef | grep "[s]afe-run-again.sh" > /dev/null; do
-    # If some of the processes is still active, wait for 60 seconds and check again
-    sleep 60
-done
-
 # Gently stop all the processes
 /home/essepuntato/OC/script/gently-stop.sh
 
