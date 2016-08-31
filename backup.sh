@@ -26,6 +26,9 @@ while ps -ef | grep "[p]ython bee.py" > /dev/null || ps -ef | grep "[p]ython spa
     sleep 60
 done
 
+# Get last statistics
+/home/essepuntato/OC/statistics.sh
+
 cd /srv/oc
 
 # Backup of the OCC
