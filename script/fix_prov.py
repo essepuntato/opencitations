@@ -36,18 +36,42 @@ PROV = Namespace("http://www.w3.org/ns/prov#")
 OCO = Namespace("https://w3id.org/oc/ontology/")
 DCTERMS = Namespace("http://purl.org/dc/terms/")
 CITO = Namespace("http://purl.org/spar/cito/")
+DATACITE = Namespace("http://purl.org/spar/datacite/")
 FRBR = Namespace("http://purl.org/vocab/frbr/core#")
 
 
-def create_citation_query(cur_subj_g):
+def create_update_query(cur_subj_g, update_date, id_dir, dir_split):
     query_string = u"INSERT DATA { GRAPH <%s> { " % cur_subj_g.identifier
     is_first = True
+
     for s, p, o in cur_subj_g.triples((None, None, None)):
         if p == CITO.cites or p == FRBR.part:
             if not is_first:
                 query_string += ". "
             is_first = False
             query_string += u"<%s> <%s> <%s> " % (str(s), str(p), str(o))
+
+    for s, p, o in cur_subj_g.triples((None, DATACITE.hasIdentifier, None)):
+        cur_number = long(re.sub("(.+/)([0-9]+)$", "\\2", str(o)))
+
+        # Find the correct directory number where to save the file
+        cur_split = 0
+        while True:
+            if cur_number > cur_split:
+                cur_split += dir_split
+            else:
+                break
+
+        id_se_file_path = \
+            id_dir + os.sep + str(cur_split) + os.sep + str(cur_number) + os.sep + "prov" + os.sep + "se" + os.sep + "1.json"
+        g_id = load(id_se_file_path)
+        if g_id is not None:
+            gen_date = g_id.objects(None, PROV.generatedAtTime).next()
+            if gen_date == update_date:
+                if not is_first:
+                    query_string += ". "
+                is_first = False
+                query_string += u"<%s> <%s> <%s> " % (str(s), str(p), str(o))
 
     return query_string + "} }"
 
@@ -133,6 +157,10 @@ if __name__ == "__main__":
     arg_parser.add_argument("-i", "--input", dest="input", required=True,
                             help="The directory containing the provenance files (at any level "
                                  "of the tree).")
+    arg_parser.add_argument("-id", "--id_dir", dest="id_dir",
+                            help="The directory containing all the ids.")
+    arg_parser.add_argument("-ds", "--dir_split", dest="dir_split", required=True,
+                            help="The max number of resources a directory can contain.")
     arg_parser.add_argument("-t", "--tmp_dir", dest="tmp_dir",
                             help="The directory for easing the RDF loading.")
     arg_parser.add_argument("-c", "--context", dest="context", required=True,
@@ -173,7 +201,8 @@ if __name__ == "__main__":
                         # se/2
                         g_prov_se_2.remove((cur_se_2, OCO.hasUpdateQuery, None))
                         g_prov_se_2.add((cur_se_2, OCO.hasUpdateQuery,
-                                         Literal(create_citation_query(cur_g))))
+                                         Literal(create_update_query(cur_g, invalidation_time,
+                                                                     args.id_dir, int(args.dir_split)))))
                         g_prov_se_2.remove((cur_se_2, PROV.wasDerivedFrom, None))
                         g_prov_se_2.add((cur_se_2, PROV.wasDerivedFrom, cur_se_1))
 
@@ -195,5 +224,5 @@ if __name__ == "__main__":
                                              "created", "extended with citation data"))))
                         store(g_prov_ca_2, ca2_file_path)
 
-    repok.write_file("fix_prov.rep.ok.txt")
+    # repok.write_file("fix_prov.rep.ok.txt")
     reperr.write_file("fix_prov.rep.err.txt")

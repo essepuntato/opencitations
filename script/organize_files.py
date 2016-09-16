@@ -271,5 +271,5 @@ if __name__ == "__main__":
                           new_file, new_prov_files, file_done, dir_done)
                     break
 
-    repok.write_file("organize_files.rep.ok.txt")
+    # repok.write_file("organize_files.rep.ok.txt")
     reperr.write_file("organize_files.rep.err.txt")
