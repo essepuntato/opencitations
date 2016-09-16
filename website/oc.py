@@ -35,7 +35,7 @@ pages = ["/", "about", "corpus", "model", "sparql", "publications", "contacts"]
 
 # For redirecting to classes
 urls = (
-    "(/)", "Home",
+    "(/)", "WorkInProgress",
     "/(about)", "About",
     "/(model)", "Model",
     "/(corpus)", "CorpusIntro",
@@ -88,9 +88,9 @@ class Redirect:
 
 
 class WorkInProgress:
-    def GET(self):
+    def GET(self, active):
         web_logger.mes()
-        return render.wip()
+        return render.wip(pages, active)
 
 
 class Home:
