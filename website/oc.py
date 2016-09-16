@@ -182,7 +182,9 @@ class Corpus:
                 "http://purl.org/dc/terms/modified": "modification date",
                 "http://purl.org/spar/biro/references": "references"
             },
-            tmp_dir=c["tmp_dir"], dir_split_number=int(c["dir_split_number"]))
+            tmp_dir=c["tmp_dir"],
+            dir_split_number=int(c["dir_split_number"]),
+            file_split_number=int(c["file_split_number"]))
         cur_page = director.redirect(file_path)
         if cur_page is None:
             raise web.notfound()

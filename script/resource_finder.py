@@ -21,6 +21,8 @@ from graphlib import GraphEntity, ProvEntity
 from rdflib import ConjunctiveGraph
 from storer import Storer
 import os
+from support import find_paths
+from conf_spacin import dir_split_number, items_per_file
 
 
 class ResourceFinder(object):
@@ -41,25 +43,26 @@ class ResourceFinder(object):
             self.ts = ConjunctiveGraph('SPARQLUpdateStore')
             self.ts.open((ts_url, ts_url))
 
-    def add_triples_in_filesystem(self, res_iri):
+    def add_prov_triples_in_filesystem(self, res_iri, prov_entity_type=None):
         if self.base_dir is not None and self.base_iri is not None:
-            cur_path = res_iri.replace(self.base_iri, self.base_dir)
+            cur_file_path = find_paths(res_iri, self.base_dir, self.base_iri,
+                                       dir_split_number, items_per_file)[1]
+            if cur_file_path.endswith("index.json"):
+                cur_path = cur_file_path.replace("index.json", "") + "prov"
+            else:
+                cur_path = cur_file_path[:-5] + os.sep + "prov"
 
-            if os.path.exists(cur_path):
-                file_list = []
+            file_list = []
+            if os.path.isdir(cur_path):
+                for cur_dir, cur_subdir, cur_files in os.walk(cur_path):
+                    for cur_file in cur_files:
+                        if cur_file.endswith(".json") and \
+                           (prov_entity_type is None or cur_file.startswith(prov_entity_type)):
+                            file_list += [cur_dir + os.sep + cur_file]
 
-                if os.path.isdir(cur_path):
-                    for cur_dir, cur_subdir, cur_files in os.walk(cur_path):
-                        for cur_file in cur_files:
-                            if cur_file.endswith(".json"):
-                                file_list += [cur_dir + os.sep + cur_file]
-                else:
-                    file_list += [cur_path]
-
-                for file_path in file_list:
-                    cur_g = self.storer.load(file_path, tmp_dir=self.tmp_dir)
-                    self.add_triples_in_graph(cur_g)
-
+            for file_path in file_list:
+                cur_g = self.storer.load(file_path, tmp_dir=self.tmp_dir)
+                self.add_triples_in_graph(cur_g)
 
     def add_triples_in_graph(self, g):
         if g is not None:

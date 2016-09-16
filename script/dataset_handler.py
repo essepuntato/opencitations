@@ -171,7 +171,7 @@ class DatasetHandler(object):
     def get_dataset_graph(self, res, cur_time):
         dataset_path = self.get_metadata_path_from_resource(res)
         if os.path.exists(dataset_path):
-            return self.st.load(dataset_path, tmp_dir=self.tmp_dir)
+            return list(self.st.load(dataset_path, tmp_dir=self.tmp_dir).contexts())[0]
         else:
             dataset_label = "OCC"
             dataset_title = "The OpenCitations Corpus"

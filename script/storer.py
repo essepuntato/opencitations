@@ -20,20 +20,22 @@ from SPARQLWrapper import SPARQLWrapper
 from reporter import Reporter
 import re
 import os
-from rdflib import Graph, BNode
+from rdflib import Graph, BNode, ConjunctiveGraph
 import shutil
 import json
 from datetime import datetime
 import argparse
 import io
 from conf_spacin import *
-from support import find_paths
+from support import find_paths, has_bib_entity_number
 
 
 class Storer(object):
 
-    def __init__(self, graph_set=None, repok=None, reperr=None, context_map={}, dir_split=0):
+    def __init__(self, graph_set=None, repok=None, reperr=None,
+                 context_map={}, dir_split=0, n_file_item=1):
         self.dir_split = dir_split
+        self.n_file_item = n_file_item
         self.context_map = context_map
         for context_url in context_map:
             context_file_path = context_map[context_url]
@@ -188,18 +190,27 @@ class Storer(object):
         if len(cur_g) > 0:
             cur_subject = set(cur_g.subjects(None, None)).pop()
             cur_dir_path, cur_file_path = find_paths(
-                str(cur_subject), base_dir, base_iri, self.dir_split)
+                str(cur_subject), base_dir, base_iri, self.dir_split, self.n_file_item)
             try:
                 if not os.path.exists(cur_dir_path):
                     os.makedirs(cur_dir_path)
 
                 # Merging the data
                 if os.path.exists(cur_file_path) and not override:
+                    # This is a conjunctive graps that contains all the triples (and graphs)
+                    # the file is actually defining - they could be more than those using
+                    # 'cur_subject' as subject.
                     cur_g = self.load(cur_file_path, cur_g, tmp_dir)
 
                 cur_json_ld = json.loads(
                     cur_g.serialize(format="json-ld", context=self.__get_context(context_path)))
-                cur_json_ld["@context"] = context_path
+
+                if isinstance(cur_json_ld, dict):
+                    cur_json_ld["@context"] = context_path
+                else:  # it is a list
+                    for item in cur_json_ld:
+                        item["@context"] = context_path
+
                 with open(cur_file_path, "w") as f:
                     json.dump(cur_json_ld, f, indent=4)
 
@@ -225,17 +236,15 @@ class Storer(object):
         self.repok.new_article()
         self.reperr.new_article()
 
-        current_graph = cur_graph
-
         if os.path.isfile(rdf_file_path):
             try:
-                current_graph = self.__load_graph(rdf_file_path, current_graph)
+                cur_graph = self.__load_graph(rdf_file_path, cur_graph)
             except IOError:
                 if tmp_dir is not None:
                     current_file_path = tmp_dir + os.sep + "tmp_rdf_file.rdf"
                     shutil.copyfile(rdf_file_path, current_file_path)
                     try:
-                        current_graph = self.__load_graph(current_file_path, current_graph)
+                        cur_graph = self.__load_graph(current_file_path, cur_graph)
                     except IOError as e:
                         self.reperr.add_sentence("[2] "
                                                  "It was impossible to handle the format used for "
@@ -253,47 +262,38 @@ class Storer(object):
                                      "The file specified ('%s') doesn't exist."
                                      % rdf_file_path)
 
-        return current_graph
+        return cur_graph
 
     def __load_graph(self, file_path, cur_graph=None):
         formats = ["json-ld", "rdfxml", "turtle", "trig"]
 
-        if cur_graph is None:
-            current_graph = Graph()
-        else:
-            current_graph = cur_graph
+        current_graph = ConjunctiveGraph()
+
+        if cur_graph is not None:
+            current_graph.parse(data=cur_graph.serialize(format="trig"), format="trig")
 
         for cur_format in formats:
             try:
                 if cur_format == "json-ld":
                     with open(file_path) as f:
                         json_ld_file = json.load(f)
-                        # Trick to force the use of a pre-loaded context if the format
-                        # specified is JSON-LD
-                        context_json = None
-                        if "@context" in json_ld_file:
-                            cur_context = json_ld_file["@context"]
-                            if cur_context in self.context_map:
-                                context_json = self.__get_context(cur_context)["@context"]
-                                json_ld_file["@context"] = context_json
-                        graph_id = None
+                        if isinstance(json_ld_file, dict):
+                            json_ld_file = [json_ld_file]
 
-                        # Note: the loading of the existing graph will work correctly if and only if
-                        # the IRI of the graph is specified as identifier in the constructor
-                        if "@graph" in json_ld_file and "iri" in json_ld_file:
-                            graph_id = json_ld_file["iri"]
-                            if context_json is not None:
-                                if re.search("^.+:", graph_id) is not None:
-                                    cur_prefix = graph_id.split(":", 1)[0]
-                                    if cur_prefix in context_json:
-                                        graph_id = graph_id.replace(
-                                            cur_prefix + ":", context_json[cur_prefix])
-                        if cur_graph is None:
-                            current_graph = Graph(identifier=graph_id)
+                        for json_ld_resource in json_ld_file:
+                            # Trick to force the use of a pre-loaded context if the format
+                            # specified is JSON-LD
+                            context_json = None
+                            if "@context" in json_ld_resource:
+                                cur_context = json_ld_resource["@context"]
+                                if cur_context in self.context_map:
+                                    context_json = self.__get_context(cur_context)["@context"]
+                                    json_ld_resource["@context"] = context_json
 
-                        current_graph.parse(data=json.dumps(json_ld_file), format=cur_format)
+                            current_graph.parse(data=json.dumps(json_ld_resource), format=cur_format)
                 else:
                     current_graph.parse(file_path, format=cur_format)
+
                 return current_graph
             except Exception as e:
                 errors = " | " + str(e)  # Try another format
@@ -342,4 +342,7 @@ if __name__ == "__main__":
                     query_string = f.read()
                     storer.execute_upload_query(query_string, triplestore_url)
             elif cur_file.endswith(".json"):
-                storer.upload(storer.load(cur_file, tmp_dir=temp_dir_for_rdf_loading), triplestore_url)
+                conj_g = storer.load(cur_file, tmp_dir=temp_dir_for_rdf_loading)
+                for cur_g in conj_g.contexts():
+                    storer.upload(storer.load(
+                        cur_g, tmp_dir=temp_dir_for_rdf_loading), triplestore_url)

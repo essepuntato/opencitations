@@ -31,4 +31,6 @@ reference_dir = base_home + "ref/todo/"
 reference_dir_error = base_home + "ref/err/"
 reference_dir_done = base_home + "ref/done/"
 dataset_home = "http://opencitations.net/"
-dir_split_number = 10000
+dir_split_number = 10000  # This must be multiple of the following one
+items_per_file = 1000
+

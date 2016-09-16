@@ -24,8 +24,9 @@ import re
 import os
 from datetime import datetime
 from support import is_string_empty, create_literal, create_type, get_short_name, \
-    get_count, encode_url, find_paths
-from conf_spacin import dir_split_number
+    get_count, encode_url, find_paths, find_local_line_id
+from conf_spacin import dir_split_number, items_per_file
+import linecache
 
 
 class GraphEntity(object):
@@ -445,11 +446,14 @@ class GraphSet(object):
         # of the responsible agent. In this case, a new individual will be created.
         else:
             self._increment()
-            count = GraphSet._add_number(info_file_path)
             related_to_label = ""
             related_to_short_label = ""
 
+            # Note: even if list of entities is actually a list, it seems
+            # that it would be composed by at most one item (e.g. for provenance)
             if list_of_entities:
+                count = GraphSet._add_number(
+                    info_file_path, find_local_line_id(list_of_entities[0], items_per_file))
                 related_to_label += " related to"
                 related_to_short_label += " ->"
                 for idx, cur_entity in enumerate(list_of_entities):
@@ -460,6 +464,8 @@ class GraphSet(object):
                     cur_entity_count = get_count(cur_entity)
                     related_to_label += " %s %s" % (self.labels[cur_short_name], cur_entity_count)
                     related_to_short_label += " %s/%s" % (cur_short_name, cur_entity_count)
+            else:
+                count = GraphSet._add_number(info_file_path)
 
             label = "%s %s%s [%s/%s%s]" % (
                 GraphSet.labels[short_name], str(count), related_to_label,
@@ -510,27 +516,40 @@ class GraphSet(object):
         return str(g.identifier)
 
     @staticmethod
-    def _read_number(file_path):
+    def _read_number(file_path, line_number=1):
         cur_number = 0
 
-        if os.path.exists(file_path):
-            with open(file_path, "r") as f:
-                try:
-                    cur_number = int(f.read())
-                except Exception as e:
-                    pass  # Do nothing
+        try:
+            with open(file_path) as f:
+                cur_number = long(f.readlines()[line_number - 1])
+        except Exception as e:
+            pass  # Do nothing
 
         return cur_number
 
     @staticmethod
-    def _add_number(file_path):
-        cur_number = GraphSet._read_number(file_path) + 1
+    def _add_number(file_path, line_number=1):
+        cur_number = GraphSet._read_number(file_path, line_number) + 1
 
         if not os.path.exists(os.path.dirname(file_path)):
             os.makedirs(os.path.dirname(file_path))
 
+        if os.path.exists(file_path):
+            with open(file_path) as f:
+                all_lines = f.readlines()
+        else:
+            all_lines = []
+
+        line_len = len(all_lines)
+        zero_line_number = line_number - 1
+        for i in range(line_number):
+            if i >= line_len:
+                all_lines += ["\n"]
+            if i == zero_line_number:
+                all_lines[i] = str(cur_number) + "\n"
+
         with open(file_path, "wb") as f:
-            f.write(str(cur_number))
+            f.writelines(all_lines)
 
         return cur_number
 
@@ -656,15 +675,15 @@ class ProvSet(GraphSet):
         cur_time = datetime.now().strftime(time_string)
 
         # Add all existing information for provenance agents
-        self.rf.add_triples_in_filesystem(self.base_iri + "prov/")
+        self.rf.add_prov_triples_in_filesystem(self.base_iri)
 
         # The 'all_subjects' set includes only the subject of the created graphs that
         # have at least some new triples to add
         for prov_subject in self.all_subjects:
             cur_subj = self.prov_g.get_entity(prov_subject)
 
-            # Load all provenance data for that subject on resource finder
-            self.rf.add_triples_in_filesystem(str(prov_subject) + "/prov/")
+            # Load all provenance data of snapshots for that subject
+            self.rf.add_prov_triples_in_filesystem(str(prov_subject), "se")
 
             last_snapshot = None
             last_snapshot_res = self.rf.retrieve_last_snapshot(prov_subject)
@@ -744,7 +763,8 @@ class ProvSet(GraphSet):
         else:
             g_prov = str(prov_subject) + "/prov/"
             res_file_path = \
-                find_paths(str(prov_subject), self.info_dir, self.base_iri, dir_split_number)[1][:-5]
+                find_paths(str(prov_subject), self.info_dir, self.base_iri,
+                           dir_split_number, items_per_file)[1][:-5]
             prov_info_path = res_file_path + "/prov/" + short_name + ".txt"
         return self._add(g_prov, prov_type, res, resp_agent, None, None,
                          prov_info_path, short_name, [] if prov_subject is None else [prov_subject])

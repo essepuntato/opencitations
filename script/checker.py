@@ -57,7 +57,9 @@ class Checker(object):
 
 
 if __name__ == "__main__":
-    arg_parser = argparse.ArgumentParser("checker.py")
+    arg_parser = argparse.ArgumentParser(
+        "checker.py", description="This script allows one to convert any RDF file contained in "
+                                  "the input directory into TRIG format.")
     arg_parser.add_argument("-i", "--input-dir", dest="input_dir", required=True,
                             help="The directory containing the RDF documents to check.")
     arg_parser.add_argument("-o", "--output-dir", dest="output_dir",

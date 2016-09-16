@@ -11,5 +11,6 @@
   "ontology_url": "../ontology/ontology.owl",
   "onto_acronym": "ontology",
   "dir_split_number": "10000",
+  "file_split_number": "1000",
   "statistics": "/srv/oc/statistics.csv"
 }

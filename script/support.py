@@ -215,40 +215,87 @@ def is_dataset(string_iri):
     return re.search("^.+/[0-9]+$", string_iri) is None
 
 
-def find_paths(string_iri, base_dir, base_iri, dir_split=0):
-    res_regex = "(.+/)([0-9]+)$"
-    prov_regex = "(.+/)([0-9]+)(/prov/.+)/([0-9]+)$"
+def has_bib_entity_number(subj):
+    return re.search("/\d+", str(subj)) is not None
+
+# Variable used in several functions
+res_regex = "(.+/)([0-9]+)$"
+prov_regex = "(.+/)([0-9]+)(/prov)/(.+)/([0-9]+)$"
+
+
+def get_resource_number(string_iri):
+    is_prov = "/prov/" in string_iri
+
+    if is_prov:
+        cur_number = long(re.sub(prov_regex, "\\2", string_iri))
+    else:
+        cur_number = long(re.sub(res_regex, "\\2", string_iri))
+
+    return cur_number
+
+
+def find_local_line_id(res, n_file_item=1):
+    cur_number = get_resource_number(str(res))
+
+    cur_file_split = 0
+    while True:
+        if cur_number > cur_file_split:
+            cur_file_split += n_file_item
+        else:
+            cur_file_split -= n_file_item
+            break
+
+    return cur_number - cur_file_split
+
+
+def find_paths(string_iri, base_dir, base_iri, dir_split=0, n_file_item=1):
+    cur_file_path = None
 
     if is_dataset(string_iri):
         cur_dir_path = base_dir + re.sub("^%s(.*)$" % base_iri, "\\1", string_iri)
+        # In case of dataset, the file path is different from regular files, e.g.
+        # /corpus/br/index.json
         cur_file_path = cur_dir_path + "index.json"
     else:
+        # The data have been split in multiple directories and it is not something related
+        # with the provenance data of the whole corpus (e.g. provenance agents)
         if dir_split and not string_iri.startswith(base_iri + "prov/"):
-            is_prov = "/prov/" in string_iri
-            cur_split = 0
-            if is_prov:
-                cur_number = long(re.sub(prov_regex, "\\2", string_iri))
-            else:
-                cur_number = long(re.sub(res_regex, "\\2", string_iri))
+            cur_number = get_resource_number(string_iri)
 
+            # Find the correct directory number where to save the file
+            cur_split = 0
             while True:
                 if cur_number > cur_split:
                     cur_split += dir_split
                 else:
                     break
 
-            if is_prov:
+            # Find the correct file number where to save the resources
+            cur_file_split = 0
+            while True:
+                if cur_number > cur_file_split:
+                    cur_file_split += n_file_item
+                else:
+                    break
+
+            if "/prov/" in string_iri:  # provenance file of a bibliographic entity
                 cur_dir_path = base_dir + os.sep + \
                                re.sub(("^%s" + prov_regex) % base_iri, "\\1", string_iri) + \
-                               str(cur_split) + os.sep + \
-                               re.sub(("^%s" + prov_regex) % base_iri, "\\2\\3", string_iri)
-            else:
+                               str(cur_split) + os.sep + str(cur_file_split) + os.sep + "prov"
+                # In case of provenance, the file path is different from regular files, e.g.
+                # /corpus/br/10000/1000/prov/se.json
+                cur_file_path = cur_dir_path + os.sep + re.sub(
+                    ("^%s" + prov_regex) % base_iri, "\\4", string_iri) + ".json"
+            else:  # regular bibliographic entity
                 cur_dir_path = base_dir + os.sep + \
                                re.sub(("^%s" + res_regex) % base_iri, "\\1", string_iri) + \
                                os.sep + str(cur_split)
+
+                cur_file_path = cur_dir_path + os.sep + str(cur_file_split) + ".json"
+        # Enter here if no split is needed or if the data is about a provenance agent, e.g.,
+        # /corpus/prov/
         else:
             cur_dir_path = base_dir + re.sub(("^%s" + res_regex) % base_iri, "\\1", string_iri)
-
-        cur_file_path = cur_dir_path + os.sep + re.sub(res_regex, "\\2", string_iri) + ".json"
+            cur_file_path = cur_dir_path + os.sep + re.sub(res_regex, "\\2", string_iri) + ".json"
 
     return cur_dir_path, cur_file_path
