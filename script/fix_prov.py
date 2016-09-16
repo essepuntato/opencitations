@@ -43,9 +43,12 @@ FRBR = Namespace("http://purl.org/vocab/frbr/core#")
 def create_update_query(cur_subj_g, update_date, id_dir, dir_split):
     query_string = u"INSERT DATA { GRAPH <%s> { " % cur_subj_g.identifier
     is_first = True
+    new_citations = False
+    new_ids = False
 
     for s, p, o in cur_subj_g.triples((None, None, None)):
         if p == CITO.cites or p == FRBR.part:
+            new_citations = True
             if not is_first:
                 query_string += ". "
             is_first = False
@@ -63,17 +66,19 @@ def create_update_query(cur_subj_g, update_date, id_dir, dir_split):
                 break
 
         id_se_file_path = \
-            id_dir + os.sep + str(cur_split) + os.sep + str(cur_number) + os.sep + "prov" + os.sep + "se" + os.sep + "1.json"
+            id_dir + os.sep + str(cur_split) + os.sep + str(cur_number) + os.sep + "prov" + \
+            os.sep + "se" + os.sep + "1.json"
         g_id = load(id_se_file_path)
         if g_id is not None:
             gen_date = g_id.objects(None, PROV.generatedAtTime).next()
             if gen_date == update_date:
+                new_ids = True
                 if not is_first:
                     query_string += ". "
                 is_first = False
                 query_string += u"<%s> <%s> <%s> " % (str(s), str(p), str(o))
 
-    return query_string + "} }"
+    return query_string + "} }", new_citations, new_ids
 
 
 def load(rdf_file_path, tmp_dir=None):
@@ -199,10 +204,10 @@ if __name__ == "__main__":
                         g_prov_se_1.add((cur_se_1, PROV.wasInvalidatedBy, new_curatorial_activity))
 
                         # se/2
+                        new_update_data = create_update_query(
+                            cur_g, invalidation_time, args.id_dir, int(args.dir_split))
                         g_prov_se_2.remove((cur_se_2, OCO.hasUpdateQuery, None))
-                        g_prov_se_2.add((cur_se_2, OCO.hasUpdateQuery,
-                                         Literal(create_update_query(cur_g, invalidation_time,
-                                                                     args.id_dir, int(args.dir_split)))))
+                        g_prov_se_2.add((cur_se_2, OCO.hasUpdateQuery, Literal(new_update_data[0])))
                         g_prov_se_2.remove((cur_se_2, PROV.wasDerivedFrom, None))
                         g_prov_se_2.add((cur_se_2, PROV.wasDerivedFrom, cur_se_1))
 
@@ -210,6 +215,14 @@ if __name__ == "__main__":
                         store(g_prov_se_1, se1_file_path)
                         store(g_prov_se_2, se2_file_path)
                     else:  # is_ca
+                        se2_file_path = cur_dir + os.sep + ".." + os.sep + "se" + os.sep + "2.json"
+                        g_prov_se_2 = load(se2_file_path)
+                        invalidation_time = g_prov_se_2.objects(None, PROV.generatedAtTime).next()
+                        res_file_path = re.sub("^(.+)/%s.*$" % ca_dir, "\\1.json", cur_dir)
+                        cur_g = load(res_file_path)
+                        new_update_data = create_update_query(
+                            cur_g, invalidation_time, args.id_dir, int(args.dir_split))
+
                         ca2_file_path = cur_dir + os.sep + "2.json"
                         g_prov_ca_2 = load(ca2_file_path)
                         cur_ca_2 = g_prov_ca_2.subjects(None, None).next()
@@ -218,11 +231,21 @@ if __name__ == "__main__":
                         g_prov_ca_2.add((cur_ca_2, RDF.type, PROV.Modify))
 
                         old_description = g_prov_ca_2.objects(cur_ca_2, DCTERMS.description).next()
+                        new_description = "extended with"
+                        if new_update_data[1]:
+                            new_description += " citation data"
+                            if new_update_data[2]:
+                                new_description += " and"
+                        if new_update_data[2]:
+                            new_description += " new identifiers"
+
                         g_prov_ca_2.remove((cur_ca_2, DCTERMS.description, None))
-                        g_prov_ca_2.add((cur_ca_2, DCTERMS.description,
-                                         Literal(old_description.replace(
-                                             "created", "extended with citation data"))))
+                        g_prov_ca_2.add((cur_ca_2, DCTERMS.description, Literal(
+                            old_description
+                                .replace("extended with citation data", new_description)
+                                .replace("created", new_description))))
                         store(g_prov_ca_2, ca2_file_path)
 
     # repok.write_file("fix_prov.rep.ok.txt")
     reperr.write_file("fix_prov.rep.err.txt")
+    
