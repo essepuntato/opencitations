@@ -736,25 +736,40 @@ class ProvSet(GraphSet):
                 cur_activity.create_creation_activity()
                 cur_activity.create_description("The entity '%s' has been created." % str(cur_subj.res))
             else:
+                update_query_data = self._create_update_query(cur_subj.g)
+                update_description = "The entity '%s' has been extended with" % str(cur_subj.res)
+                if update_query_data[1]:
+                    update_description += " citation data"
+                    if update_query_data[2]:
+                        update_description += " and"
+                if update_query_data[2]:
+                    update_description += " new identifiers"
+                update_description += "."
                 cur_activity.create_update_activity()
-                cur_activity.create_description("The entity '%s' has been extended with citation data."
-                                                % str(cur_subj.res))
+                cur_activity.create_description(update_description)
                 last_snapshot.create_invalidation_time(cur_time)
                 cur_activity.invalidates(last_snapshot)
                 cur_snapshot.derives_from(last_snapshot)
-                cur_snapshot.create_update_query(self._create_citation_query(cur_subj.g))
+                cur_snapshot.create_update_query(update_query_data[0])
 
     @staticmethod
-    def _create_citation_query(cur_subj_g):
+    def _create_update_query(cur_subj_g):
         query_string = u"INSERT DATA { GRAPH <%s> { " % cur_subj_g.identifier
         is_first = True
+        new_citations = False
+        new_ids = False
+
         for s, p, o in cur_subj_g.triples((None, None, None)):
             if not is_first:
                 query_string += ". "
             is_first = False
+            if p == GraphEntity.cites:
+                new_citations = True
+            elif p == GraphEntity.has_identifier:
+                new_ids = True
             query_string += u"<%s> <%s> <%s> " % (str(s), str(p), str(o))
 
-        return query_string + "} }"
+        return query_string + "} }", new_citations, new_ids
 
     def _add_prov(self, short_name, prov_type, res, resp_agent, prov_subject=None):
         if prov_subject is None:
