@@ -272,4 +272,4 @@ if __name__ == "__main__":
                     break
 
     # repok.write_file("organize_files.rep.ok.txt")
-    reperr.write_file("organize_files.rep.err.txt")
+    reperr.write_file("organize_files.rep.%s.err.txt" % re.sub("[\.%s/]" % os.sep, "_", args.input))
