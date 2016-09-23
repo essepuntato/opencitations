@@ -35,7 +35,7 @@ pages = ["/", "about", "corpus", "model", "sparql", "publications", "contacts"]
 
 # For redirecting to classes
 urls = (
-    "(/)", "WorkInProgress",
+    "(/)", "Home",
     "/(about)", "About",
     "/(model)", "Model",
     "/(corpus)", "CorpusIntro",
