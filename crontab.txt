@@ -18,5 +18,5 @@
 # 6. safely re-run the triplestore (it runs at 16:00 everyday)
 0       16  *   *   *   /srv/oc/triplestore/safe-run-again.sh
 
-# 7. backup everything (it runs the first day of the month at 00:15, root only)
-15      0	1   *   *   /home/essepuntato/OC/backup.sh
+# 7. backup everything (it runs the 15th day of the month at 00:15, root only)
+15      0	15   *   *   nohup /home/essepuntato/OC/backup.sh
