@@ -117,21 +117,21 @@ sleep 3
 CMD="ssh ocbackup.cs.unibo.it -l oc -t -t 'nc -l -p 5000 | dar_xform -s 500M -w -n - /mnt/backup/oc/$BACKUP_DATE-corpus_prov' &"
 eval $CMD
 sleep 2
-dar -Q -c - -R prov | nc -w 1 ocbackup.cs.unibo.it 5000
+dar -Q -c - -R /srv/oc/corpus/prov/ | nc -w 1 ocbackup.cs.unibo.it 5000
 sleep 3
 
 # references
 CMD="ssh ocbackup.cs.unibo.it -l oc -t -t 'nc -l -p 5000 | dar_xform -s 500M -w -n - /mnt/backup/oc/$BACKUP_DATE-ref' &"
 eval $CMD
 sleep 2
-dar -Q -c - -R ref | nc -w 1 ocbackup.cs.unibo.it 5000
+dar -Q -c - -R /srv/oc/ref/ | nc -w 1 ocbackup.cs.unibo.it 5000
 sleep 3
 
 # triplestore
 CMD="ssh ocbackup.cs.unibo.it -l oc -t -t 'nc -l -p 5000 | dar_xform -s 500M -w -n - /mnt/backup/oc/$BACKUP_DATE-triplestore' &"
 eval $CMD
 sleep 2
-dar -Q -c - -R triplestore -X "log.txt" -X "nohup.out" | nc -w 1 ocbackup.cs.unibo.it 5000
+dar -Q -c - -R /srv/oc/triplestore/ -X "log.txt" -X "nohup.out" | nc -w 1 ocbackup.cs.unibo.it 5000
 
 # Gently run all the processes
 /home/essepuntato/OC/script/gently-run.sh
