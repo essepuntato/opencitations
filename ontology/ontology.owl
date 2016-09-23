@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<rdf:RDF xmlns="https://w3id.org/oc/ontology#"
-     xml:base="https://w3id.org/oc/ontology"
+<rdf:RDF xmlns="https://w3id.org/oc/ontology/"
+     xml:base="https://w3id.org/oc/ontology/"
      xmlns:owl="http://www.w3.org/2002/07/owl#"
      xmlns:fabio="http://purl.org/spar/fabio/"
      xmlns:datacite="http://purl.org/spar/datacite/"
@@ -19,15 +19,17 @@
      xmlns:oco="https://w3id.org/oc/ontology/"
      xmlns:spar="http://purl.org/spar/"
      xmlns:vann="http://purl.org/vocab/vann/"
+     xmlns:prov="http://www.w3.org/ns/prov#"
      xmlns:prism="http://prismstandard.org/namespaces/basic/2.0/"
      xmlns:dc="http://purl.org/dc/elements/1.1/"
      xmlns:c4o="http://purl.org/spar/c4o/">
     <owl:Ontology rdf:about="https://w3id.org/oc/ontology">
         <owl:versionIRI rdf:resource="https://w3id.org/oc/ontology/1.0"/>
-        <dc:date>2016-07-13</dc:date>
+        <dc:date>2016-09-23</dc:date>
         <dc:creator rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Silvio Peroni</dc:creator>
         <vann:preferredNamespacePrefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string">oco</vann:preferredNamespacePrefix>
         <dc:title rdf:datatype="http://www.w3.org/2001/XMLSchema#string">OCO, the OpenCitations Ontology</dc:title>
+        <owl:versionInfo rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.1</owl:versionInfo>
         <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">OCO, the OpenCitations Ontology, is not yet another bibliographic ontology, rather it is just a place where existing and complementary ontological entities from several other ontologies are grouped together for the purpose of providing descriptive metadata for the [OpenCitations Corpus (OCC)](http://opencitations.net).</rdfs:comment>
         <dc:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">OCO, the OpenCitations Ontology, is not yet another bibliographic ontology, rather it is just a place where existing and complementary ontological entities from several other ontologies are grouped together for the purpose of providing descriptive metadata for the [OpenCitations Corpus (OCC)](http://opencitations.net).
 
@@ -44,7 +46,6 @@ agent roles (ar), class pro:RoleInTime – roles held by agents with respect to 
         </dc:description>
         <dc:rights xml:lang="en">This work is distributed under a Creative Commons Attribution License (http://creativecommons.org/licenses/by/4.0/).</dc:rights>
         <vann:preferredNamespaceUri rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">https://w3id.org/oc/ontology/</vann:preferredNamespaceUri>
-        <owl:versionInfo rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.0</owl:versionInfo>
         <dc:description rdf:resource="https://rawgit.com/essepuntato/opencitations/master/ontology/core.png"/>
     </owl:Ontology>
     
@@ -252,6 +253,86 @@ agent roles (ar), class pro:RoleInTime – roles held by agents with respect to 
     
 
 
+    <!-- http://www.w3.org/ns/prov#agent -->
+
+    <owl:ObjectProperty rdf:about="http://www.w3.org/ns/prov#agent">
+        <rdfs:comment xml:lang="en">This property references a provenance agent which influenced a resource.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.w3.org/ns/prov"/>
+        <rdfs:label xml:lang="en">involves agent</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.w3.org/ns/prov#hadPrimarySource -->
+
+    <owl:ObjectProperty rdf:about="http://www.w3.org/ns/prov#hadPrimarySource">
+        <rdfs:comment xml:lang="en">This property allows the specification of a primary source for a resource, i.e. something produced by some agent with direct experience and knowledge about such resource.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.w3.org/ns/prov"/>
+        <rdfs:label xml:lang="en">had primary source</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.w3.org/ns/prov#hadRole -->
+
+    <owl:ObjectProperty rdf:about="http://www.w3.org/ns/prov#hadRole">
+        <rdfs:comment xml:lang="en">This property allows one to associate a role as the function of an entity or agent with respect to an activity.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.w3.org/ns/prov"/>
+        <rdfs:label xml:lang="en">had role</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.w3.org/ns/prov#qualifiedAssociation -->
+
+    <owl:ObjectProperty rdf:about="http://www.w3.org/ns/prov#qualifiedAssociation">
+        <rdfs:comment xml:lang="en">An activity association is an assignment of responsibility to an agent for an activity, indicating that the agent had a role in the activity.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.w3.org/ns/prov"/>
+        <rdfs:label xml:lang="en">has qualified association</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.w3.org/ns/prov#specializationOf -->
+
+    <owl:ObjectProperty rdf:about="http://www.w3.org/ns/prov#specializationOf">
+        <rdfs:comment xml:lang="en">This property allows one to indicate that an entity that is a specialization of another shares all aspects of the latter, and additionally presents more specific aspects of the same thing as the latter.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.w3.org/ns/prov"/>
+        <rdfs:label xml:lang="en">is specialization of</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.w3.org/ns/prov#wasDerivedFrom -->
+
+    <owl:ObjectProperty rdf:about="http://www.w3.org/ns/prov#wasDerivedFrom">
+        <rdfs:comment xml:lang="en">This property allows the specification of a derivation from another entity, where a derivation is a transformation of an entity into another, an update of an entity resulting in a new one, or the construction of a new entity based on a pre-existing entity.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.w3.org/ns/prov"/>
+        <rdfs:label xml:lang="en">was derived from</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.w3.org/ns/prov#wasGeneratedBy -->
+
+    <owl:ObjectProperty rdf:about="http://www.w3.org/ns/prov#wasGeneratedBy">
+        <rdfs:comment xml:lang="en">This property allows one to specify the creation of an existing entity by an activity.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.w3.org/ns/prov"/>
+        <rdfs:label xml:lang="en">was generated by</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.w3.org/ns/prov#wasInvalidatedBy -->
+
+    <owl:ObjectProperty rdf:about="http://www.w3.org/ns/prov#wasInvalidatedBy">
+        <rdfs:comment xml:lang="en">This property allows one to specify the invalidation (i.e. the start of the destruction, cessation, or expiry) of an existing entity by an activity.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.w3.org/ns/prov"/>
+        <rdfs:label xml:lang="en">was invalidated by</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
     <!-- https://w3id.org/oc/ontology/hasNext -->
 
     <owl:ObjectProperty rdf:about="https://w3id.org/oc/ontology/hasNext">
@@ -302,6 +383,16 @@ agent roles (ar), class pro:RoleInTime – roles held by agents with respect to 
         <rdfs:comment xml:lang="en">Identifies the first page of an entity such as a journal article.</rdfs:comment>
         <rdfs:isDefinedBy rdf:resource="http://purl.org/spar/fabio"/>
         <rdfs:label xml:lang="en">has starting page</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://purl.org/dc/terms/description -->
+
+    <owl:DatatypeProperty rdf:about="http://purl.org/dc/terms/description">
+        <rdfs:comment xml:lang="en">A textual description of a resource.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://purl.org/dc/terms"/>
+        <rdfs:label xml:lang="en">has description</rdfs:label>
     </owl:DatatypeProperty>
     
 
@@ -366,6 +457,26 @@ agent roles (ar), class pro:RoleInTime – roles held by agents with respect to 
     
 
 
+    <!-- http://www.w3.org/ns/prov#generatedAtTime -->
+
+    <owl:DatatypeProperty rdf:about="http://www.w3.org/ns/prov#generatedAtTime">
+        <rdfs:comment xml:lang="en">The date on which a particular entity was created.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.w3.org/ns/prov"/>
+        <rdfs:label xml:lang="en">was generated at time</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.w3.org/ns/prov#invalidatedAtTime -->
+
+    <owl:DatatypeProperty rdf:about="http://www.w3.org/ns/prov#invalidatedAtTime">
+        <rdfs:comment xml:lang="en">The date on which a particular entity was invalidated.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.w3.org/ns/prov"/>
+        <rdfs:label xml:lang="en">was invalidated at time</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
     <!-- http://xmlns.com/foaf/0.1/familyName -->
 
     <owl:DatatypeProperty rdf:about="http://xmlns.com/foaf/0.1/familyName">
@@ -392,6 +503,16 @@ agent roles (ar), class pro:RoleInTime – roles held by agents with respect to 
         <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The name of an agent.</rdfs:comment>
         <rdfs:isDefinedBy rdf:resource="http://xmlns.com/foaf/0.1"/>
         <rdfs:label xml:lang="en">has name</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- https://w3id.org/oc/ontology/hasUpdateQuery -->
+
+    <owl:DatatypeProperty rdf:about="https://w3id.org/oc/ontology/hasUpdateQuery">
+        <dc:description xml:lang="en">This property allows one to specify the UPDATE SPARQL query that keeps track of which metadata have been modified as the result of a modification of some of the metadata or the merging of the metadata relating to a particular bibliographic entity.</dc:description>
+        <rdfs:isDefinedBy rdf:resource="https://w3id.org/oc/ontology"/>
+        <rdfs:label xml:lang="en">has update query</rdfs:label>
     </owl:DatatypeProperty>
     
 
@@ -692,6 +813,79 @@ agent roles (ar), class pro:RoleInTime – roles held by agents with respect to 
         <rdfs:comment xml:lang="en">A particular situation that describe a role an agent may have, that can be restricted to a particular time interval.</rdfs:comment>
         <rdfs:isDefinedBy rdf:resource="http://purl.org/spar/pro"/>
         <rdfs:label xml:lang="en">role in time</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.w3.org/ns/prov#Activity -->
+
+    <owl:Class rdf:about="http://www.w3.org/ns/prov#Activity">
+        <rdfs:comment xml:lang="en">In the OpenCitations Corpus, this class is used to describe a curatorial activity relating to an entity.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.w3.org/ns/prov"/>
+        <rdfs:label xml:lang="en">activity</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.w3.org/ns/prov#Agent -->
+
+    <owl:Class rdf:about="http://www.w3.org/ns/prov#Agent">
+        <rdfs:comment xml:lang="en">In the OpenCitations Corpus, a provenance agent, such as a person, organisation or process, is responsible to create or modifie entities metadata, it is used as source provider of those metadata.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.w3.org/ns/prov"/>
+        <rdfs:label xml:lang="en">provenance agent</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.w3.org/ns/prov#Association -->
+
+    <owl:Class rdf:about="http://www.w3.org/ns/prov#Association">
+        <rdfs:comment xml:lang="en">In the OpenCitations Corpus, an association allows one to link a particular role held by a provenance agent with respect to a curatorial activity.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.w3.org/ns/prov"/>
+        <rdfs:label xml:lang="en">association</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.w3.org/ns/prov#Create -->
+
+    <owl:Class rdf:about="http://www.w3.org/ns/prov#Create">
+        <rdfs:subClassOf rdf:resource="http://www.w3.org/ns/prov#Activity"/>
+        <rdfs:comment xml:lang="en">The activity of creating a new entity.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.w3.org/ns/prov-dc-refinements"/>
+        <rdfs:label xml:lang="en">create</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.w3.org/ns/prov#Entity -->
+
+    <owl:Class rdf:about="http://www.w3.org/ns/prov#Entity">
+        <rdfs:comment xml:lang="en">In the OpenCitations Corpus, an entity represents a particular snapshot recording the metadata associated with another individual entity at a particular time.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.w3.org/ns/prov"/>
+        <rdfs:label xml:lang="en">entity</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.w3.org/ns/prov#Modify -->
+
+    <owl:Class rdf:about="http://www.w3.org/ns/prov#Modify">
+        <rdfs:subClassOf rdf:resource="http://www.w3.org/ns/prov#Activity"/>
+        <rdfs:comment xml:lang="en">The activity of modifying (adding/removing) data associated with an existing entity.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.w3.org/ns/prov-dc-refinements"/>
+        <rdfs:label xml:lang="en">modify</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.w3.org/ns/prov#Replace -->
+
+    <owl:Class rdf:about="http://www.w3.org/ns/prov#Replace">
+        <rdfs:subClassOf rdf:resource="http://www.w3.org/ns/prov#Activity"/>
+        <rdfs:comment xml:lang="en">The activity of replacing one entity with another.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.w3.org/ns/prov-dc-refinements"/>
+        <rdfs:label xml:lang="en">replace</rdfs:label>
     </owl:Class>
     
 
