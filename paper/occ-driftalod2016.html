@@ -99,10 +99,10 @@
          <p>The addition of these statements also generates, at least, the following provenance statements, so as to set <em>sp</em> as a provenance entity, where its statements are implicitly encoded in a specific snapshot:</p>
          <pre>
             <code>
-:entity a prov:Entity .
+:sp a prov:Entity .
 
-:entity-snapshot-1 a prov:Entity ;
-  prov:specializationOf :entity .</code>
+:sp-snapshot-1 a prov:Entity ;
+  prov:specializationOf :sp .</code>
          </pre>
          <p>Then suppose the curator of such data will decide to split the full name of <em>sp</em> using two distinct properties, i.e. <em>foaf:givenName</em> and <em>foaf:familyName</em>, so as to remove the more generic <em>foaf:name</em>:</p>
          <pre>
@@ -114,9 +114,9 @@
          <p>In this case, a new snapshot of the entity will be generated, which specifies which statements have been added/deleted (by means of the property <em>new:hasUpdateQuery</em>) starting from the previous snapshot linked through the property <em>prov:wasDerivedFrom</em>, as shown as follows:</p>
          <pre>
             <code>
-:entity-snapshot-2 a prov:Entity ;
-  prov:specializationOf :entity ;
-  prov:wasDerivedFrom :entity-snapshot-1 ;
+:sp-snapshot-2 a prov:Entity ;
+  prov:specializationOf :sp ;
+  prov:wasDerivedFrom :sp-snapshot-1 ;
   new:hasUpdateQuery "INSERT DATA { :sp foaf:givenName 'Silvio' ; foaf:familyName 'Peroni' } ; DELETE DATA { :sp foaf:name 'Silvio Peroni' }" .</code>
          </pre>
          <p>Using such snapshot-oriented structure, which clearly indicates how a previous snapshot of an entity has been modified to reach the set of statements currently available, makes easier to:</p>
