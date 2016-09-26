@@ -41,6 +41,7 @@ urls = (
     "/(corpus)", "CorpusIntro",
     "/corpus/(.+)", "Corpus",
     "/corpus/", "Corpus",
+    "/download", "Download",
     "/(sparql)", "Sparql",
     "/(publications)", "Publications",
     "/(contacts)", "Contacts",
@@ -121,6 +122,12 @@ class CorpusIntro:
     def GET(self, active):
         web_logger.mes()
         return render.corpus(pages, active)
+
+
+class Download:
+    def GET(self, active):
+        web_logger.mes()
+        return render.download(pages, active)
 
 
 class Model:

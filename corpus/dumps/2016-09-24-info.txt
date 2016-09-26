@@ -1,0 +1,5 @@
+The set of whole the dumps created on September 24, 2016 (available at http://opencitations.net/download) includes:
+* 953736 citing/cited bibliographic resources;
+* 1106920 citation links;
+* 25772 containers (journals, books, etc.);
+* 92833 ORCID identifiers.

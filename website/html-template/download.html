@@ -1,0 +1,109 @@
+$def with (pages, active)
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+        <link rel="icon" href="/static/favicon.ico" />
+        <title>OpenCitations - Download</title>
+
+        <!-- Bootstrap core CSS -->
+        <link href="/static/css/bootstrap.min.css" rel="stylesheet" />
+
+        <!-- Font Awesome -->
+        <link href="/static/css/font-awesome.min.css" rel="stylesheet" />
+
+        <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+        <link href="/static/css/ie10-viewport-bug-workaround.css" rel="stylesheet" />
+
+        <!-- Custom styles for this template -->
+        <link href="/static/css/cover.css" rel="stylesheet" />
+
+        <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+            <script src="/static/js/html5shiv.min.js"><![CDATA[ ]]></script>
+            <script src="/static/js/respond.min.js"><![CDATA[ ]]></script>
+        <![endif]-->
+    </head>
+    <body>
+        <div class="cover-container">
+            <div class="masthead clearfix">
+                <h3 class="masthead-brand">
+                    <a href="/"><span class="oc-purple">Open</span><span class="oc-blue">Citations</span></a>
+                </h3>
+                <nav>
+                    <ul class="nav masthead-nav">
+                        $for page in pages:
+                            $if page == active:
+                                <li class="active">
+                            $else:
+                                <li>
+                            <a href="$page">
+                                $if page == "/":
+                                    Home
+                                $else:
+                                    $page.title()
+                            </a>
+                            </li>
+                    </ul>
+                </nav>
+            </div>
+
+            <div class="cover left">
+                 <h3>$active.title()</h3>
+                 <p>This page contains all the dumps of the <span class="oc-purple">Open</span><span class="oc-blue">Citations</span> Corpus (OCC) that are created regularly every month. Each dump is composed by several zip archives, each containing either data or provenance information of a particular sub-dataset of the OCC. After unzipping an archive, it is needed to use <a href="http://dar.linux.free.fr/">Disk ARchive (DAR)</a> for recreating the whole structure - which is a multi-platform archive tool for managing huge amount of data.</p>
+                 <h4>Earliest dump</h4>
+                 <p>Dump created on September 24, 2016. It includes:</p>
+                 <ul>
+                     <li><p>953736 citing/cited bibliographic resources;</p></li>
+                     <li><p>1106920 citation links;</p></li>
+                     <li><p>25772 containers (journals, books, etc.);</p></li>
+                     <li><p>92833 ORCID identifiers.</p></li>
+                 </ul>
+                 <table>
+                     <tr><th>Type</th><th>Archive</th></tr>
+                     <tr><td>agent roles (ar)</td><td><a href="https://dx.doi.org/10.6084/m9.figshare.3858759">data</a>, <a href="https://dx.doi.org/10.6084/m9.figshare.3858756">provenance</a></td></tr>
+                     <tr><td>bibliographic entries (be)</td><td><a href="https://dx.doi.org/10.6084/m9.figshare.3858765">data</a>, <a href="https://dx.doi.org/10.6084/m9.figshare.3858762">provenance</a></td></tr>
+                     <tr><td>bibliographic resources (br)</td><td><a href="https://dx.doi.org/10.6084/m9.figshare.3858771">data</a>, <a href="https://dx.doi.org/10.6084/m9.figshare.3858768">provenance</a></td></tr>
+                     <tr><td>identifiers (id)</td><td><a href="https://dx.doi.org/10.6084/m9.figshare.3858777">data</a>, <a href="https://dx.doi.org/10.6084/m9.figshare.3858774">provenance</a></td></tr>
+                     <tr><td>responsible agents (ra)</td><td><a href="https://dx.doi.org/10.6084/m9.figshare.3858786">data</a>, <a href="https://dx.doi.org/10.6084/m9.figshare.3858783">provenance</a></td></tr>
+                     <tr><td>resource embodiment (re)</td><td><a href="https://dx.doi.org/10.6084/m9.figshare.3858795">data</a>, <a href="https://dx.doi.org/10.6084/m9.figshare.3858789">provenance</a></td></tr>
+                     <tr><td>corpus</td><td><a href="https://dx.doi.org/10.6084/m9.figshare.3858780">provenance</a></td></tr>
+                 </table>
+            </div>
+        </div>
+
+        <footer>
+            <div class="container">
+                <div class="row">
+                    <div id="disi" class="col-xs-12 col-sm-4">
+                        <p><a href="http://www.cse.unibo.it"><img src="/static/img/disi-unibo.png" /></a></p>
+                    </div>
+                    <div id="ox" class="col-xs-12 col-sm-4">
+                        <p><a href="http://www.ox.ac.uk"><img src="/static/img/uniox.png" /></a></p>
+                    </div>
+                    <div id="is4oa" class="col-xs-12 col-sm-4">
+                        <p><a href="https://is4oa.org"><img src="/static/img/is4oa.png" /></a></p>
+                    </div>
+                </div>
+            </div>
+            <p>
+                <a class="social oc-purple" href="mailto:contact@opencitations.net"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+                <a class="social oc-purple" href="http://www.twitter.com/opencitations"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+                <a class="social oc-blue" href="http://github.com/essepuntato/opencitations"><i class="fa fa-github" aria-hidden="true"></i></a>
+            </p>
+        </footer>
+
+        <!-- Bootstrap core JavaScript
+        ================================================== -->
+        <!-- Placed at the end of the document so the pages load faster -->
+        <script src="/static/js/jquery.min.js"><![CDATA[ ]]></script>
+        <script>window.jQuery || document.write('<script src="/static/js/jquery.min.js"><\/script>')</script>
+        <script src="/static/js/bootstrap.min.js"><![CDATA[ ]]></script>
+        <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+        <script src="/static/js/ie10-viewport-bug-workaround.js"><![CDATA[ ]]></script>
+    </body>
+</html>
