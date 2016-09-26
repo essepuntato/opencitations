@@ -31,7 +31,7 @@ from datetime import datetime
 with open("conf.json") as f:
     c = json.load(f)
 
-pages = ["/", "about", "corpus", "model", "sparql", "publications", "contacts"]
+pages = ["/", "about", "corpus", "model", "download", "sparql", "publications", "contacts"]
 
 # For redirecting to classes
 urls = (
