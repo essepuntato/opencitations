@@ -41,7 +41,7 @@ urls = (
     "/(corpus)", "CorpusIntro",
     "/corpus/(.+)", "Corpus",
     "/corpus/", "Corpus",
-    "/download", "Download",
+    "/(download)", "Download",
     "/(sparql)", "Sparql",
     "/(publications)", "Publications",
     "/(contacts)", "Contacts",
