@@ -35,6 +35,7 @@ class ResourceFinder(object):
         self.storer = Storer(context_map=context_map)
         self.tmp_dir = tmp_dir
         self.name = "SPACIN " + self.__class__.__name__
+        self.loaded = set()
         if g_set is not None:
             self.update_graph_set(g_set)
         if ts_url is None:
@@ -61,8 +62,10 @@ class ResourceFinder(object):
                             file_list += [cur_dir + os.sep + cur_file]
 
             for file_path in file_list:
-                cur_g = self.storer.load(file_path, tmp_dir=self.tmp_dir)
-                self.add_triples_in_graph(cur_g)
+                if file_path not in self.loaded:
+                    self.loaded.add(file_path)
+                    cur_g = self.storer.load(file_path, tmp_dir=self.tmp_dir)
+                    self.add_triples_in_graph(cur_g)
 
     def add_triples_in_graph(self, g):
         if g is not None:
