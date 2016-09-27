@@ -66,9 +66,15 @@ class Storer(object):
 
         self.repok.add_sentence("Starting the process")
 
+        processed_graphs = {}
+        for cur_g in self.g:
+            processed_graphs = self.store(cur_g, base_dir, base_iri, context_path, tmp_dir,
+                                          override, processed_graphs, False)
+
         stored_graph_path = []
-        for idx, cur_g in enumerate(self.g):
-            stored_graph_path += [self.store(cur_g, base_dir, base_iri, context_path, tmp_dir, override)]
+        for cur_file_path in processed_graphs:
+            stored_graph_path += [cur_file_path]
+            self.__store_in_file(processed_graphs[cur_file_path], cur_file_path, context_path)
 
         return stored_graph_path
 
@@ -183,7 +189,23 @@ class Storer(object):
             return u"INSERT DATA { GRAPH <%s> { %s } }" % \
                    (str(cur_g.identifier), cur_g.serialize(format="nt"))
 
-    def store(self, cur_g, base_dir, base_iri, context_path, tmp_dir=None, override=False):
+    def __store_in_file(self, cur_g, cur_file_path, context_path):
+        cur_json_ld = json.loads(
+            cur_g.serialize(format="json-ld", context=self.__get_context(context_path)))
+
+        if isinstance(cur_json_ld, dict):
+            cur_json_ld["@context"] = context_path
+        else:  # it is a list
+            for item in cur_json_ld:
+                item["@context"] = context_path
+
+        with open(cur_file_path, "w") as f:
+            json.dump(cur_json_ld, f, indent=4)
+
+        self.repok.add_sentence("File '%s' added." % cur_file_path)
+
+    def store(self, cur_g, base_dir, base_iri, context_path, tmp_dir=None,
+              override=False, already_processed={}, store_now=True):
         self.repok.new_article()
         self.reperr.new_article()
 
@@ -191,31 +213,32 @@ class Storer(object):
             cur_subject = set(cur_g.subjects(None, None)).pop()
             cur_dir_path, cur_file_path = find_paths(
                 str(cur_subject), base_dir, base_iri, self.dir_split, self.n_file_item)
+
             try:
                 if not os.path.exists(cur_dir_path):
                     os.makedirs(cur_dir_path)
 
+                final_g = ConjunctiveGraph()
+                final_g.addN([item + (cur_g.identifier,) for item in list(cur_g)])
+
                 # Merging the data
-                if os.path.exists(cur_file_path) and not override:
-                    # This is a conjunctive graps that contains all the triples (and graphs)
-                    # the file is actually defining - they could be more than those using
-                    # 'cur_subject' as subject.
-                    cur_g = self.load(cur_file_path, cur_g, tmp_dir)
+                if not override:
+                    if cur_file_path in already_processed:
+                        stored_g = already_processed[cur_file_path]
+                        stored_g.addN(final_g.quads((None, None, None, None)))
+                        final_g = stored_g
+                    elif os.path.exists(cur_file_path):
+                        # This is a conjunctive graps that contains all the triples (and graphs)
+                        # the file is actually defining - they could be more than those using
+                        # 'cur_subject' as subject.
+                        final_g = self.load(cur_file_path, cur_g, tmp_dir)
 
-                cur_json_ld = json.loads(
-                    cur_g.serialize(format="json-ld", context=self.__get_context(context_path)))
+                already_processed[cur_file_path] = final_g
 
-                if isinstance(cur_json_ld, dict):
-                    cur_json_ld["@context"] = context_path
-                else:  # it is a list
-                    for item in cur_json_ld:
-                        item["@context"] = context_path
+                if store_now:
+                    self.__store_in_file(final_g, cur_file_path, context_path)
 
-                with open(cur_file_path, "w") as f:
-                    json.dump(cur_json_ld, f, indent=4)
-
-                self.repok.add_sentence("File '%s' added." % cur_file_path)
-                return cur_file_path
+                return already_processed
             except Exception as e:
                 self.reperr.add_sentence("[5] It was impossible to store the RDF statements in %s. %s" %
                                          (cur_file_path, str(e)))
