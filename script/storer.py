@@ -367,5 +367,4 @@ if __name__ == "__main__":
             elif cur_file.endswith(".json"):
                 conj_g = storer.load(cur_file, tmp_dir=temp_dir_for_rdf_loading)
                 for cur_g in conj_g.contexts():
-                    storer.upload(storer.load(
-                        cur_g, tmp_dir=temp_dir_for_rdf_loading), triplestore_url)
+                    storer.upload(cur_g, triplestore_url)
