@@ -368,3 +368,6 @@ if __name__ == "__main__":
                 conj_g = storer.load(cur_file, tmp_dir=temp_dir_for_rdf_loading)
                 for cur_g in conj_g.contexts():
                     storer.upload(cur_g, triplestore_url)
+
+    storer.repok.write_file("storer_ok.txt")
+    storer.reperr.write_file("storer_err.txt")
