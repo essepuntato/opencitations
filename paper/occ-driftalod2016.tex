@@ -6,7 +6,7 @@
 \usepackage{mathtools}
 \usepackage{tabularx}
 \usepackage{fixltx2e}
-\usepackage{hyperref}
+\PassOptionsToPackage{hyphens}{url}\usepackage{hyperref}
 \usepackage[hyphens]{url}
 \usepackage{upquote,textcomp}
 \lstset{breaklines=true, basicstyle=\scriptsize\ttfamily, upquote=true}
@@ -21,8 +21,9 @@
 \makeatother
 
 \usepackage{amsmath}
-\usepackage{color,graphics,array,csscolor}
 \usepackage{pmml-new}
+
+\usepackage{color,graphics,array,csscolor}
 
 \usepackage{fontspec,unicode-math}
 \usepackage[Latin,Greek]{ucharclasses}
@@ -30,11 +31,12 @@
 
 \usepackage{subscript}
 \lstset{breaklines=true, basicstyle=\scriptsize\ttfamily}
-\usepackage[margin=1.72in]{geometry}
+\usepackage[margin=1.62in]{geometry}
+
 \begin{document}
 \mainmatter
 
-\title{A document-inspired way\\ for tracking changes of RDF data}
+\title{A document-inspired way for \\tracking changes of RDF data}
 \subtitle{The case of the OpenCitations Corpus}
 \titlerunning{A document-inspired way for tracking changes of RDF data}
 \author{Silvio Peroni\inst{1} \and
@@ -44,12 +46,12 @@ Fabio Vitali\inst{1}}
 \institute{DASPLab, DISI, University of Bologna, Bologna, Italy\and
 Oxford e-Research Centre, University of Oxford, Oxford, UK\\
 \email{silvio.peroni@unibo.it, 
-david.shotton@oerc.oc.ac.uk, 
+david.shotton@oerc.ox.ac.uk, 
 fabio.vitali@unibo.it}}
 \maketitle
 
 \begin{abstract}
-There are several distinct ways to represent data drift the in Linked Open Data world. In this paper we introduce the approach for tracking data changes that has been used in the context of the OpenCitations Project. Such approach has been inspired by existing works on change tracking mechanisms in documents created through word-processors such as Microsoft Word and OpenOffice Writer.
+There are several distinct ways to represent data drift in the Linked Open Data world. In this paper we introduce an approach for tracking data changes that has been used in the context of the OpenCitations Project. Such approach has been inspired by existing works on change tracking mechanisms in documents created through word-processors such as Microsoft Word and OpenOffice Writer.
 
 {\bf RASH:} \url{https://w3id.org/oc/paper/occ-driftalod2016.html}
 
@@ -59,39 +61,41 @@ There are several distinct ways to represent data drift the in Linked Open Data 
 
 \section{Introduction}
 
-Data change in time, and the reason for this change can be manyfold. On the one hand, they can have mistakes that are corrected once they are identified, even after the publication date. On the other hand, information (or, better, representations of certain actual situations, like the composition of the government of a country) naturally evolves in time.
+Data change in time, and the reason for this change can be manyfold. On the one hand, they can contain mistakes that are corrected once they are identified, even after the publication date. On the other hand, information (or, better, representations of certain actual situations, like the composition of the government of a country) naturally evolves in time.
 
-RDF technologies (RDF, OWL, SPARQL, etc.) were not originally thought to keep track of such changes natively. Thus, alternative approaches have been proposed in the past years so as to extend such formalisms with a mechanism for adding such additional endeavour, so as to keep track how certain data have changed. The introduction of Named Graphs  \cite{__RefNumPara__17367_1591320820} and the Provenance Ontology (PROV-O)  \cite{__RefNumPara__17349_1591320820} are among the most used and appropriate ways for enabling the description of time-dependent (or, more generally, context-dependent) data. However, there can still exist different ways of keeping track of such changes in time.
+RDF technologies (RDF, OWL, SPARQL, etc.) were not originally thought to keep track of such changes natively. Thus, alternative approaches have been proposed in the past so as to extend such formalisms with mechanisms for adding such additional endeavour. The introduction of Named Graphs  \cite{__RefNumPara__17367_1591320820} and the Provenance Ontology (PROV-O)  \cite{__RefNumPara__17349_1591320820} are among the most used and appropriate ways for enabling the description of time-dependent (or, more generally, context-dependent) data. However, there can still exist different ways of keeping track of such changes in time.
 
-In this paper we introduce the approach for tracking changes in RDF data that has been used in the context of the OpenCitations Project\footnote{\url{http://opencitations.net/}} \cite{__RefNumPara__293_1852566440} \cite{__RefNumPara__17351_1591320820}. The main aim of this project is the creation of an open repository of scholarly citation data -- the OpenCitations Corpus (OCC) -- made available under a Creative Commons public domain dedication\footnote{\url{https://creativecommons.org/publicdomain/zero/1.0/legalcode}} to provide in RDF accurate citation information (bibliographic references) harvested from the scholarly literature. All the entities in the OCC have associated metadata describing its provenance, so as to keep track of the curatorial activities related to each OCC entity, the curatorial agents involved, their roles, and the sources used for retrieving such data. These provenance data are organised in a way that allows us to reconstruct a particular status (or snapshot) of any entity in the OCC at a specified time by using a mechanism inspired by existing works on change tracking mechanisms in documents created through word-processors such as Microsoft Word and OpenOffice Writer.
+In this paper we introduce an approach for tracking changes in RDF data by means of RDF provenance statements, which has been concretely used in the context of the OpenCitations Project\footnote{\url{http://opencitations.net/}} \cite{__RefNumPara__293_1852566440} \cite{__RefNumPara__17351_1591320820}. The main aim of OpenCitations is the creation of an open repository of scholarly citation data -- the OpenCitations Corpus (OCC) -- made available under a Creative Commons public domain dedication\footnote{\url{https://creativecommons.org/publicdomain/zero/1.0/legalcode}} to provide in RDF accurate citation information (bibliographic references) harvested from the scholarly literature. All the entities in the OCC have metadata describing their provenance, so as to keep track of the curatorial activities related to each OCC entity, the curatorial agents involved, their roles, and the sources used for retrieving such data. By means of the extension to the Provenance Ontology (PROV-O)  \cite{__RefNumPara__17349_1591320820} we propose for handling such provenance data (which is one of the contributions of this work), we show how it is possible to reconstruct a particular status (or snapshot) of an entity in the OCC at a specified time by using a mechanism inspired by existing works on change tracking mechanisms in documents created through word-processors such as Microsoft Word and OpenOffice Writer.
 
-The rest of the paper is organised as follows. In Section~\ref{__RefHeading__16806_1591320820} we briefly introduce some possible approaches to keep track of changes of RDF data. In Section~\ref{__RefHeading__16812_1591320820} we describe the approach we propose for addressing such issue, while in Section~\ref{__RefHeading__16814_1591320820} we discuss its application in the context of the OCC. Finally, in Section~\ref{__RefHeading__16816_1591320820} we conclude the paper sketching out some future works.
+The rest of the paper is organised as follows. In Section~\ref{__RefHeading__16806_1591320820} we briefly introduce some possible approaches to keep track of changes of RDF data. In Section~\ref{__RefHeading__16812_1591320820} we describe our approach for addressing such issue, while in Section~\ref{__RefHeading__16814_1591320820} we discuss its application in the context of the OCC. Finally, in Section~\ref{__RefHeading__16816_1591320820} we conclude the paper sketching out some future works.
 
 \section{Approaches to changes}\label{__RefHeading__16806_1591320820}
 
-Two approaches can be used for representing how a particular dataset has evolved in time. On the one hand, we have {\em statement-centric} approaches, that basically provide mechanisms to record how the set of statements in a dataset have evolved by means of simple operation such as addition and deletion. On the other hand, we have {\em resource-centric} approaches, that mainly allow one to say when an instance of a time-dependent class or property (traditionally called {\em anti-rigid} concepts  \cite{__RefNumPara__21031_1591320820}) change its status somehow.
+In the past, several works in the Semantic Web domain have concerned theoretical and practical aspects of change tracking in ontologies and RDF data  \cite{__RefNumPara__2072_1802243057} \cite{__RefNumPara__2076_1802243057} \cite{__RefNumPara__2074_1802243057}. However, the main focus of this paper is not about expanding the theoretical notion of {\em delta} (i.e. the function that defines the changes) nor about discussing algorithms that are able to identify changes between two versions of the same object (e.g. an ontology) {\em a posteriori}. Rather, we are interested in mechanisms (based on RDF) to keep track explicitly of the changes when they happen, so as to reconstruct the whole history of an entity at a given time.
+
+Two approaches can be used for representing how a particular dataset has evolved in time. On the one hand, we have {\em statement-centric} approaches, that basically provide mechanisms to record how the set of statements in a dataset has evolved by means of simple operations such as addition and deletion. On the other hand, we have {\em resource-centric} approaches, that mainly allow one to say when an instance of a time-dependent class or property (traditionally called {\em anti-rigid} concept  \cite{__RefNumPara__21031_1591320820}) changes its status somehow.
 
 There are at least two possible approaches belonging to the first of the aforementioned categories: {\em physical snapshots} and {\em massive statement reification}.
 
-A {\em physical snapshot} of a given LOD dataset is a particular record of all the statements in such dataset at a given time. Using this technique, the tracking of all the changes of the dataset is stored every time one think is appropriate, e.g. every time a statement has been added/modified, after a certain amount of modification to the dataset, after a particular time interval (every week, every month, etc.), and so on. This is a quite common strategy for several LOD datasets available online (such as DBPedia  \cite{__RefNumPara__17502_1591320820}, which makes available versioned datasets as described at \url{http://wiki.dbpedia.org/datasets}), it is quite easy to implement, but one would need of an extraordinary amount of space and time for keeping track of how a dataset has changed, since every snapshot would record the entire dataset at a certain date.
+A {\em physical snapshot} of a given LOD dataset is a particular record of all the statements in such dataset at a given time. Using this technique, the tracking of all the changes of the dataset is stored every time one thinks is appropriate, e.g. every time a statement has been added/modified, after a certain amount of modification to the dataset, after a particular time interval (every week, every month, etc.), and so on. This is a quite common strategy for several LOD datasets available online (such as DBPedia  \cite{__RefNumPara__17502_1591320820}, which makes available versioned datasets as described at \url{http://wiki.dbpedia.org/datasets}), it is quite easy to implement, but one would need extraordinary amounts of space and time for keeping track of how a dataset has changed, since every snapshot would record the entire dataset at a certain date.
 
-The {\em massive statement reification} mechanism requires the creation of additional identifiers (one for each statement), and all of them are, in some way, marked when they have been created/removed and by whom. This kind of approach can be coupled easily with existing models, such as PROV-O  \cite{__RefNumPara__17349_1591320820}, so as to keep track of how a statement has been modified in time -- similarly to what Wikidata\footnote{\url{https://www.wikidata.org/}} \cite{__RefNumPara__17504_1591320820} implements. In this case, the dataset is continuously increasing its size -- since deleted statements are not really removed from the dataset, rather they are marked as deleted -- but it also allows to track every change and to index it according to the time it happened. This is a quite huge advantage, since it would allow to restore any possible status of the dataset by discarding all the modifications happened after a certain date.
+The {\em massive statement reification} mechanism requires the creation of additional identifiers (one for each statement), and all of them are, in some way, marked when they have been created/removed and by whom. This kind of approach can be coupled easily with existing models, such as PROV-O  \cite{__RefNumPara__17349_1591320820}, so as to keep track of how a statement has been modified in time -- similarly to what Wikidata\footnote{\url{https://www.wikidata.org/}} \cite{__RefNumPara__17504_1591320820} implements. In this case, the size of the dataset continuously increases -- since deleted statements are not really removed from the dataset, rather they are marked as deleted. However, such mechanism also allows one to track changes and to index them when they actually happen. This is a quite huge advantage, since it would allow one to restore any possible status of the dataset by discarding all the modifications happened after a certain date.
 
 Among the {\em resource-centric} mechanisms, it is worth mentioning the {\em provenance-centric} and the {\em by-design} approaches, that allow one to record changes of a certain resource, e.g. a particular class or an individual, by means of re-using existing models and without explicitly referring to the set of statements they are involved in. 
 
-An ontology that can be used for addressing the former category is PROV-DC  \cite{__RefNumPara__17595_1591320820}, which can be used to for expressing how entities change in time by means of additional classes and properties added to PROV-O, which now allows the specification of activities such as {\em prov:Create}, {\em prov:Modify}, etc. While this is a valuable and simple approach, it is not easy to understand in a formal way which particular aspect of an entity has actually changed.
+An ontology that can be used for addressing the former category is PROV-DC  \cite{__RefNumPara__17595_1591320820}, which enables expressing how entities change in time by means of additional classes and properties added to PROV-O, which now allows the specification of activities such as {\em prov:Create}, {\em prov:Modify}, etc. While this is a valuable and simple approach, it is not easy to understand in a formal way which particular aspect of an entity has actually changed.
 
-The alternative approaches, i.e. those compliant with the {\em by-design} mechanism, oblige the dataset creator of including, from the very beginning, a finest conceptualisation of the ({\em anti-rigid}) entities that can change in time in the actual ontology she is using for representing the data. A good option here is to use particular ontology design patterns, such as the time-indexed situation pattern\footnote{\url{http://ontologydesignpatterns.org/wiki/Submissions:TimeIndexedSituation}} (that is enough flexible to be reused with different kind of data), or the 4D Fluent OWL ontology  \cite{__RefNumPara__17813_1591320820}. However, if something that now can be modified was not considered as such at the very beginning, it would be possible that part of the ontology used for representing the data (and consequently the data themselves) could be modified accordingly -- wasting time and, potentially, changing the current organisation of the data, thus limiting their reusability in the long term.
+The alternative approaches, i.e. those compliant with the {\em by-design} mechanism, oblige the dataset creator to include, from the very beginning, a finest conceptualisation of the ({\em anti-rigid}) entities that can change in time in the actual ontology she is using for representing the data. A good option here is to use particular ontology design patterns, such as the time-indexed situation pattern\footnote{\url{http://ontologydesignpatterns.org/wiki/Submissions:TimeIndexedSituation}} or the 4D Fluent OWL ontology  \cite{__RefNumPara__17813_1591320820}. However, if something that now can be modified was not considered as such at the very beginning, it would be possible that part of the ontology used for representing the data (and consequently the data themselves) could be modified accordingly -- wasting time and, potentially, changing the current organisation of the data, thus limiting their reusability in the long term.
 
 Both the aforementioned resource-centric mechanisms would allow not to delete permanently any information, rather they would oblige to include the entire history of each entity in the dataset, since they use particular ontological constructs to tell the user when an entity has been created/invalidated, by whom, and so on.
 
 \section{A document-inspired approach to data drift}\label{__RefHeading__16812_1591320820}
 
-The approach we propose readapts a well-known structure for keeping track of changes in word-processor documents, in particular OpenOffice Writer (OOW herein). When an author activate the change tracking plugin in OOW, every insertion and deletion into the document are tracked by using two different mechanisms proper to {\em overlapping markup} theories, called {\em milestone} (for insertions) and {\em stand-off markup} (for deletions)  \cite{__RefNumPara__17979_1591320820}. Milestones allows one to add the new content directly within the existing text, marking it in some way that can be recognisable. Contrarily, stand-off markup removes explicitly a piece of text from the actual content of the document, and places it in an auxiliary space for easy retrieving and, if needed, restoration.
+The approach we propose reuses techniques proper to both statement-centric and resource-centric approaches, taking inspiration from a well-known structure for keeping track of changes in word-processor documents, in particular OpenOffice Writer (OOW herein). When an author activates the change tracking plugin in OOW, every insertion and deletion into the document are tracked by using two different mechanisms proper to {\em overlapping markup} theories, called {\em milestone} (for insertions) and {\em stand-off markup} (for deletions)  \cite{__RefNumPara__17979_1591320820}. Milestones allows one to add the new content directly within the existing text, marking it in some way that can be recognisable. Contrarily, stand-off markup removes explicitly a piece of text from the actual content of the document, and places it in an auxiliary space for easy retrieving and, if needed, restoration.
 
-Following the same principles, we developed a mechanism that allows us to either add or remove new statements directly to the current set of data related to an entity (i.e. the RDF triples that have such entity as subject), while preserving provenance information of such addition/deletion actions in an appropriate contextual space, i.e. the provenance graph associated to such entity. For doing that we leverage the PROV-O  \cite{__RefNumPara__17349_1591320820} ontology, and extend it by adding an additional data property called {\em hasUpdateQuery}, which allows us to record insertions and deletions as SPARQL INSERT and SPARQL DELETE queries.
+Following the same principles, we developed a mechanism that allows us to either add or remove new statements directly to the current set of data related to an entity (i.e. the RDF triples that have such entity as subject, readapting some of the aspects of the approach introduced in  \cite{__RefNumPara__1876_1802243057}), while preserving provenance information of such addition/deletion actions in an appropriate contextual space, i.e. the provenance graph associated to such entity (as also suggested in  \cite{__RefNumPara__2188_1802243057}). For doing that we leverage the PROV-O  \cite{__RefNumPara__17349_1591320820} ontology, and extend it by adding an additional data property called {\em hasUpdateQuery}, which allows us to record insertions and deletions as SPARQL INSERT and SPARQL DELETE queries -- while the use of SPARQL variables is prohibited in the update queries.
 
-The main idea of our approach is that each entity in a dataset (i.e. an instance {\em e} of the class {\em prov:Entity}) is represented by one or more snapshots (other instances {\em e1}, {\em e2}, {\em e3}, ... of {\em prov:Entity}, each intended as specialisation of {\em e} via {\em prov:specializationOf}), each recording the composition of such entity {\em e} (i.e. the statements that have the entity as subject) at a fixed point in time. In addition, each snapshot is linked to the others according to their temporal creation/invalidation by means of the property {\em prov:wasDerivedFrom}. 
+The main idea of our approach is that each entity in a dataset (i.e. an instance {\em e} of the class {\em prov:Entity}) is represented by one or more snapshots (other instances {\em e1}, {\em e2}, {\em e3}, ... of {\em prov:Entity}, each intended as specialisation of {\em e} via {\em prov:specializationOf}). Each snapshot records the composition of the entity {\em e} (i.e. the set of statements using {\em e} as subject) at a fixed point in time. In addition, each snapshot is linked to the others according to their temporal creation/invalidation by means of the property {\em prov:wasDerivedFrom}. 
 
 Please let us introduce a working example for discussing the approach proposed. For instance, let us consider the entity {\em sp} as composed by the following two statements:
 
@@ -103,10 +107,10 @@ Please let us introduce a working example for discussing the approach proposed. 
 The addition of these statements also generates, at least, the following provenance statements, so as to set {\em sp} as a provenance entity, where its statements are implicitly encoded in a specific snapshot:
 
 \begin{lstlisting}[mathescape]
-:entity a prov:Entity .
+:sp a prov:Entity .
 
-:entity-snapshot-1 a prov:Entity ;
-  prov:specializationOf :entity .
+:sp-snapshot-1 a prov:Entity ;
+  prov:specializationOf :sp .
 \end{lstlisting}
 
 Then suppose the curator of such data will decide to split the full name of {\em sp} using two distinct properties, i.e. {\em foaf:givenName} and {\em foaf:familyName}, so as to remove the more generic {\em foaf:name}:
@@ -117,12 +121,12 @@ Then suppose the curator of such data will decide to split the full name of {\em
   foaf:familyName "Peroni" .
 \end{lstlisting}
 
-In this case, a new snapshot of the entity will be generated, which specifies which statements have been added/deleted (by means of the property {\em new:hasUpdateQuery}) starting from the previous snapshot linked through the property {\em prov:wasDerivedFrom}, as shown as follows:
+In this case, a new snapshot of the entity will be generated, which specifies which statements have been added/deleted (by means of the property {\em new:hasUpdateQuery}) starting from the previous snapshot linked through the property {\em prov:wasDerivedFrom}, as follows:
 
 \begin{lstlisting}[mathescape]
-:entity-snapshot-2 a prov:Entity ;
-  prov:specializationOf :entity ;
-  prov:wasDerivedFrom :entity-snapshot-1 ;
+:sp-snapshot-2 a prov:Entity ;
+  prov:specializationOf :sp ;
+  prov:wasDerivedFrom :sp-snapshot-1 ;
   new:hasUpdateQuery "INSERT DATA { :sp foaf:givenName 'Silvio' ; foaf:familyName 'Peroni' } ; DELETE DATA { :sp foaf:name 'Silvio Peroni' }" .
 \end{lstlisting}
 
@@ -132,7 +136,7 @@ Using such snapshot-oriented structure, which clearly indicates how a previous s
 \item restore the entity to a certain snapshot s\textsubscript{i} by applying the inverse operations (i.e. deletions instead of insertions and vice versa) of all the update queries from the most recent snapshot s\textsubscript{n} to s\textsubscript{i+1}.
 \end{itemize}
 
-For instance, to get back to the status recorded by the first snapshot of the aforementioned example, we can just to run all the inverse operations of the update query indicated in the second snapshot, i.e.:
+For instance, to get back to the status recorded by the first snapshot of the aforementioned example, we can run all the inverse operations of the update query specified in the second snapshot, i.e.:
 
 \begin{lstlisting}[mathescape]
 INSERT DATA { :sp foaf:name 'Silvio Peroni' } ;
@@ -141,10 +145,10 @@ DELETE DATA { :sp foaf:givenName 'Silvio' ; foaf:familyName 'Peroni' }
 
 \section{A real application: the OpenCitations Corpus}\label{__RefHeading__16814_1591320820}
 
-The OCC has been accompanied by a formal metadata model  \cite{__RefNumPara__19064_1591320820} which is strictly followed by all the data in the corpus. The metadata model is explicitly aligned with the SPAR Ontologies  \cite{__RefNumPara__19067_1591320820} for expressing the data and to other standard vocabularies, e.g. PROV-O  \cite{__RefNumPara__17349_1591320820} and PROV-DC  \cite{__RefNumPara__17595_1591320820}, for expressing contextual information of entities, such as provenance data. All the ontological entities introduced by the metadata model are conveniently grouped together in the OpenCitations Ontology (OCO)\footnote{\url{http://w3id.org/oc/ontology}}, which also implements the {\em oco:hasUpdateQuery} for keeping track of changes as described in Section~\ref{__RefHeading__16812_1591320820}. The entities included in the corpus can have one of the following types:
+The OCC has been accompanied by a formal metadata model  \cite{__RefNumPara__19064_1591320820} which is strictly followed by all the data in the corpus. The metadata model is explicitly aligned with the SPAR Ontologies  \cite{__RefNumPara__19067_1591320820} for expressing the data and to other standard vocabularies, e.g. PROV-O  \cite{__RefNumPara__17349_1591320820} and PROV-DC  \cite{__RefNumPara__17595_1591320820}, for expressing contextual information of entities, such as provenance information. All the ontological entities introduced by the metadata model are conveniently grouped together in the OpenCitations Ontology (OCO)\footnote{\url{http://w3id.org/oc/ontology}}, which also implements the {\em oco:hasUpdateQuery} for keeping track of changes as described in Section~\ref{__RefHeading__16812_1591320820}\textsuperscript{,}\footnote{We have not specify any formal domain and range for this property so as to foster its reuse in different contexts. However, in the OpenCitations Corpus, it has been used implicitly on \Verb+prov:Entity+ individuals, each referring to a particular snapshot of a certain OCC bibliographic entity.}. The entities included in the corpus can have one of the following types:
 \begin{itemize}
-\item {\bf bibliographic resource} (br), class \Verb+fabio:Expression+ -- a resource that either cites or is cited by other bibliographic resources (e.g. journal articles), or that contains such citing/cited resources (e.g. journals);
-\item {\bf resource embodiment} (re), class \Verb+fabio:Manifestation+ -- details of the physical or digital form in which the bibliographic resource is made available by their publishers;
+\item {\bf bibliographic resource} (br), class \Verb+fabio:Expression+ -- a resource that either cites or is cited by other bibliographic resources (e.g. journal articles), or that contains such citing/cited resources (e.g. a journal);
+\item {\bf resource embodiment} (re), class \Verb+fabio:Manifestation+ -- details of the physical or digital form in which the bibliographic resource is made available by its publisher;
 \item {\bf bibliographic entry} (be), class \Verb+biro:BibliographicReference+ -- the literal textual bibliographic entry occurring in the reference lists within the bibliographic resource, that references another bibliographic resource;
 \item {\bf responsible agent} (ra), class \Verb+foaf:Agent+ -- an agent having certain roles with respect to the bibliographic resource;
 \item {\bf agent role} (ar), class \Verb+pro:RoleInTime+ -- a role held by an agent with respect to the bibliographic resource (e.g. author, editor, publisher);
@@ -156,17 +160,17 @@ Each OCC entity is identified by a URL (e.g. \url{https://w3id.org/oc/corpus/br/
 \item {\em snapshot of entity metadata} (short: {\em se}) -- a particular snapshot recording the metadata associated with an individual entity at a particular time;.
 \item {\em curatorial activity} (short: {\em ca}) -- a curatorial activity relating to that entity, where possible activities are:
 \begin{enumerate}
-\item creation, i.e. the activity of creating a new entity and of associating new metadata with it, within the corpus;
-\item modification, i.e. the activity of modifying (adding/removing) the metadata associated with an existing entity, or even of deprecating the entire entity;
-\item merging, i.e. the activity of unifying the metadata relating to two different OCC bibliographic entity descriptions, if they actually represent the same thing. This can result in the deprecation of one of the corpus entries in favour of the other one.
+\item creation, i.e. the activity of creating a new entity and of associating new metadata with it;
+\item modification, i.e. the activity of modifying (adding/removing) the metadata associated with an existing entity, or even of deprecating the entire entity; 
+\item merging, i.e. the activity of unifying the metadata relating to two different OCC bibliographic entity descriptions, if they actually represent the same thing. This can result in the deprecation of one of the corpus entities in favour of the other one. 
 \end{enumerate}
-\item {\em provenance agent} (short: {\em pa}) -- the agent, such as a person, organisation or process, that creates or modifies entity metadata, or that is used as source provider of those metadata (e.g. Crossref);
-\item {\em curatorial role} (short: {\em cr}) -- a particular role held by a provenance agent with respect to a curatorial activity (e.g. OCC curator, metadata source).
+\item {\em provenance agent} (short: {\em pa}) -- the agent, such as a person, organisation or process, that creates or modifies entity metadata, or that is used as source provider of those metadata (e.g. Crossref); 
+\item {\em curatorial role} (short: {\em cr}) -- a particular role held by a provenance agent with respect to a curatorial activity (e.g. OCC curator, metadata source). 
 \end{itemize}
 
-All these information are stored in the provenance graph related to the particular entity in consideration. The URL of such provenance graph is the URL of the entity in consideration plus ``/prov/''. The URL of all the aforementioned provenance entities (e.g. \url{https://w3id.org/oc/corpus/br/525205/prov/se/1}) is built using the provenance graph as base and adding two-letter short name for the class of such provenance entity (e.g. ``se'' for snapshot of entity metadata) and the number (e.g. ``1'') that uniquely identifies it among the resources of the same type in the context of that particular provenance graph. An exception to that URL template is provided for all the provenance agents, that are shared among the whole corpus and, thus, they have \url{https://w3id.org/oc/corpus/prov/pa/} as base URL (e.g. \url{https://w3id.org/oc/corpus/prov/pa/1}). 
+All this information is stored in the provenance graph related to the particular OCC entity in consideration. The URL of such provenance graph is the URL of the entity in consideration plus ``/prov/''. The URL of all the aforementioned provenance entities (e.g. \url{https://w3id.org/oc/corpus/br/525205/prov/se/1}) is built using the provenance graph as base and adding two-letter short name for the class of such provenance entity (e.g. ``se'' for snapshot of entity metadata) plus ``/'' plus the number (e.g. ``1'') that uniquely identifies it among the resources of the same type in the context of that particular provenance graph. An exception to that URL template is provided for all the provenance agents that are shared among the whole corpus and, thus, that have \url{https://w3id.org/oc/corpus/prov/pa/} as base URL (e.g. \url{https://w3id.org/oc/corpus/prov/pa/1}). 
 
-As an example, let us discuss the provenance statements added during the creation and modification of \url{https://w3id.org/oc/corpus/br/525205} -- that are all accessible online. After the creation, the following statements are added to the corpus:
+As an example, let us discuss the provenance statements added during the creation and modification of \url{https://w3id.org/oc/corpus/br/525205} -- that are all available online. After the creation, the following statements are added to the corpus:
 
 \begin{lstlisting}[mathescape]
 # Snapshot of entity metadata
@@ -203,10 +207,10 @@ As an example, let us discuss the provenance statements added during the creatio
 
 <https://w3id.org/oc/corpus/prov/pa/2> a prov:Agent ;
   rdfs:label "provenance agent 2 [pa/2]" ;
-  ns1:name "Crossref" .
+  foaf:name "Crossref" .
 \end{lstlisting}
 
-Basically, the first snapshot of the resource \Verb+br/525205+ has been created on August 8, 2016, at 22:25:48 (property {\em prov:generatedAtTime}), starting from the data retrieved in the source document \url{http://api.crossref.org/works/10.2196/mhealth.5331} (property {\em prov:hadPrimarySource}). The activity that generates the data of \Verb+br/525205+ (property {\em prov:wasGeneratedBy}) was a creation activity (class {\em prov:Create}) that involved (property {\em prov:qualifiedAssociation}) two agents (referred by the property {\em prov:agent}), i.e. SPACIN CrossrefProcessor (that is one of the automatic scripts of OpenCitations responsible for the creation of RDF data) and Crossref, as OCC curator and source metadata provider respectively.
+Basically, the first snapshot of the resource \Verb+br/525205+ has been created on August 8, 2016, at 22:25:48 (property {\em prov:generatedAtTime}), starting from the data contained in the source document \url{http://api.crossref.org/works/10.2196/mhealth.5331} (property {\em prov:hadPrimarySource}). The activity that generated the data of \Verb+br/525205+ (property {\em prov:wasGeneratedBy}) was a creation (class {\em prov:Create}) that involved (property {\em prov:qualifiedAssociation}) two agents (referred by the property {\em prov:agent}), i.e. SPACIN CrossrefProcessor (that is one of the automatic scripts of OpenCitations responsible for the creation of RDF data) and Crossref, as OCC curator and source metadata provider respectively.
 
 Then, few days after its creation, the resource \Verb+br/525205+ has been extended with additional data concerning its citation links to other bibliographic resources, as well as the completion of the full textual references it includes. The following provenance statements have been, thus, generated:
 
@@ -216,7 +220,7 @@ Then, few days after its creation, the resource \Verb+br/525205+ has been extend
   prov:invalidatedAtTime "2016-08-29T22:42:06"^^xsd:dateTime ;
   prov:wasInvalidatedBy <https://w3id.org/oc/corpus/br/525205/prov/ca/2> .
 
-# ... and it was substituted by a new one
+# ... and it has been substituted by a new one
 <https://w3id.org/oc/corpus/br/525205/prov/se/2> a prov:Entity ;
   rdfs:label "snapshot of entity metadata 2 related to bibliographic resource 525205 [se/2 -> br/525205]" ;
   prov:generatedAtTime "2016-08-29T22:42:06"^^xsd:dateTime ;
@@ -246,26 +250,31 @@ Then, few days after its creation, the resource \Verb+br/525205+ has been extend
   prov:hadRole oco:source-metadata-provider .
 \end{lstlisting}
 
-The new snapshot has substituted the previous one (properties {\em prov:invalidatedAtTime} and {\em prov:wasInvalidatedBy}) by updating the information about the resource \Verb+br/525205+ with those indicated by the property {\em oco:hasUpdateQuery}. The new snapshot has been created by a particular modification activity (class {\em prov:Modify}) that involved the same agents with the same roles as before.
+The new snapshot has substituted the previous one (properties {\em prov:invalidated} {\em AtTime} and {\em prov:wasInvalidatedBy}) by updating the information about the resource \Verb+br/525205+ with the update query specified (property {\em oco:hasUpdateQuery}). The new snapshot has been created by a particular modification activity (class {\em prov:Modify}) that involved the same agents with the same roles as before.
 
 \section{Conclusions}\label{__RefHeading__16816_1591320820}
 
-In this paper we have introduced a new approach for keeping track of changes in RDF data and, consequently, in LOD datasets. The method proposed is actually derived from existing techniques applied to the Document Engineering domain for addressing similar issues. We have also described as this approach has been implemented within the OpenCitations Project, and it is used as the main mechanism for providing a complete history of how the entities in the OpenCitations Corpus have evolved in time. In the future, we plan to develop automatic tools that allow us to restore a particular snapshot of an entity by looking at its provenance information only, so as to facilitate the restoration of entities at a particular time.
+In this paper we have introduced an approach for keeping track of changes in RDF data and, consequently, in LOD datasets. The method proposed is actually derived from existing techniques applied to the Document Engineering domain for addressing similar issues. We have also described the use of this approach within the OpenCitations Project as the main mechanism for providing a complete history of how the entities in the OpenCitations Corpus have evolved in time. In the future, we plan to develop automatic tools that allow us to restore a particular snapshot of an entity by looking at its provenance information only, so as to facilitate the restoration of entities at a particular time.
 
 \begin{thebibliography}{4}
 
+\bibitem{__RefNumPara__1876_1802243057} Berners-Lee, T., Connolly, D. (2015). Delta: An Ontology for the Distribution of Differences Between RDF Graphs. \url{https://www.w3.org/DesignIssues/Diff}
 \bibitem{__RefNumPara__17367_1591320820} Carroll, J. J., Bizer, C., Hayes, P., \& Stickler, P. (2005). Named graphs. Web Semantics: Science, Services and Agents on the World Wide Web, 3(4): 247--267. \url{http://dx.doi.org/10.1016/j.websem.2005.09.001}
+\bibitem{__RefNumPara__2188_1802243057} Ding, L., Peng Y., da Silva, P. P., McGuinness, D. L. (2005). Tracking RDF Graph Provenance using RDF Molecules. Technical report. \url{http://ebiquity.umbc.edu/get/a/publication/178.pdf}
 \bibitem{__RefNumPara__17595_1591320820} Garijo, D., Eckert, K. (2013). Dublin Core to PROV Mapping. W3C Working Group Note, 30 April 2013. \url{https://www.w3.org/TR/prov-dc/}
 \bibitem{__RefNumPara__21031_1591320820} Guarino, N., Welty, C. A. (2009). An Overview of OntoClean. In Handbook on Ontologies: 201--220. Berlin, Germany: Springer. ISBN: 978-3-540-70999-2
 \bibitem{__RefNumPara__17349_1591320820} Lebo, T., Sahoo, S., McGuinness, D. (2013). PROV-O: The PROV Ontology. W3C Recommendation, 30 April 2013. World Wide Web Consortium. \url{http://www.w3.org/TR/prov-o/}
 \bibitem{__RefNumPara__17502_1591320820} Lehmann, J., Isele, R., Jakob, M., Jentzsch, A., Kontokostas, D., Mendes, P. N., Hellmann, S., Morsey, M., van Kleef, P., Auer, S., Bizer, C. (2015). DBpedia - A large-scale, multilingual knowledge base extracted from Wikipedia. Semantic Web, 6 (2): 167--195. \url{http://dx.doi.org/10.3233/SW-140134}
+\bibitem{__RefNumPara__2072_1802243057} Noy, N. F., Kunnatur, S., Klein, M. C. A., Musen, M. A. (2004). Tracking Changes During Ontology Evolution. In Proceedings of ISWC 2004: 259--273. \url{http://dx.doi.org/10.1007/978-3-540-30475-3\_19}
 \bibitem{__RefNumPara__19067_1591320820} Peroni, S. (2014). The Semantic Publishing and Referencing Ontologies. In Semantic Web Technologies and Legal Scholarly Publishing: 121--193. \url{http://dx.doi.org/10.1007/978-3-319-04777-5\_5}
 \bibitem{__RefNumPara__293_1852566440} Peroni, S., Dutton, A., Gray, T., Shotton, D. (2015). Setting our bibliographic references free: towards open citation data. Journal of Documentation, 71 (2): 253--277. \url{http://dx.doi.org/10.1108/JD-12-2013-0166}
 \bibitem{__RefNumPara__17979_1591320820} Peroni, S., Poggi, F., Vitali, F. (2014). Overlapproaches in documents: a definitive classification (in OWL, 2!). In Proceedings of Balisage 2014. \url{http://dx.doi.org/10.4242/BalisageVol13.Peroni01}
 \bibitem{__RefNumPara__19064_1591320820} Peroni, S., Shotton, D. (2016). Metadata for the OpenCitations Corpus. Figshare. \url{https://dx.doi.org/10.6084/m9.figshare.3443876}
 \bibitem{__RefNumPara__17351_1591320820} Peroni, S., Shotton, D., Vitali, F. (2016). Freedom for bibliographic references: OpenCitations arise. To appear in Proceedings of 2016 International Workshop on Linked Data for Information Extraction (LD4IE 2016). \url{https://w3id.org/oc/paper/occ-lisc2016.html}
 \bibitem{__RefNumPara__17504_1591320820} Vrandecic, D., Krötzsch, M. (2014). Wikidata: a free collaborative knowledge base. Communication of the ACM, 57 (10): 78--85. \url{http://dx.doi.org/10.1145/2629489}
+\bibitem{__RefNumPara__2074_1802243057} Völkel, M., Groza, T. (2006). SemVersion: RDF-based ontology versioning system. In Proceedings of the IADIS WWW/Internet 2006. 
 \bibitem{__RefNumPara__17813_1591320820} Welty, C. A., Fikes, R. (2006). A Reusable Ontology for Fluents in OWL. In Proceedings of FOIS 2006: 226--236.
+\bibitem{__RefNumPara__2076_1802243057} Zeginis, D., Tzitzikas, Y., Christophides, V. (2007). On the Foundations of Computing Deltas Between RDF Models. In Proceedings of ISWC/ASWC 2007: 637--651. \url{http://dx.doi.org/10.1007/978-3-540-76298-0\_46}
 
 \end{thebibliography}
 

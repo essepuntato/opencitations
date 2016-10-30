@@ -6,7 +6,7 @@
 \usepackage{mathtools}
 \usepackage{tabularx}
 \usepackage{fixltx2e}
-\usepackage{hyperref}
+\PassOptionsToPackage{hyphens}{url}\usepackage{hyperref}
 \usepackage[hyphens]{url}
 \usepackage{upquote,textcomp}
 \lstset{breaklines=true, basicstyle=\scriptsize\ttfamily, upquote=true}
@@ -21,8 +21,9 @@
 \makeatother
 
 \usepackage{amsmath}
-\usepackage{color,graphics,array,csscolor}
 \usepackage{pmml-new}
+
+\usepackage{color,graphics,array,csscolor}
 
 \usepackage{fontspec,unicode-math}
 \usepackage[Latin,Greek]{ucharclasses}
@@ -30,7 +31,7 @@
 
 \usepackage{subscript}
 \lstset{breaklines=true, basicstyle=\scriptsize\ttfamily}
-\usepackage[margin=1.71in]{geometry}
+\usepackage[margin=1.64in]{geometry}
 
 \begin{document}
 \mainmatter
@@ -53,19 +54,19 @@ In this demo paper we introduce SPACIN, one of the main tools used in the OpenCi
 
 {\bf RASH:} \url{https://w3id.org/oc/paper/spacin-demo-ekaw2016.html}
 
-\keywords{OCC, OpenCitations, OpenCitations Corpus, SPAR Ontologies, Semantic Publishing, citation database}
+\keywords{OCC, OpenCitations, OpenCitations Corpus,\\ SPAR Ontologies, Semantic Publishing, citation database}
 \end{abstract}
 
 
 \section{Introduction}
 
-The OpenCitations Project (\url{http://opencitations.net})  \cite{__RefNumPara__293_1852566440} has recently created a new instantiation of its open citations database, with an integrated SPARQL endpoint\footnote{\url{https://w3id.org/oc/sparql}} and a browsing interface to support data consumers  \cite{__RefNumPara__14780_1591320820}. This database, the OpenCitations Corpus (OCC), is an open repository of scholarly citation data made available under a Creative Commons public domain dedication (CC0)\footnote{\url{https://creativecommons.org/publicdomain/zero/1.0/legalcode}}, which provides accurate bibliographic references harvested from the scholarly literature, that others may freely build upon, enhance and reuse for any purpose, without restriction under copyright or database law. The OCC is evolving dynamically in time, since new articles are continuously gathered (and then processed).
+The OpenCitations Project (\url{http://opencitations.net})  \cite{__RefNumPara__293_1852566440} has recently created a new instantiation of its citation database, with an integrated SPARQL endpoint\footnote{\url{https://w3id.org/oc/sparql}} and a browsing interface to support data consumers  \cite{__RefNumPara__14780_1591320820}. This database, the OpenCitations Corpus (OCC), is an open repository of scholarly citation data made available under a Creative Commons public domain dedication (CC0)\footnote{\url{https://creativecommons.org/publicdomain/zero/1.0/legalcode}}, which provides accurate bibliographic references harvested from the scholarly literature, that others may freely build upon, enhance and reuse for any purpose, without restriction under copyright or database law -- e.g. Wikidata\footnote{\url{http://wikidata.org/}} has already started to use OCC for enriching the description of scholarly papers. The OCC is evolving dynamically in time, since new articles are continuously gathered (and then processed), and it enables the creation of incoming and outgoing links easily by means of the format used to store all the data, i.e. RDF.
 
-In this demo paper we introduce the {\em SPAR Citation Indexer}, or {\em SPACIN}, which is the primary mechanisms used in OpenCitations for producing all the data included in the OCC. In particular, we show which kind of input SPACIN is able to process, what kind of RDF data it produces, and what are the ontologies SPACIN uses for describing such data. All the code of OpenCitations, including SPACIN, is released with an ISC license\footnote{\url{https://opensource.org/licenses/ISC}} and, thus, can be freely reused in different context and according to different purposes.
+In this demo paper we introduce the {\em SPAR Citation Indexer}, or {\em SPACIN}, which is the primary mechanisms used in OpenCitations for producing all the data included in the OCC. In particular, we show which kind of input SPACIN is able to process, what kinds of RDF data it produces, and what are the ontologies SPACIN uses for describing such data. All the code of OpenCitations, including SPACIN, is released with an ISC license\footnote{\url{https://opensource.org/licenses/ISC}} and, thus, can be freely reused in different context and according to different purposes.
 
 \section{The SPAR Citation Indexer}
 
-The {\em SPAR Citation Indexer}, a.k.a. {\em SPACIN}, is a script and a series of Python classes that allow one to process particular JSON files containing the bibliographic reference lists of papers, produced by another script included in the OpenCitations GitHub repository\footnote{\url{https://github.com/essepuntato/opencitations}} by querying the Europe PubMed Central API\footnote{\url{https://europepmc.org/RestfulWebService}}. An excerpt of an input JSON file used by SPACIN is introduced as follows:
+The {\em SPAR Citation Indexer}, a.k.a. {\em SPACIN}, is a script and a series of Python classes that allow one to process particular JSON files containing the bibliographic reference lists of papers, produced by another script included in the OpenCitations GitHub repository\footnote{\url{https://github.com/essepuntato/opencitations}} that retrieves such lists by querying the Europe PubMed Central API\footnote{\url{https://europepmc.org/RestfulWebService}}. An excerpt of an input JSON file used by SPACIN is introduced as follows:
 
 \begin{lstlisting}[mathescape]
 {
@@ -79,16 +80,16 @@ The {\em SPAR Citation Indexer}, a.k.a. {\em SPACIN}, is a script and a series o
 }
 \end{lstlisting}
 
-SPACIN processes such JSON files and retrieves additional metadata information about all the citing/cited articles described in it by querying the Crossref API\footnote{\url{http://api.crossref.org/}} and the ORCID API\footnote{\url{http://members.orcid.org/api/}}. These API are also used to disambiguate bibliographic resources and agents by means of the identifiers retrieved (e.g., DOI, ISSN, ISBN, ORCID, URL, and Crossref member URL). Once SPACIN has retrieved all these metadata, appropriate RDF resources are created (or reused, if they have been already added in the past) and stored in the file system in JSON-LD format and, additionally, within the triplestore (via SPARQL UPDATE protocol) specified by the variable {\em triplestore\_url} in the file {\em conf\_spacin.py}.
+SPACIN processes such JSON files and retrieves additional metadata information about all the citing/cited articles by querying the Crossref API\footnote{\url{http://api.crossref.org/}} and the ORCID API\footnote{\url{http://members.orcid.org/api/}}. These API are also used to disambiguate bibliographic resources and agents by means of the identifiers retrieved (e.g., DOI, ISSN, ISBN, ORCID, URL, and Crossref member URL). Once SPACIN has retrieved all these metadata, RDF resources are created (or reused, if they have been already added in the past) and stored in the file system in JSON-LD format. In addition, they are also uploaded to the triplestore (via SPARQL UPDATE protocol) specified by the variable {\em triplestore\_url} in the file {\em conf\_spacin.py}.
 
-SPACIN stores all the metadata relevant to bibliographic entities by using the OCC metadata model  \cite{__RefNumPara__14748_1591320820} summarised in Fig.~\ref{refIllustration0}. The ontological terms of such metadata model are collected within an ontology called the OpenCitations Ontology (OCO)\footnote{\url{https://w3id.org/oc/ontology}}, which includes several terms from the SPAR Ontologies\footnote{\url{http://www.sparontologies.net/}} \cite{__RefNumPara__17_1852566440} and other standard vocabularies. In particular, the following six bibliographic entity types occur in any dataset created by SPACIN:
+SPACIN stores all the metadata relevant to bibliographic entities by using the OCC metadata model  \cite{__RefNumPara__14748_1591320820} summarised in Fig.~\ref{refIllustration0}. The ontological terms of such metadata model are collected within an ontology called the OpenCitations Ontology (OCO)\footnote{\url{https://w3id.org/oc/ontology}}, which includes several terms from the SPAR Ontologies\footnote{\url{http://www.sparontologies.net/}} \cite{__RefNumPara__17_1852566440} and other vocabularies. In particular, the following six bibliographic entity types occur in the datasets created by SPACIN:
 \begin{itemize}
 \item {\bf bibliographic resources} (br), class \Verb+fabio:Expression+ -- resources that either cite or are cited by other bibliographic resources (e.g. journal articles), or that contain such citing/cited resources (e.g. journals);
 \item {\bf resource embodiments} (re), class \Verb+fabio:Manifestation+ -- details of the physical or digital forms in which the bibliographic resources are made available by their publishers;
-\item {\bf bibliographic entries} (be), class \Verb+biro:BibliographicReference+ -- the literal textual bibliographic entries occurring in the reference lists within the bibliographic resources, that reference other bibliographic resources;
+\item {\bf bibliographic entries} (be), class \Verb+biro:BibliographicReference+ -- literal textual bibliographic entries occurring in the reference lists of bibliographic resources;
 \item {\bf responsible agents} (ra), class \Verb+foaf:Agent+ -- names of agents having certain roles with respect to the bibliographic resources (i.e. names of authors, editors, publishers, etc.);
 \item {\bf agent roles} (ar), class \Verb+pro:RoleInTime+ -- roles held by agents with respect to the bibliographic resources (e.g. author, editor, publisher);
-\item {\bf identifiers} (id) (class \Verb+datacite:Identifier+) -- external identifiers (e.g. DOI, ORCID, PubMedID) associated with the bibliographic entities.
+\item {\bf identifiers} (id) (class \Verb+datacite:Identifier+) -- external identifiers (e.g. DOI, ORCID, PubMedID) associated to bibliographic resources and agents.
 \end{itemize}
 \begin{figure}[h!]
 \centering
@@ -104,9 +105,9 @@ Upon initial curation by SPACIN, a URL is assigned to each entity, according to 
 [corpus URL] + [sub-dataset ID] + / + [entity ID]
 \end{lstlisting}
 
-The \Verb+corpus URL+ (which is \url{https://w3id.org/oc/corpus/} for the OCC) identifies the entire dataset one is creating. It is possible to set it up by modifying the variable {\em base\_iri} specified in the {\em conf\_spacin.py} file in the GitHub repository. The \Verb+sub-dataset ID+ is the two-letter short name for the class of items we are taking into consideration (e.g. ``br'' for bibliographic references), while the \Verb+entity ID+ is a number that identifies a particular item that is unique among resources of the same type. For instance, the entity \url{https://w3id.org/oc/corpus/br/525205} in the OCC identifies the 525,205\textsuperscript{th} bibliographic resource stored by SPACIN -- where the two-letter short name for the class of items plus ``/'' plus the number (``br/525205'' in the example) is called the internal {\em corpus identifier}, since it allows the unique identification of any entity within the dataset one is building by means of SPACIN.
+The \Verb+corpus URL+ (which is \url{https://w3id.org/oc/corpus/} for the OCC) identifies the entire dataset one is creating. It is possible to set it up by modifying the variable {\em base\_iri} specified in the {\em conf\_spacin.py} file in the GitHub repository. The \Verb+sub-dataset ID+ is the two-letter short name for the class of items we are taking into consideration (e.g. ``br'' for bibliographic references), while the \Verb+entity ID+ is a number that identifies a particular item that is unique among resources of the same type. For instance, the entity \url{https://w3id.org/oc/corpus/br/525205} in the OCC identifies the 525,205\textsuperscript{th} bibliographic resource stored by SPACIN -- where the two-letter short name for the class of items plus ``/'' plus the number (``br/525205'' in the example) is called {\em corpus identifier}, since it allows the unique identification of any entity within the dataset one is building by means of SPACIN.
 
-Each of the entities created by SPACIN has associated metadata describing its provenance using the PROV-O\footnote{\url{https://www.w3.org/TR/prov-o/}} ontology and its PROV-DC extension\footnote{\url{https://www.w3.org/TR/prov-dc/}} (e.g. \url{https://w3id.org/oc/corpus/br/525205/prov/se/1} in the OCC). In particular, SPACIN stores information about the curatorial activities related to each entity, the curatorial agents involved, and their roles. 
+Each of the entities created by SPACIN is associated with metadata describing its provenance using the PROV-O\footnote{\url{https://www.w3.org/TR/prov-o/}} ontology and its PROV-DC extension\footnote{\url{https://www.w3.org/TR/prov-dc/}} (e.g. \url{https://w3id.org/oc/corpus/br/525205/prov/se/1} in the OCC). In particular, SPACIN stores information about the curatorial activities related to each entity, the curatorial agents involved, and their roles. 
 
 All these RDF data are stored in BibJSON\footnote{\url{http://okfnlabs.org/bibjson/}} encoded as JSON-LD, defined through an appropriate JSON-LD context\footnote{\url{https://w3id.org/oc/corpus/context.json}} which hides the complexity of the model (shown in Fig.~\ref{refIllustration0}) behind natural language keywords. For instance, the following excerpt is the JSON-LD linearisation of the aforementioned ``br/525205'' entity:
 
@@ -123,13 +124,13 @@ All these RDF data are stored in BibJSON\footnote{\url{http://okfnlabs.org/bibjs
 }
 \end{lstlisting}
 
-In this excerpt, ``iri'' defines the URL of the resource in consideration (where ``gbr:'' is a prefix for \url{https://w3id.org/oc/corpus/br/}), while a\Verb+,+\Verb+label+, \Verb+title+, \Verb+year+, \Verb+part+\_of, \Verb+reference+, \Verb+citation+, \Verb+format+, \Verb+contributor+, and \Verb+identifier+ stand for \Verb+rdf:type+, \Verb+rdfs:label+, \Verb+dcterms:title+, \Verb+fabio:hasPublicationYear+, \Verb+frbr:partOf+, \Verb+biro:references+, \Verb+cito:cites+, \Verb+frbr:embodiment+, and \Verb+c4o:is+ \Verb+DocumentContextFor+, \Verb+datacite:hasidentifier+ respectively (where ``gbe:'' is a prefix for \url{https://w3id.org/oc/corpus/be/}, ``gre:'' for \url{https://w3id.org/oc/corpus/re/}, and ``gid:'' for \url{https://w3id.org/oc/corpus/id/}).
+In this excerpt, ``iri'' defines the URL of the resource in consideration (where ``gbr:'' is a prefix for \url{https://w3id.org/oc/corpus/br/}), while \Verb+a+, \Verb+label+, \Verb+title+, \Verb+year+, \Verb+part_of+, \Verb+reference+, \Verb+citation+, \Verb+format+, \Verb+contributor+, and \Verb+identifier+ stand for \Verb+rdf:type+, \Verb+rdfs:label+, \Verb+dcterms:title+, \Verb+fabio:hasPublicationYear+, \Verb+frbr:+ \Verb+partOf+, \Verb+biro:references+, \Verb+cito:cites+, \Verb+frbr:embodiment+, \Verb+c4o:isDocumentCon+ \Verb+textFor+, and \Verb+datacite:hasIdentifier+ respectively (where ``gbe:'' is a prefix for \url{https://w3id.org/oc/corpus/be/}, ``gre:'' for \url{https://w3id.org/oc/corpus/re/}, and ``gid:'' for \url{https://w3id.org/oc/corpus/id/}).
 
-Additional information about SPACIN stores of citation data, and the way they are represented in RDF, are detailed in the OCC Metadata Document  \cite{__RefNumPara__14748_1591320820}.
+Additional information about how SPACIN stores citation data, and the way they are represented in RDF, are detailed in the OCC Metadata Document  \cite{__RefNumPara__14748_1591320820}.
 
 \section{Conclusions}
 
-In this paper we have introduced SPACIN, the SPAR Citation Indexer, that is a tool for creating RDF-based citation data starting from information made available by trusty sources, such as Europe PubMed Central, Crossref, and ORCID. In the future, we plan to extend SPACIN for enabling the parallel execution of multiple instances of such script, so as to increase the number of new bibliographic entities created by SPACIN each day -- which currently is around 20,000 new citing/cited bibliographic resources, according to the statistic data related with the OCC.
+In this paper we have introduced SPACIN, the SPAR Citation Indexer, that is a tool for creating RDF-based citation data starting from information made available by trusty sources, such as Europe PubMed Central, Crossref, and ORCID. In the future, we plan to extend SPACIN for enabling the parallel execution of multiple instances of such script, so as to increase the number of new bibliographic entities created by SPACIN each day -- which currently is around 20,000 new citing/cited bibliographic resources, according to the statistics related with the OCC.
 
 \begin{thebibliography}{4}
 
