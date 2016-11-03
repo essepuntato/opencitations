@@ -50,8 +50,9 @@ if __name__ == "__main__":
                     se_generated_by = cur_graph["generated_by"]
                     
                     for ca_item in cur_ca["@graph"]:
-                        if se_generated_by == ca_item["@graph"]["iri"]:
-                            for desc in ca_item["@graph"]["description"]:
+                        cur_ca_graph = ca_item["@graph"][0]
+                        if se_generated_by == cur_ca_graph["iri"]:
+                            for desc in cur_ca_graph["description"]:
                                 if "citation data and new identifiers" in desc:
                                     sen_string += " [CIT+ID]"
                                 elif "citation data" in desc:
