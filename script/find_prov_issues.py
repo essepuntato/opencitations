@@ -44,6 +44,11 @@ if __name__ == "__main__":
                 cur_graph = item["@graph"][0]
                 generated = cur_graph["generated"]
                 if isinstance(generated, list) and len(generated) > 1:
-                    rep.add_sentence(cur_graph["iri"] + " [%s]" % str(len(generated)))
+                    sen_string = cur_graph["iri"] + " [%s]" % str(len(generated))
+                    if "datacite/hasIdentifier" in cur_graph["update_action"]:
+                        sen_string += " [ID]"
+                    if "cito/cites" in cur_graph["update_action"]:
+                        sen_string += " [CIT]"
+                    rep.add_sentence(sen_string)
 
     rep.write_file(args.o_file)
