@@ -37,18 +37,29 @@ if __name__ == "__main__":
     
     for cur_dir in glob.glob(args.i_dir + os.sep + "[0-9]*/[0-9]*/prov/"):
         se_file = cur_dir + os.sep + "se.json"
+        ca_file = cur_dir + os.sep + "ca.json"
         
-        with open(se_file) as f:
-            cur_json = json.load(f)
-            for item in cur_json["@graph"]:
+        with open(se_file) as f, open(ca_file) as g:
+            cur_se = json.load(f)
+            cur_ca = json.load(g)
+            for item in cur_se["@graph"]:
                 cur_graph = item["@graph"][0]
                 generated = cur_graph["generated"]
                 if isinstance(generated, list) and len(generated) > 1:
                     sen_string = cur_graph["iri"] + " [%s]" % str(len(generated))
-                    if "datacite/hasIdentifier" in cur_graph["update_action"]:
-                        sen_string += " [ID]"
-                    if "cito/cites" in cur_graph["update_action"]:
-                        sen_string += " [CIT]"
+                    se_generated_by = cur_graph["generated_by"]
+                    
+                    for ca_item in cur_ca["@graph"]:
+                        if se_generated_by == ca_item["@graph"]["iri"]:
+                            for desc in ca_item["@graph"]["description"]:
+                                if "citation data and new identifiers" in desc:
+                                    sen_string += " [CIT+ID]"
+                                elif "citation data" in desc:
+                                    sen_string += " [CIT]"
+                                elif "new identifiers" in desc:
+                                    sen_string += " [ID]"
+                            break
+
                     rep.add_sentence(sen_string)
 
     rep.write_file(args.o_file)
