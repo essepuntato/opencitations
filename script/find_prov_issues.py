@@ -28,29 +28,22 @@ if __name__ == "__main__":
         description="This script allows one to identify the provenance item ids that have some issues.")
     arg_parser.add_argument("-i", "--input_dir", dest="i_dir", required=True,
                             help="The id directory where to look for issues.")
-    arg_parser.add_argument("-m", "--max_dir", dest="m_dir", required=True,
-                            help="The max number of dir in well-formed files.")
     arg_parser.add_argument("-o", "--output_file", dest="o_file", required=True,
                             help="The file where to write the results.")
     args = arg_parser.parse_args()
     
-    max_dir = int(args.m_dir)
     rep = Reporter(True)
     rep.new_article()
     
-    for cur_dir in glob.glob(args.i_dir + os.sep + "[0-9]*/"):
-        cur_subdirs = glob.glob(cur_dir + os.sep + "[0-9]*/")
-        if len(cur_subdirs) > max_dir:
-            for cur_subdir in cur_subdirs:
-                prov_dir = cur_subdir + os.sep + "prov" + os.sep
-                se_file = prov_dir + "se.json"
-                
-                with open(se_file) as f:
-                    cur_json = json.load(f)
-                    for item in cur_json["@graph"]:
-                        cur_graph = item["@graph"][0]
-                        generated = cur_graph["generated"]
-                        if isinstance(generated, list) and len(generated) > 1:
-                            rep.add_sentence(cur_graph["iri"] + " [%s]" % str(len(generated)))
-    
+    for cur_dir in glob.glob(args.i_dir + os.sep + "[0-9]*/[0-9]*/prov/"):
+        se_file = cur_dir + os.sep + "se.json"
+        
+        with open(se_file) as f:
+            cur_json = json.load(f)
+            for item in cur_json["@graph"]:
+                cur_graph = item["@graph"][0]
+                generated = cur_graph["generated"]
+                if isinstance(generated, list) and len(generated) > 1:
+                    rep.add_sentence(cur_graph["iri"] + " [%s]" % str(len(generated)))
+
     rep.write_file(args.o_file)
