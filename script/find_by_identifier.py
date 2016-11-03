@@ -44,9 +44,10 @@ def merge(similar_file_paths, final_result):
 
 if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser(
-        "find.py", description="This script allows one to identify the files in a given directory "
-                               "containing RDF documents that seem to be identical according to the "
-                               "identifier of the entity they describe.")
+        "find_by_identifier.py",
+        description="This script allows one to identify the files in a given directory "
+                    "containing RDF documents that seem to be identical according to the "
+                    "identifier of the entity they describe.")
     arg_parser.add_argument("-i", "--input_dir", dest="i_dir", required=True,
                             help="The directory where to look for duplicates.")
     arg_parser.add_argument("-o", "--output_file", dest="o_file",
