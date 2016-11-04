@@ -55,6 +55,15 @@ queries = [
         GRAPH <https://w3id.org/oc/corpus/id/> {
             ?id datacite:usesIdentifierScheme datacite:orcid
         }
+    }""",
+    """
+    PREFIX fabio: <http://purl.org/spar/fabio/>
+    PREFIX cito: <http://purl.org/spar/cito/>
+    SELECT (count(?citing) as ?tot) {
+        GRAPH <https://w3id.org/oc/corpus/br/> {
+            ?citing a fabio:Expression .
+            FILTER EXISTS { ?citing cito:cites [] }
+      }
     }"""
 ]
 
