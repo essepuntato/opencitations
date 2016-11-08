@@ -204,6 +204,7 @@ if __name__ == "__main__":
                        list(g.triples((prov_entity, PROV.hadPrimarySource, None)))]
             
             # Get all identifiers creation dates and sources
+            id_sources = {}
             spec_entity = g.value(prov_entity, PROV.specializationOf)
             res_g = load(str(spec_entity))
             res_entity_g = get_entity_graph(spec_entity, res_g)
@@ -217,10 +218,9 @@ if __name__ == "__main__":
                 new_source = id_snap_g.value(id_snap_entity, PROV.hadPrimarySource)
                 id_gen_date_dict[id_snap_entity] = (new_generation_dates, new_source)
                 generation_dates += [new_generation_dates]
-                sources += [new_source]
+                id_sources[id_entity] += new_source
             
             generation_dates = sorted(list(set(generation_dates)))
-            sources = list(set(sources))
             
             
             
