@@ -83,7 +83,10 @@ def create_update_query(cur_subj_g, update_date, id_dir, dir_split):
     return query_string + "} }", new_citations, new_ids
 
 
-def load(rdf_file_path, tmp_dir=None):
+def load(rdf_iri_string, tmp_dir=None):
+    res_dir, rdf_file_path = \
+        find_paths(rdf_iri_string, args.base + os.sep, "https://w3id.org/oc/corpus/", 10000, 1000)
+    
     cur_graph = None
 
     if os.path.isfile(rdf_file_path):
@@ -190,15 +193,38 @@ if __name__ == "__main__":
         csv_reader = csv.reader(g)
         
         for res, n_mod, m_type in csv_reader:
-            res_dir, res_file = find_paths(
-                res, args.base + os.sep, "https://w3id.org/oc/corpus/", 10000, 1000)
-            prov_g = load(res_file)
-            
-            prov_entity = URIRef(res)
+            prov_g = load(res)
             prov_entity_g = get_entity_graph(res, prov_g)
+
+            prov_entity = URIRef(res)
+
             generation_dates = [o for s, p, o in
                                 list(g.triples((prov_entity, PROV.generatedAtTime, None)))]
-
+            sources = [o for s, p, o in
+                       list(g.triples((prov_entity, PROV.hadPrimarySource, None)))]
+            
+            # Get all identifiers creation dates and sources
+            spec_entity = g.value(prov_entity, PROV.specializationOf)
+            res_g = load(str(spec_entity))
+            res_entity_g = get_entity_graph(spec_entity, res_g)
+            id_gen_date_dict = {}
+            for id_entity in [o for s, p, o in
+                              list(res_entity_g.triples((spec_entity, DATACITE.hasIdentifier, None)))]:
+                id_iri = str(id_entity)
+                id_snap_entity = URIRef(id_iri + "/prov/se/1")
+                id_snap_g = get_entity_graph(id_snap_entity, load(str(id_snap_entity)))
+                new_generation_dates = id_snap_g.value(id_snap_entity, PROV.generatedAtTime)
+                new_source = id_snap_g.value(id_snap_entity, PROV.hadPrimarySource)
+                id_gen_date_dict[id_snap_entity] = (new_generation_dates, new_source)
+                generation_dates += [new_generation_dates]
+                sources += [new_source]
+            
+            generation_dates = sorted(list(set(generation_dates)))
+            sources = list(set(sources))
+            
+            
+            
+            update_query = list(g.triples((prov_entity, OCO.hasUpdateQuery, None)))[0][2]
     # for cur_dir, cur_subdir, cur_files in os.walk(args.input):
     #     is_se = se_dir in cur_dir
     #     is_ca = ca_dir in cur_dir

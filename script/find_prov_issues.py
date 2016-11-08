@@ -45,7 +45,15 @@ if __name__ == "__main__":
             for item in cur_se["@graph"]:
                 cur_graph = item["@graph"][0]
                 generated = cur_graph["generated"]
+                
                 if isinstance(generated, list) and len(generated) > 1:
+                    invalidated = cur_graph["invalidated"]
+                    if isinstance(invalidated, list):
+                        generated += invalidated
+                    else:
+                        generated += [invalidated]
+                    generated += sorted(generated)
+    
                     sen_string = cur_graph["iri"] + " [%s]" % str(len(generated))
                     se_generated_by = cur_graph["generated_by"]
                     
