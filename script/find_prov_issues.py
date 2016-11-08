@@ -52,7 +52,7 @@ if __name__ == "__main__":
                         generated += invalidated
                     else:
                         generated += [invalidated]
-                    generated += sorted(generated)
+                    generated = sorted(generated)
     
                     sen_string = cur_graph["iri"] + " [%s]" % str(len(generated))
                     se_generated_by = cur_graph["generated_by"]
