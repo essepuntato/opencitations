@@ -56,11 +56,16 @@ if __name__ == "__main__":
     
                     sen_string = cur_graph["iri"] + " [%s]" % str(len(generated))
                     se_generated_by = cur_graph["generated_by"]
+                    se_invalidated_by = \
+                        cur_graph["invalidated_by"] if "invalidated_by" in cur_graph else None
                     
                     for ca_item in cur_ca["@graph"]:
                         cur_ca_graph = ca_item["@graph"][0]
-                        if se_generated_by == cur_ca_graph["iri"]:
-                            for desc in cur_ca_graph["description"]:
+                        if se_generated_by == cur_ca_graph["iri"] or \
+                           se_invalidated_by == cur_ca_graph["iri"]:
+                            all_descs = cur_ca_graph["description"]
+                            descs = all_descs if isinstance(all_descs, list) else [all_descs]
+                            for desc in descs:
                                 if "citation data and new identifiers" in desc:
                                     sen_string += " [CIT+ID]"
                                 elif "citation data" in desc:

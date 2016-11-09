@@ -40,47 +40,43 @@ DCTERMS = Namespace("http://purl.org/dc/terms/")
 CITO = Namespace("http://purl.org/spar/cito/")
 DATACITE = Namespace("http://purl.org/spar/datacite/")
 FRBR = Namespace("http://purl.org/vocab/frbr/core#")
+LITERAL = Namespace("http://www.essepuntato.it/2010/06/literalreification/")
 
 
-def create_update_query(cur_subj_g, update_date, id_dir, dir_split):
-    query_string = u"INSERT DATA { GRAPH <%s> { " % cur_subj_g.identifier
-    is_first = True
-    new_citations = False
-    new_ids = False
-
+def create_citation_update_part(cur_subj_g, is_f=True):
+    query_part = u""
+    is_first = is_f
+    
     for s, p, o in cur_subj_g.triples((None, None, None)):
         if p == CITO.cites or p == FRBR.part:
-            new_citations = True
             if not is_first:
-                query_string += ". "
+                query_part += ". "
             is_first = False
-            query_string += u"<%s> <%s> <%s> " % (str(s), str(p), str(o))
+            query_part += u"<%s> <%s> <%s> " % (str(s), str(p), str(o))
+    return query_part
 
-    for s, p, o in cur_subj_g.triples((None, DATACITE.hasIdentifier, None)):
-        cur_number = long(re.sub("(.+/)([0-9]+)$", "\\2", str(o)))
 
-        # Find the correct directory number where to save the file
-        cur_split = 0
-        while True:
-            if cur_number > cur_split:
-                cur_split += dir_split
-            else:
-                break
+def create_identifier_update_part(cur_subj, cur_ids, is_f=True):
+    query_part = u""
+    is_first = is_f
+    
+    for cur_id in cur_ids:
+        if not is_first:
+            query_part += u". "
+        is_first = False
+        query_part += u"<%s> <%s> <%s> " % (str(cur_subj), DATACITE.hasIdentifier, cur_id)
 
-        id_se_file_path = \
-            id_dir + os.sep + str(cur_split) + os.sep + str(cur_number) + os.sep + "prov" + \
-            os.sep + "se" + os.sep + "1.json"
-        g_id = load(id_se_file_path)
-        if g_id is not None:
-            gen_date = g_id.objects(None, PROV.generatedAtTime).next()
-            if gen_date == update_date:
-                new_ids = True
-                if not is_first:
-                    query_string += ". "
-                is_first = False
-                query_string += u"<%s> <%s> <%s> " % (str(s), str(p), str(o))
+    return query_part
 
-    return query_string + "} }", new_citations, new_ids
+
+def create_update_query(cur_subj_g, cur_subj, cur_ids, citations_exist=False):
+    query_string = u"INSERT DATA { GRAPH <%s> { " % cur_subj_g.identifier
+    if citations_exist:
+        query_string += create_citation_update_part(cur_subj_g)
+    if cur_ids:
+        query_string += create_identifier_update_part(cur_subj, cur_ids, not citations_exist)
+
+    return query_string + "} }"
 
 
 def load(rdf_iri_string, tmp_dir=None):
@@ -191,40 +187,43 @@ if __name__ == "__main__":
     with open(args.context) as f, open(args.input) as g:
         context_json = json.load(f)
         csv_reader = csv.reader(g)
-        
         for res, n_mod, m_type in csv_reader:
-            prov_g = load(res)
-            prov_entity_g = get_entity_graph(res, prov_g)
-
-            prov_entity = URIRef(res)
-
-            generation_dates = [o for s, p, o in
-                                list(g.triples((prov_entity, PROV.generatedAtTime, None)))]
-            sources = [o for s, p, o in
-                       list(g.triples((prov_entity, PROV.hadPrimarySource, None)))]
-            
-            # Get all identifiers creation dates and sources
-            id_sources = {}
-            spec_entity = g.value(prov_entity, PROV.specializationOf)
-            res_g = load(str(spec_entity))
-            res_entity_g = get_entity_graph(spec_entity, res_g)
-            id_gen_date_dict = {}
-            for id_entity in [o for s, p, o in
-                              list(res_entity_g.triples((spec_entity, DATACITE.hasIdentifier, None)))]:
-                id_iri = str(id_entity)
-                id_snap_entity = URIRef(id_iri + "/prov/se/1")
-                id_snap_g = get_entity_graph(id_snap_entity, load(str(id_snap_entity)))
-                new_generation_dates = id_snap_g.value(id_snap_entity, PROV.generatedAtTime)
-                new_source = id_snap_g.value(id_snap_entity, PROV.hadPrimarySource)
-                id_gen_date_dict[id_snap_entity] = (new_generation_dates, new_source)
-                generation_dates += [new_generation_dates]
-                id_sources[id_entity] += new_source
-            
-            generation_dates = sorted(list(set(generation_dates)))
-            
-            
-            
-            update_query = list(g.triples((prov_entity, OCO.hasUpdateQuery, None)))[0][2]
+            if res.endswith("/se/1"):
+                prov_g = load(res)
+                prov_entity_g = get_entity_graph(res, prov_g)
+    
+                prov_entity = URIRef(res)
+    
+                generation_dates = [o for s, p, o in
+                                    list(g.triples((prov_entity, PROV.generatedAtTime, None)))]
+                sources = [o for s, p, o in
+                           list(g.triples((prov_entity, PROV.hadPrimarySource, None)))]
+                
+                # Get all identifiers creation dates and sources
+                spec_entity = g.value(prov_entity, PROV.specializationOf)
+                res_g = load(str(spec_entity))
+                res_entity_g = get_entity_graph(spec_entity, res_g)
+                id_gen_date_dict = {}
+                for id_entity in [o for s, p, o in list(
+                        res_entity_g.triples((spec_entity, DATACITE.hasIdentifier, None)))]:
+                    id_iri = str(id_entity)
+                    id_snap_entity = URIRef(id_iri + "/prov/se/1")
+                    id_snap_g = get_entity_graph(id_snap_entity, load(str(id_snap_entity)))
+                    new_generation_dates = id_snap_g.value(id_snap_entity, PROV.generatedAtTime)
+                    new_source = id_snap_g.value(id_snap_entity, PROV.hadPrimarySource)
+                    new_id_string = id_snap_g.value(id_snap_entity, LITERAL.hasLiteralValue)
+                    id_gen_date_dict[id_entity] = (new_generation_dates, new_id_string, new_source)
+                    generation_dates += [new_generation_dates]
+                
+                generation_dates = sorted(list(set(generation_dates)))
+                if len(generation_dates) == 2:
+                    pass
+                else:
+                    pass
+                
+                update_query = list(g.triples((prov_entity, OCO.hasUpdateQuery, None)))[0][2]
+            else:
+                reperr.add_sentence("%s to be handled by hand")
     # for cur_dir, cur_subdir, cur_files in os.walk(args.input):
     #     is_se = se_dir in cur_dir
     #     is_ca = ca_dir in cur_dir
