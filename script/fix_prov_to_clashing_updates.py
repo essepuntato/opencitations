@@ -24,7 +24,7 @@ import shutil
 import json
 from reporter import Reporter
 from rdflib import Graph, ConjunctiveGraph, URIRef, Literal
-from rdflib.namespace import RDF, Namespace
+from rdflib.namespace import RDF, Namespace, RDFS
 import csv
 from support import find_paths
 
@@ -169,6 +169,73 @@ def get_entity_graph(string_iri, cur_g):
     return result
 
 
+def add_modification_info(prov_g, br_res, se_num, inv_time, update_query):
+    prev_se_res = URIRef(br_res + "/prov/se/" + str(int(se_num) - 1))
+    se_res = URIRef(br_res + "/prov/se/" + se_num)
+    ca_res = URIRef(br_res + "/prov/ca/" + se_num)
+
+    # se
+    prov_g.add((prev_se_res, PROV.invalidatedAtTime, inv_time))
+    prov_g.add((prev_se_res, PROV.wasInvalidatedBy, ca_res))
+    prov_g.add((se_res, OCO.hasUpdateQuery, update_query))
+
+
+def add_creation_info(prov_g, br_res, se_num, gen_time, cr_start, description, curator_id, source_id):
+    se_res = URIRef(br_res + "/prov/se/" + se_num)
+    ca_res = URIRef(br_res + "/prov/ca/" + se_num)
+
+    br_num = str(br_res).split("/")[-1]
+    cr_curator_num = cr_start
+    cr_source_num = str(int(cr_start) + 1)
+
+    cr_curator_res = URIRef(br_res + "/prov/cr/" + cr_curator_num)
+    cr_source_res = URIRef(br_res + "/prov/cr/" + cr_source_num)
+    
+    # se
+    prov_g.add((se_res, RDF.type, PROV.Entity))
+    prov_g.add((se_res, RDFS.label, Literal(
+        "snapshot of entity metadata %s related to bibliographic resource %s [se/%s -> br/%s]" %
+        (se_num, br_num, se_num, br_num))))
+    prov_g.add((se_res, PROV.specializationOf, br_res))
+    prov_g.add((se_res, PROV.generatedAtTime, gen_time))
+    prov_g.add((se_res, PROV.wasGeneratedBy, ca_res))
+    
+    # ca
+    prov_g.add((ca_res, RDF.type, PROV.Activity))
+    prov_g.add((ca_res, RDF.type, PROV.Create))
+    prov_g.add((ca_res, RDFS.label, Literal(
+        "curatorial activity %s related to bibliographic resource %s [ca/%s -> br/%s]" %
+        (se_num, br_num, se_num, br_num))))
+    prov_g.add((ca_res, DCTERMS.description,
+                Literal("The entity '%s' has been %s." % (br_res, description))))
+    prov_g.add((ca_res, PROV.qualifiedAssociation, cr_curator_res))
+    prov_g.add((ca_res, PROV.qualifiedAssociation, cr_source_res))
+    
+    # cr
+    prov_g.add((cr_curator_res, RDF.type, PROV.Association))
+    prov_g.add((cr_curator_res, RDFS.label, Literal(
+        "curatorial role %s related to bibliographic resource %s [cr/%s -> br/%s]" %
+        (cr_curator_num, br_num, cr_curator_num, br_num))))
+    prov_g.add((cr_curator_res, PROV.agent, URIRef("https://w3id.org/oc/corpus/prov/pa/" + curator_id)))
+    prov_g.add((cr_curator_res, PROV.hadRole, URIRef("https://w3id.org/oc/ontology/occ-curator")))
+    prov_g.add((cr_source_res, RDF.type, PROV.Association))
+    prov_g.add((cr_source_res, RDFS.label, Literal(
+        "curatorial role %s related to bibliographic resource %s [cr/%s -> br/%s]" %
+        (cr_source_num, br_num, cr_source_num, br_num))))
+    prov_g.add((cr_source_res, PROV.agent, URIRef("https://w3id.org/oc/corpus/prov/pa/" + source_id)))
+    prov_g.add((cr_source_res, PROV.hadRole,
+                URIRef("https://w3id.org/oc/ontology/source-metadata-provider")))
+    
+    return se_res, ca_res, cr_curator_res, cr_source_res
+
+
+def get_source(all_sources, sources_by_date, cur_date):
+    if cur_date in sources_by_date:
+        for source in sources_by_date[cur_date]:
+            if source in all_sources:
+                return source
+
+
 if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser("fix_prov.py",
                                          description="This script fixes the bug of having multiple "
@@ -203,23 +270,48 @@ if __name__ == "__main__":
                 spec_entity = g.value(prov_entity, PROV.specializationOf)
                 res_g = load(str(spec_entity))
                 res_entity_g = get_entity_graph(spec_entity, res_g)
-                id_gen_date_dict = {}
+                sources_per_date = {}
                 for id_entity in [o for s, p, o in list(
                         res_entity_g.triples((spec_entity, DATACITE.hasIdentifier, None)))]:
                     id_iri = str(id_entity)
                     id_snap_entity = URIRef(id_iri + "/prov/se/1")
                     id_snap_g = get_entity_graph(id_snap_entity, load(str(id_snap_entity)))
-                    new_generation_dates = id_snap_g.value(id_snap_entity, PROV.generatedAtTime)
+                    new_generation_date = id_snap_g.value(id_snap_entity, PROV.generatedAtTime)
                     new_source = id_snap_g.value(id_snap_entity, PROV.hadPrimarySource)
                     new_id_string = id_snap_g.value(id_snap_entity, LITERAL.hasLiteralValue)
-                    id_gen_date_dict[id_entity] = (new_generation_dates, new_id_string, new_source)
-                    generation_dates += [new_generation_dates]
+                    if new_generation_date not in sources_per_date:
+                        sources_per_date[new_generation_date] = set()
+                    sources_per_date[new_generation_date].add(new_source)
+                    generation_dates += [new_generation_date]
                 
                 generation_dates = sorted(list(set(generation_dates)))
+                
+                g_prov = Graph(identifier=str(spec_entity))
+                
+                se_1, ca_1, cr_1, cr_2 = add_creation_info(
+                    g_prov, spec_entity, "1", generation_dates[0], "1", "created", "1", "2")
+                
                 if len(generation_dates) == 2:
-                    pass
+                    if "[ID]" in m_type:
+                        prov_g.add((se_1, PROV.hadPrimarySource,
+                                    get_source(sources, sources_per_date, generation_dates[0])))
+                        se_2, ca_2, cr_3, cr_4 = add_creation_info(
+                            g_prov, spec_entity, "2", generation_dates[1], "3", "created", "1", "2")
+                        prov_g.add((se_2, PROV.hadPrimarySource,
+                                    get_source(sources, sources_per_date, generation_dates[1])))
+                        
+                    elif "[CIT]" in m_type:
+                        pass
+                    elif "[CIT+ID]" in m_type:
+                        pass
+                    else:
+                        pass  # no type
+
+                    update_query = g.value(prov_entity, OCO.hasUpdateQuery)
+                    
+                    # TODO: update!
                 else:
-                    pass
+                    pass   # more than 2
                 
                 update_query = list(g.triples((prov_entity, OCO.hasUpdateQuery, None)))[0][2]
             else:

@@ -56,8 +56,9 @@ if __name__ == "__main__":
     
                     sen_string = cur_graph["iri"] + " [%s]" % str(len(generated))
                     se_generated_by = cur_graph["generated_by"]
-                    se_invalidated_by = \
-                        cur_graph["invalidated_by"] if "invalidated_by" in cur_graph else None
+                    se_invalidated_by = cur_graph["invalidated_by"]
+                    if se_generated_by != se_invalidated_by:
+                        sen_string += " [DIFF]"
                     
                     for ca_item in cur_ca["@graph"]:
                         cur_ca_graph = ca_item["@graph"][0]
