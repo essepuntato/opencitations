@@ -54,11 +54,10 @@ if __name__ == "__main__":
                         generated += [invalidated]
                     generated = sorted(list(set(generated)))
     
-                    sen_string = cur_graph["iri"] + " [%s]" % str(len(generated))
+                    sen_string = cur_graph["iri"] + ",[%s]," % str(len(generated))
                     se_generated_by = cur_graph["generated_by"]
                     se_invalidated_by = cur_graph["invalidated_by"]
-                    if se_generated_by != se_invalidated_by:
-                        sen_string += " [DIFF]"
+                    
                     
                     for ca_item in cur_ca["@graph"]:
                         cur_ca_graph = ca_item["@graph"][0]
@@ -68,11 +67,11 @@ if __name__ == "__main__":
                             descs = all_descs if isinstance(all_descs, list) else [all_descs]
                             for desc in descs:
                                 if "citation data and new identifiers" in desc:
-                                    sen_string += " [CIT+ID]"
+                                    sen_string += "[CIT+ID]"
                                 elif "citation data" in desc:
-                                    sen_string += " [CIT]"
+                                    sen_string += "[CIT]"
                                 elif "new identifiers" in desc:
-                                    sen_string += " [ID]"
+                                    sen_string += "[ID]"
                             break
 
                     rep.add_sentence(sen_string)
