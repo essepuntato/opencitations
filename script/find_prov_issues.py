@@ -52,11 +52,12 @@ if __name__ == "__main__":
                     
                     if isinstance(cur_generated, list) and len(cur_generated) > 1:
                         generated += cur_generated
-                        cur_invalidated = cur_graph["invalidated"]
-                        if isinstance(cur_invalidated, list):
-                            generated += cur_invalidated
-                        else:
-                            generated += [cur_invalidated]
+                        if "invalidated" in cur_graph:
+                            cur_invalidated = cur_graph["invalidated"]
+                            if isinstance(cur_invalidated, list):
+                                generated += cur_invalidated
+                            else:
+                                generated += [cur_invalidated]
         
                         cur_generated_by = cur_graph["generated_by"]
                         cur_invalidated_by = cur_graph["invalidated_by"]

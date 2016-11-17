@@ -28,6 +28,7 @@ from rdflib.namespace import RDF, Namespace, RDFS
 import csv
 from support import find_paths
 from datetime import datetime
+import glob
 
 context_path = "https://w3id.org/oc/corpus/context.json"
 repok = Reporter(True, prefix="[fix_prov.py: INFO] ")
@@ -297,7 +298,7 @@ if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser("create_id_counter.py",
                                          description="This script create the id-counter prov dir "
                                                      "starting from the provenance data.")
-    arg_parser.add_argument("-i", "--input_fir", dest="input", required=True,
+    arg_parser.add_argument("-i", "--input_dir", dest="input", required=True,
                             help="The corpus base dir.")
     arg_parser.add_argument("-o", "--out_dir", dest="output", required=True,
                             help="The directory where to store the new id-counter.")
@@ -309,6 +310,11 @@ if __name__ == "__main__":
     repok.new_article()
     reperr.new_article()
     result = set()
+    
+    for prov_dir in glob.glob(args.input + os.sep + "[a-z]*/[0-9]*/[0-9]*/prov/"):
+        cur_se_path = prov_dir + os.sep + "se.json"
+        cur_cr_path = prov_dir + os.sep + "cr.json"
+        cur_ca_path = prov_dir + os.sep + "ca.json"
 
     with open(args.context) as f, open(args.input) as g:
         context_json = json.load(f)
