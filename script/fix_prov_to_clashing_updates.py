@@ -44,6 +44,9 @@ FRBR = Namespace("http://purl.org/vocab/frbr/core#")
 LITERAL = Namespace("http://www.essepuntato.it/2010/06/literalreification/")
 
 
+loaded_files = {}
+
+
 def create_citation_update_part(cur_subj_g, is_f=True):
     query_part = u""
     is_first = is_f
@@ -116,6 +119,9 @@ def load(rdf_iri_string, tmp_dir=None):
 
 
 def __load_graph(file_p, tmp_dir=None):
+    if file_p in loaded_files:
+        return loaded_files[file_p]
+    
     errors = ""
     current_graph = ConjunctiveGraph()
 
@@ -138,7 +144,7 @@ def __load_graph(file_p, tmp_dir=None):
                 json_ld_resource["@context"] = context_json
 
                 current_graph.parse(data=json.dumps(json_ld_resource), format="json-ld")
-
+            loaded_files[file_p] = current_graph
             return current_graph
     except Exception as e:
         errors = " | " + str(e)  # Try another format
@@ -315,102 +321,108 @@ if __name__ == "__main__":
     repok.new_article()
     reperr.new_article()
     result = set()
-
-    with open(args.context) as f, open(args.input) as g:
-        context_json = json.load(f)
-        csv_reader = csv.reader(g)
-        for res, n_mod, m_type in csv_reader:
-            prov_entity = URIRef(res)
-            
-            if args.id:
-                prov_g = load(res)
-                prov_entity_g = get_entity_graph(res, prov_g)
-                spec_entity = prov_entity_g.value(prov_entity, PROV.specializationOf)
-                res_g = load(str(spec_entity))
-                res_entity_g = get_entity_graph(spec_entity, res_g)
-                for id_entity in [o for s, p, o in list(
-                        res_entity_g.triples((spec_entity, DATACITE.hasIdentifier, None)))]:
-                    rdf_dir, rdf_file_path = find_paths(
-                        id_entity, args.base + os.sep, "https://w3id.org/oc/corpus/", 10000, 1000)
-                    result.add(rdf_file_path)
-            else:
-                repok.add_sentence("Processing '%s'" % res)
-                
-                prov_g = load(res)
-                spec_entity_iri = res.split("/prov/")[0]
-                prov_entity_g = get_entity_graph(res, prov_g, True)
+    last_res = None
     
-                generation_dates = [o for s, p, o in
-                                    list(prov_entity_g.triples(
-                                        (None, PROV.generatedAtTime, None)))]
-                sources = [o for s, p, o in
-                           list(prov_entity_g.triples((None, PROV.hadPrimarySource, None)))]
+    try:
+        with open(args.context) as f, open(args.input) as g:
+            context_json = json.load(f)
+            csv_reader = csv.reader(g)
+            for res, n_mod, m_type in csv_reader:
+                last_res = res
+                prov_entity = URIRef(res)
                 
-                # Get all identifiers creation dates and sources
-                spec_entity = URIRef(spec_entity_iri)
-                res_g = load(str(spec_entity))
-                res_entity_g = get_entity_graph(spec_entity, res_g)
-                sources_per_date = {}
-                ids_per_date = {}
-                for id_entity in [o for s, p, o in list(
-                        res_entity_g.triples((spec_entity, DATACITE.hasIdentifier, None)))]:
-                    id_iri = str(id_entity)
-                    id_snap_entity = URIRef(id_iri + "/prov/se/1")
-                    id_snap_g = get_entity_graph(id_snap_entity, load(str(id_snap_entity), True))
-                    new_generation_date = id_snap_g.value(id_snap_entity, PROV.generatedAtTime)
-                    new_source = id_snap_g.value(id_snap_entity, PROV.hadPrimarySource)
-                    new_id_string = id_snap_g.value(id_snap_entity, LITERAL.hasLiteralValue)
-                    if new_generation_date not in sources_per_date:
-                        sources_per_date[new_generation_date] = set()
-                    sources_per_date[new_generation_date].add(new_source)
-                    generation_dates += [new_generation_date]
+                if args.id:
+                    prov_g = load(res)
+                    prov_entity_g = get_entity_graph(res, prov_g)
+                    spec_entity = prov_entity_g.value(prov_entity, PROV.specializationOf)
+                    res_g = load(str(spec_entity))
+                    res_entity_g = get_entity_graph(spec_entity, res_g)
+                    for id_entity in [o for s, p, o in list(
+                            res_entity_g.triples((spec_entity, DATACITE.hasIdentifier, None)))]:
+                        rdf_dir, rdf_file_path = find_paths(
+                            id_entity, args.base + os.sep, "https://w3id.org/oc/corpus/", 10000, 1000)
+                        result.add(rdf_file_path)
+                else:
+                    repok.add_sentence("Processing '%s'" % res)
                     
-                    if new_generation_date not in ids_per_date:
-                        ids_per_date[new_generation_date] = []
-                    ids_per_date[new_generation_date] += [id_iri]
-                
-                generation_dates = sorted(list(set(generation_dates)))
-                
-                new_prov = Graph(identifier=str(spec_entity) + "/prov/")
-                for idx, generation_date in enumerate(generation_dates, 1):
-                    description = None
-                    update_query = None
+                    prov_g = load(res)
+                    spec_entity_iri = res.split("/prov/")[0]
+                    prov_entity_g = get_entity_graph(res, prov_g, True)
+        
+                    generation_dates = [o for s, p, o in
+                                        list(prov_entity_g.triples(
+                                            (None, PROV.generatedAtTime, None)))]
+                    sources = [o for s, p, o in
+                               list(prov_entity_g.triples((None, PROV.hadPrimarySource, None)))]
                     
-                    if idx == 1:
-                        description = "created"
-                    elif "[ID]" in m_type:
-                        description = "extended with new identifiers"
-                        update_query = create_update_query(
-                            res_entity_g, spec_entity,
-                            ids_per_date[generation_date] if generation_date in ids_per_date else [],
-                            False)
-                    elif "[CIT]" in m_type:
-                        description = "extended with citation data"
-                        update_query = create_update_query(
-                            res_entity_g, spec_entity, [], True)
-                    elif "[CIT+ID]" in m_type:
-                        description = "extended with citation data and new identifiers"
-                        update_query = create_update_query(
-                            res_entity_g, spec_entity,
-                            ids_per_date[generation_date] if generation_date in ids_per_date else [],
-                            True)
-                    else:
-                        reperr.add_sentence("No type for '%s'" % res)
+                    # Get all identifiers creation dates and sources
+                    spec_entity = URIRef(spec_entity_iri)
+                    res_g = load(str(spec_entity))
+                    res_entity_g = get_entity_graph(spec_entity, res_g)
+                    sources_per_date = {}
+                    ids_per_date = {}
+                    for id_entity in [o for s, p, o in list(
+                            res_entity_g.triples((spec_entity, DATACITE.hasIdentifier, None)))]:
+                        id_iri = str(id_entity)
+                        id_snap_entity = URIRef(id_iri + "/prov/se/1")
+                        id_snap_g = get_entity_graph(id_snap_entity, load(str(id_snap_entity), True))
+                        new_generation_date = id_snap_g.value(id_snap_entity, PROV.generatedAtTime)
+                        new_source = id_snap_g.value(id_snap_entity, PROV.hadPrimarySource)
+                        new_id_string = id_snap_g.value(id_snap_entity, LITERAL.hasLiteralValue)
+                        if new_generation_date not in sources_per_date:
+                            sources_per_date[new_generation_date] = set()
+                        sources_per_date[new_generation_date].add(new_source)
+                        generation_dates += [new_generation_date]
+                        
+                        if new_generation_date not in ids_per_date:
+                            ids_per_date[new_generation_date] = []
+                        ids_per_date[new_generation_date] += [id_iri]
                     
-                    if description is not None:
-                        cur_se = add_creation_info(new_prov, spec_entity, str(idx), generation_date,
-                                                   str((idx - 1) * 2 + 1), description, "1", "2",
-                                                   PROV.Create if idx == 1 else PROV.Modify)
-                        if idx > 1:
-                            add_modification_info(new_prov, spec_entity, str(idx),
-                                                  generation_date, update_query)
-
-                        se_source = get_source(sources, sources_per_date, generation_date, str(cur_se))
-                        if se_source is not None:
-                            new_prov.add((cur_se, PROV.hadPrimarySource, se_source))
-
-                store(new_prov, str(spec_entity), args.dest_dir)
-                
+                    generation_dates = sorted(list(set(generation_dates)))
+                    
+                    new_prov = Graph(identifier=str(spec_entity) + "/prov/")
+                    for idx, generation_date in enumerate(generation_dates, 1):
+                        description = None
+                        update_query = None
+                        
+                        if idx == 1:
+                            description = "created"
+                        elif "[ID]" in m_type:
+                            description = "extended with new identifiers"
+                            update_query = create_update_query(
+                                res_entity_g, spec_entity,
+                                ids_per_date[generation_date] if generation_date in ids_per_date else [],
+                                False)
+                        elif "[CIT]" in m_type:
+                            description = "extended with citation data"
+                            update_query = create_update_query(
+                                res_entity_g, spec_entity, [], True)
+                        elif "[CIT+ID]" in m_type:
+                            description = "extended with citation data and new identifiers"
+                            update_query = create_update_query(
+                                res_entity_g, spec_entity,
+                                ids_per_date[generation_date] if generation_date in ids_per_date else [],
+                                True)
+                        else:
+                            reperr.add_sentence("No type for '%s'" % res)
+                        
+                        if description is not None:
+                            cur_se = add_creation_info(new_prov, spec_entity, str(idx), generation_date,
+                                                       str((idx - 1) * 2 + 1), description, "1", "2",
+                                                       PROV.Create if idx == 1 else PROV.Modify)
+                            if idx > 1:
+                                add_modification_info(new_prov, spec_entity, str(idx),
+                                                      generation_date, update_query)
+    
+                            se_source = get_source(
+                                sources, sources_per_date, generation_date, str(cur_se))
+                            if se_source is not None:
+                                new_prov.add((cur_se, PROV.hadPrimarySource, se_source))
+    
+                    store(new_prov, str(spec_entity), args.dest_dir)
+    except Exception as e:
+        reperr.add_sentence("Last res: %s. %s" (last_res, e))
+        
     if result:
         for it in result:
             print it
