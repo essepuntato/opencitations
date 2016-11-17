@@ -315,6 +315,12 @@ if __name__ == "__main__":
         cur_se_path = prov_dir + os.sep + "se.json"
         cur_cr_path = prov_dir + os.sep + "cr.json"
         cur_ca_path = prov_dir + os.sep + "ca.json"
+        
+        for cur_file in [cur_se_path, cur_ca_path, cur_cr_path]:
+            final_file = cur_file[:-5].replace(args.input, args.output + os.sep) + ".txt"
+            # TODO
+        
+        
 
     with open(args.context) as f, open(args.input) as g:
         context_json = json.load(f)

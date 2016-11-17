@@ -60,17 +60,18 @@ if __name__ == "__main__":
                                 generated += [cur_invalidated]
         
                         cur_generated_by = cur_graph["generated_by"]
-                        cur_invalidated_by = cur_graph["invalidated_by"]
                         
                         if isinstance(cur_generated_by, list):
                             se_generated_by += cur_generated_by
                         else:
                             se_generated_by += [cur_generated_by]
                         
-                        if isinstance(cur_invalidated_by, list):
-                            se_generated_by += cur_invalidated_by
-                        else:
-                            se_generated_by += [cur_invalidated_by]
+                        if "invalidated_by" in cur_graph:
+                            cur_invalidated_by = cur_graph["invalidated_by"]
+                            if isinstance(cur_invalidated_by, list):
+                                se_generated_by += cur_invalidated_by
+                            else:
+                                se_generated_by += [cur_invalidated_by]
                         
                 generated = sorted(list(set(generated)))
                 se_generated_by = sorted(list(set(se_generated_by)))
