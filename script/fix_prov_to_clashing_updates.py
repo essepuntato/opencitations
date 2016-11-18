@@ -138,7 +138,7 @@ def __load_graph(file_p, tmp_dir=None):
                 json_ld_resource["@context"] = context_json
 
                 current_graph.parse(data=json.dumps(json_ld_resource), format="json-ld")
-            loaded_files[file_p] = current_graph
+            
             return current_graph
     except Exception as e:
         errors = " | " + str(e)  # Try another format
