@@ -44,9 +44,6 @@ FRBR = Namespace("http://purl.org/vocab/frbr/core#")
 LITERAL = Namespace("http://www.essepuntato.it/2010/06/literalreification/")
 
 
-loaded_files = {}
-
-
 def create_citation_update_part(cur_subj_g, is_f=True):
     query_part = u""
     is_first = is_f
@@ -119,9 +116,6 @@ def load(rdf_iri_string, tmp_dir=None):
 
 
 def __load_graph(file_p, tmp_dir=None):
-    if file_p in loaded_files:
-        return loaded_files[file_p]
-    
     errors = ""
     current_graph = ConjunctiveGraph()
 
