@@ -415,7 +415,7 @@ if __name__ == "__main__":
     
                     store(new_prov, str(spec_entity), args.dest_dir)
     except Exception as e:
-        reperr.add_sentence("Last res: %s. %s" (last_res, e))
+        reperr.add_sentence("Last res: %s. %s" % (last_res, e))
         
     if result:
         for it in result:
