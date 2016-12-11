@@ -105,8 +105,8 @@ class Home:
             lastrow = None
             for lastrow in csv.reader(f): pass
             cur_date = datetime.strptime(
-                lastrow[0], "%Y-%m-%dT%H:%M:%S").strftime("%B %d, %Y, at %H:%M:%S")
-            cur_tot = lastrow[1]
+                lastrow[0], "%Y-%m-%dT%H:%M:%S").strftime("%B %d, %Y")
+            cur_tot = lastrow[8]
             cur_cit = lastrow[2]
 
         return render.home(pages, active, cur_date, cur_tot, cur_cit)
