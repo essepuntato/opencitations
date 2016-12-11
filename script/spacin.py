@@ -29,6 +29,8 @@ import os
 import traceback
 from dataset_handler import DatasetHandler
 from datetime import datetime
+import re
+import shutil
 
 start_time = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
 error = False
@@ -41,6 +43,7 @@ try:
                 if s.can_proceed():
                     if cur_file.endswith(".json"):
                         cur_file_path = cur_dir + os.sep + cur_file
+                        cur_local_dir_path = re.sub("^([0-9]+-[0-9]+-[0-9]+-[0-9]+).+$", "\\1", cur_file)
                         with open(cur_file_path) as fp:
                             last_file = cur_file_path
                             print "\n\nProcess file '%s'\n" % cur_file_path
@@ -81,16 +84,26 @@ try:
                                 dset_handler.update_dataset_info(result)
 
                                 # If everything went fine, move the input file to the done directory
-                                move_file(cur_file_path, reference_dir_done)
+                                move_file(cur_file_path,
+                                          reference_dir_done + os.sep + cur_local_dir_path)
 
                             # If something in the process went wrong, move the input file
                             # in an appropriate directory
                             else:
                                 if crp.reperr.is_empty():  # The resource has been already processed
-                                    move_file(cur_file_path, reference_dir_done)
+                                    move_file(cur_file_path,
+                                              reference_dir_done + os.sep + cur_local_dir_path)
                                 else:
-                                    moved_file = move_file(cur_file_path, reference_dir_error)
+                                    moved_file = \
+                                        move_file(cur_file_path,
+                                                  reference_dir_error + os.sep + cur_local_dir_path)
                                     crp.reperr.write_file(moved_file + ".err")
+                            
+                            cur_dir_path = os.path.dirname(cur_file_path)
+                            print cur_dir_path
+                            if len([name for name in os.listdir(cur_dir_path)
+                                    if name.endswith(".json")]) == 0:
+                                shutil.rmtree(cur_dir_path)
                 else:
                     print "\n\nProcess stopped due to external reasons"
                     break

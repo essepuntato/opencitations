@@ -105,18 +105,19 @@ class BibliographicReferenceStorer(object):
 
             cur_time = datetime.now().strftime('%Y-%m-%d-%H-%M-%S-%f_')
             local_file_name = cur_time + normalise_id(id_string) + ".json"
-
+            local_dir_name = re.sub("^([0-9]+-[0-9]+-[0-9]+-[0-9]+).+$", "\\1", cur_time)
             # The error variable is True if a reference in the reference list
             # has no information at all
             if self.error:
-                new_file_path = self.err_dir + os.sep + local_file_name
-                if not os.path.exists(self.err_dir):
-                    os.makedirs(self.err_dir)
+                new_dir_path = self.err_dir + os.sep + local_dir_name
+                new_file_path = new_dir_path + os.sep + local_file_name
             else:
-                new_file_path = self.ref_dir + os.sep + local_file_name
-                if not os.path.exists(self.ref_dir):
-                    os.makedirs(self.ref_dir)
-
+                new_dir_path = self.ref_dir + os.sep + local_dir_name
+                new_file_path = new_dir_path + os.sep + local_file_name
+                
+            if not os.path.exists(new_dir_path):
+                os.makedirs(new_dir_path)
+            
             with open(new_file_path, "w") as f:
                 json.dump(json_item, f, indent=4)
 

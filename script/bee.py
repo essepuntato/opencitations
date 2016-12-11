@@ -27,7 +27,7 @@ start_time = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
 exception_string = None
 try:
     epmc = EuropeanPubMedCentralProcessor(
-        stored_file, reference_dir, error_dir, pagination_file, Stopper(reference_dir))
+        stored_file, reference_dir, error_dir, pagination_file, Stopper(reference_dir), p_size=page_size)
     epmc.process(True)
 except Exception as e:
     exception_string = str(e) + " " + traceback.format_exc().rstrip("\n+")

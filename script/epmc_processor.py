@@ -38,17 +38,24 @@ class EuropeanPubMedCentralProcessor(ReferenceProcessor):
                  sec_to_wait=10,
                  max_iteration=6,
                  timeout=30,
-                 max_query_per_sec=10):
+                 max_query_per_sec=10,
+                 p_size=1000):
+        if p_size > 1000 or p_size < 1:
+            page_size = "1000"
+        else:
+            page_size = str(p_size)
         self.provider = "Europe PubMed Central"
         self.all_papers_api = "http://www.ebi.ac.uk/europepmc/webservices/rest/search?query=" \
-                              "has_reflist:y+sort_date:y&resulttype=lite&pageSize=1000&format=json&page="
+                              "has_reflist:y+sort_date:y&resulttype=lite&pageSize=%s&format=json" \
+                              "&cursorMark=" % page_size
         self.ref_list_api = "http://www.ebi.ac.uk/europepmc/webservices/rest/XXX/YYY/references/" \
                             "1/1000/json"
         self.paper_api = "http://www.ebi.ac.uk/europepmc/webservices/rest/search?resulttype=lite&" \
                          "format=json&query="
         self.xml_source_api = "http://www.ebi.ac.uk/europepmc/webservices/rest/XXX/fullTextXML"
         self.open_access_api = "http://www.ebi.ac.uk/europepmc/webservices/rest/search?query=" \
-                               "open_access:y+sort_date:y&resulttype=lite&pageSize=1000&format=json&page="
+                               "open_access:y+sort_date:y&resulttype=lite&pageSize=%s&format=json" \
+                               "&cursorMark=" % page_size
         self.pagination_file = pagination_file
         self.max_query_per_sec = max_query_per_sec
         self.query_count = 1
@@ -57,17 +64,26 @@ class EuropeanPubMedCentralProcessor(ReferenceProcessor):
         super(EuropeanPubMedCentralProcessor, self).__init__(
             stored_file, reference_dir, error_dir, stopper, headers, sec_to_wait, max_iteration, timeout)
 
+    def __get_data_from_page(self, cur_page, oa=False):
+        self.repok.new_article()
+        self.repok.add_sentence("Processing page %s." % str(cur_page))
+        if oa:
+            cur_get_url = self.open_access_api + cur_page
+        else:
+            cur_get_url = self.all_papers_api + cur_page
+        return self.__get_data(cur_get_url), cur_get_url
+
     def process(self, oa=False):
         while True:
             if self.stopper.can_proceed():
                 cur_page = self.__get_next_page()
-                self.repok.new_article()
-                self.repok.add_sentence("Processing page %s." % str(cur_page))
-                if oa:
-                    cur_get_url = self.open_access_api + str(cur_page)
-                else:
-                    cur_get_url = self.all_papers_api + str(cur_page)
-                result = self.__get_data(cur_get_url)
+                
+                result, cur_get_url = self.__get_data_from_page(cur_page, oa)
+                # Re-run the query with the first page,
+                # since a wrong page can be specified
+                if result is None:
+                    result, cur_get_url = self.__get_data_from_page("*", oa)
+                
                 # Proceed only if there were no problems in getting the data, otherwise stop
                 if result is not None:
                     papers_retrieved = dg(result, ["resultList", "result"])
@@ -109,7 +125,7 @@ class EuropeanPubMedCentralProcessor(ReferenceProcessor):
                             else:
                                 break
                         if self.stopper.can_proceed():
-                            self.__store_page_number(cur_page)
+                            self.__store_page_number(dg(result, ["nextCursorMark"]))
                     else:  # We have browsed all the pages with results, and thus the counting is reset
                         self.__reset_page_number()
                         self.repok.add_sentence("All the pages has been processed.")
@@ -408,17 +424,20 @@ class EuropeanPubMedCentralProcessor(ReferenceProcessor):
         return result
 
     def __get_next_page(self):
-        result = 1
+        result = "*"
 
         if os.path.exists(self.pagination_file):
             with open(self.pagination_file) as f:
-                result += int(f.read().strip())
+                result = f.read().strip()
 
         return result
 
     def __reset_page_number(self):
-        self.__store_page_number(0)
+        self.__store_page_number("*")
 
     def __store_page_number(self, p_num):
         with open(self.pagination_file, "w") as f:
-            f.write(str(p_num))
+            if p_num is None:
+                f.write("*")
+            else:
+                f.write(p_num)
