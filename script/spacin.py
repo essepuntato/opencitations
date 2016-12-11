@@ -46,6 +46,7 @@ try:
                         cur_local_dir_path = re.sub("^([0-9]+-[0-9]+-[0-9]+-[0-9]+).+$", "\\1", cur_file)
                         with open(cur_file_path) as fp:
                             last_file = cur_file_path
+                            last_local_dir = cur_local_dir_path
                             print "\n\nProcess file '%s'\n" % cur_file_path
                             json_object = json.load(fp)
                             crp = CrossrefProcessor(base_iri, context_path, info_dir, json_object,
@@ -100,7 +101,6 @@ try:
                                     crp.reperr.write_file(moved_file + ".err")
                             
                             cur_dir_path = os.path.dirname(cur_file_path)
-                            print cur_dir_path
                             if len([name for name in os.listdir(cur_dir_path)
                                     if name.endswith(".json")]) == 0:
                                 shutil.rmtree(cur_dir_path)
@@ -114,8 +114,12 @@ except Exception as e:
     exception_string = str(e) + " " + traceback.format_exc().rstrip("\n+")
     print exception_string
     if last_file is not None:
-        moved_file = move_file(last_file, reference_dir_error)
+        moved_file = move_file(last_file, reference_dir_error + os.sep + last_local_dir)
         with open(moved_file + ".err", "w") as f:
             f.write(exception_string)
+        cur_dir_path = os.path.dirname(last_file)
+        if len([name for name in os.listdir(cur_dir_path)
+                if name.endswith(".json")]) == 0:
+            shutil.rmtree(cur_dir_path)
 end_time = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
 print "\nStarted at:\t%s\nEnded at:\t%s" % (start_time, end_time)
