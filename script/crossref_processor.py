@@ -49,7 +49,7 @@ class CrossrefProcessor(FormatProcessor):
                  timeout=30,
                  use_doi_in_bibentry_as_id=True,
                  use_url_in_bibentry_as_id=True,
-                 crossref_min_similarity_score=2.7):
+                 crossref_min_similarity_score=100.0):
         self.crossref_api_works = "http://api.crossref.org/works/"
         self.crossref_api_search = "http://api.crossref.org/works?rows=1&query="
         self.headers = headers
