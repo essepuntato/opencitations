@@ -1,4 +1,4 @@
-$def with (pages, active, date, tot, cit)
+$def with (pages, active, date, tot, cit, cited)
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
     <head>
@@ -59,7 +59,7 @@ $def with (pages, active, date, tot, cit)
                 <p class="lead">Welcome to the <span class="oc-purple">Open</span><span class="oc-blue">Citations</span> homepage!</p>
                 <p>The main output of the <span class="oc-purple">Open</span><span class="oc-blue">Citations</span> Project is the creation of the <a href="corpus">Open Citations Corpus (OCC)</a>, an open repository of scholarly citation data made available under a <a href="https://creativecommons.org/publicdomain/zero/1.0/">Creative Commons public domain</a> dedication, which provides in RDF accurate citation information (bibliographic references) harvested from the scholarly literature. These are described using the <a href="http://www.sparontologies.net">SPAR Ontologies</a> according to the <a href="model">OCC metadata model</a>, and are made freely available so that others may freely build upon, enhance and reuse them for any purpose, without restriction under copyright or database law.</p>
                 <p class="lead">The OCC is being continuously populated from the scholarly literature.</p>
-                <p class="lead">As of $date, the OCC has ingested the references from<br />$tot citing bibliographic resources<br />and contains information about $cit citation links.</p>
+                <p class="lead">As of $date, the OCC has ingested the references from<br />$tot citing bibliographic resources<br />and contains information about $cit citation links<br />to $cited cited resources.</p>
                 <p>The whole <a href="corpus">OCC</a> is now available for <a href="sparql">querying (via SPARQL)</a> and for browsing by means of a very simple Web interface that shows only the data about bibliographic entities (e.g. <a href="https://w3id.org/oc/corpus/br/1">https://w3id.org/oc/corpus/br/1</a>). Additional and more user-friendly interfaces will be available in the coming months, and will be described in this page.</p>
                 <p>Please follow us on <a href="http://www.twitter.com/opencitations">Twitter</a> to be kept updated with news about the <span class="oc-purple">Open</span><span class="oc-blue">Citations</span> Project!</p>
             </div>

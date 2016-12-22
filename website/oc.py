@@ -108,8 +108,9 @@ class Home:
                 lastrow[0], "%Y-%m-%dT%H:%M:%S").strftime("%B %d, %Y")
             cur_tot = lastrow[5]
             cur_cit = lastrow[2]
+            cur_cited = lastrow[6]
 
-        return render.home(pages, active, cur_date, cur_tot, cur_cit)
+        return render.home(pages, active, cur_date, cur_tot, cur_cit, cur_cited)
 
 
 class About:
