@@ -64,6 +64,15 @@ queries = [
             ?citing a fabio:Expression .
             FILTER EXISTS { ?citing cito:cites [] }
       }
+    }""",
+    """
+    PREFIX fabio: <http://purl.org/spar/fabio/>
+    PREFIX cito: <http://purl.org/spar/cito/>
+    SELECT (count(?cited) as ?tot) {
+      GRAPH <https://w3id.org/oc/corpus/br/> {
+        ?cited a fabio:Expression .
+        FILTER EXISTS { ?cited ^cito:cites [] }
+      }
     }"""
 ]
 
