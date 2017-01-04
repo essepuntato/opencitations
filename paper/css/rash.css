@@ -1,5 +1,5 @@
 /* 
-rash.css - Version 0.4, February 16, 2016
+rash.css - Version 0.5, December 28, 2016
 by Silvio Peroni
 
 This work is licensed under a Creative Commons Attribution 4.0 International License (http://creativecommons.org/licenses/by/4.0/).
@@ -22,8 +22,8 @@ body { font-size: 12pt; }
 
 /* Footnote counters */
 body { counter-reset: fn_pointer; }
-section[role=doc-footnotes] { counter-reset: fn; }
-section[role=doc-footnotes] > section[role=doc-footnote]:before {
+section[role=doc-endnotes] { counter-reset: fn; }
+section[role=doc-endnotes] > section[role=doc-endnote]:before {
     counter-increment: fn;
     content: counter(fn);
     float: left;
@@ -81,6 +81,10 @@ th {
     color: white;
     text-align:center;
 }
+
+.rash-math div {
+    display: inline !important;
+}
 /* /END Figure, table and formula */
 
 /* Heading counters */
@@ -91,32 +95,32 @@ h3 { counter-reset: h4; }
 h4 { counter-reset: h5; }
 h5 { counter-reset: h6; }
 
-section:not([role=doc-abstract]):not([role=doc-bibliography]):not([role=doc-acknowledgements]):not([role=doc-footnotes]) h1:before {
+section:not([role=doc-abstract]):not([role=doc-bibliography]):not([role=doc-acknowledgements]):not([role=doc-endnotes]) h1:before {
     counter-increment: h1;
     content: counter(h1) ". ";
 }
 
-section:not([role=doc-abstract]):not([role=doc-bibliography]):not([role=doc-acknowledgements]):not([role=doc-footnotes]) h2:before{
+section:not([role=doc-abstract]):not([role=doc-bibliography]):not([role=doc-acknowledgements]):not([role=doc-endnotes]) h2:before{
     counter-increment: h2;
     content: counter(h1) "." counter(h2) ". ";
 }
 
-section:not([role=doc-abstract]):not([role=doc-bibliography]):not([role=doc-acknowledgements]):not([role=doc-footnotes]) h3:before{
+section:not([role=doc-abstract]):not([role=doc-bibliography]):not([role=doc-acknowledgements]):not([role=doc-endnotes]) h3:before{
     counter-increment: h3;
     content: counter(h1) "." counter(h2) "." counter(h3) ". ";
 }
 
-section:not([role=doc-abstract]):not([role=doc-bibliography]):not([role=doc-acknowledgements]):not([role=doc-footnotes]) h4:before{
+section:not([role=doc-abstract]):not([role=doc-bibliography]):not([role=doc-acknowledgements]):not([role=doc-endnotes]) h4:before{
     counter-increment: h4;
     content: counter(h1) "." counter(h2) "." counter(h3) "." counter(h4) ". ";
 }
 
-section:not([role=doc-abstract]):not([role=doc-bibliography]):not([role=doc-acknowledgements]):not([role=doc-footnotes]) h5:before{
+section:not([role=doc-abstract]):not([role=doc-bibliography]):not([role=doc-acknowledgements]):not([role=doc-endnotes]) h5:before{
     counter-increment: h5;
     content: counter(h1) "." counter(h2) "." counter(h3) "." counter(h4) "." counter(h5) ". ";
 }
 
-section:not([role=doc-abstract]):not([role=doc-bibliography]):not([role=doc-acknowledgements]):not([role=doc-footnotes]) h6:before{
+section:not([role=doc-abstract]):not([role=doc-bibliography]):not([role=doc-acknowledgements]):not([role=doc-endnotes]) h6:before{
     counter-increment: h6;
     content: counter(h1) "." counter(h2) "." counter(h3) "." counter(h4) "." counter(h5) "." counter(h6) ". ";
 }
@@ -169,11 +173,43 @@ body {
 
 /* Not cited */
 .notcited {
-    color: lightgrey;
-    font-style:italic;
+    color: red;
     cursor:help;
 }
 /* /END Not cited */
+
+/* Sections */
+body > section {
+    padding-right:15px;
+    padding-left:15px;
+    margin-right:auto;
+    margin-left:auto;
+}
+
+@media (min-width:768px){
+    body > section {
+        width:750px;
+    }
+}
+
+@media (min-width:992px){
+    body > section {
+        width:970px;
+    }
+}
+
+@media (min-width:1200px){
+    body > section {
+        width:1170px;
+    }
+}
+
+body > section:after{
+    display:table;
+    content:" ";
+    clear:both;
+}
+/* /END Sections */
 
 /* Error */
 .error {
@@ -187,6 +223,12 @@ body {
     content: "]]";
 }
 /* /END Error */
+
+/* Reference list */
+section[role=doc-bibliography] > ul {
+    list-style-type: decimal;
+}
+/* /END Reference list */
 
 /* ### Rules for printing the document */
 @media print {

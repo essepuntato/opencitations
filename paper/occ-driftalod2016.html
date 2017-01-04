@@ -1,53 +1,25 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<?xml-model href="./rash.rng" type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0"?>
-<html xmlns="http://www.w3.org/1999/xhtml"
-      prefix="schema: http://schema.org/ prism: http://prismstandard.org/namespaces/basic/2.0/">
+<?xml version="1.0" encoding="UTF-8"?><?xml-model href="./rash.rng" type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0"?><html xmlns="http://www.w3.org/1999/xhtml" prefix="schema: http://schema.org/ prism: http://prismstandard.org/namespaces/basic/2.0/">
    <head>
       <meta charset="UTF-8"/>
       <meta name="viewport" content="width=device-width, initial-scale=1"/>
       <link rel="stylesheet" href="css/bootstrap.min.css"/>
       <link rel="stylesheet" href="css/rash.css"/>
-      <script src="js/jquery.min.js"> </script>
-      <script src="js/bootstrap.min.js"> </script>
-      <script src="js/rash.js"> </script>
-      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"> </script>
+      <script src="js/jquery.min.js"><![CDATA[ ]]></script>
+      <script src="js/bootstrap.min.js"><![CDATA[ ]]></script>
+      <script src="js/rash.js"><![CDATA[ ]]></script>
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"><![CDATA[ ]]></script>
       <title>A document-inspired way for tracking changes of RDF data -- The case of the OpenCitations Corpus</title>
-      <meta about="#affiliation-1"
-            property="schema:name"
-            content="DASPLab, DISI, University of Bologna, Bologna, Italy"/>
-      <meta about="#affiliation-2"
-            property="schema:name"
-            content="Oxford e-Research Centre, University of Oxford, Oxford, UK"/>
-      <meta about="#author-1"
-            name="dc.creator"
-            property="schema:name"
-            content="Silvio Peroni"/>
-      <meta about="#author-1"
-            property="schema:email"
-            content="silvio.peroni@unibo.it"/>
-      <link about="#author-1"
-            property="schema:affiliation"
-            href="#affiliation-1"/>
-      <meta about="#author-2"
-            name="dc.creator"
-            property="schema:name"
-            content="David Shotton"/>
-      <meta about="#author-2"
-            property="schema:email"
-            content="david.shotton@oerc.ox.ac.uk"/>
-      <link about="#author-2"
-            property="schema:affiliation"
-            href="#affiliation-2"/>
-      <meta about="#author-3"
-            name="dc.creator"
-            property="schema:name"
-            content="Fabio Vitali"/>
-      <meta about="#author-3"
-            property="schema:email"
-            content="fabio.vitali@unibo.it"/>
-      <link about="#author-3"
-            property="schema:affiliation"
-            href="#affiliation-1"/>
+      <meta about="#affiliation-1" property="schema:name" content="DASPLab, DISI, University of Bologna, Bologna, Italy"/>
+      <meta about="#affiliation-2" property="schema:name" content="Oxford e-Research Centre, University of Oxford, Oxford, UK"/>
+      <meta about="#author-1" name="dc.creator" property="schema:name" content="Silvio Peroni"/>
+      <meta about="#author-1" property="schema:email" content="silvio.peroni@unibo.it"/>
+      <link about="#author-1" property="schema:affiliation" href="#affiliation-1"/>
+      <meta about="#author-2" name="dc.creator" property="schema:name" content="David Shotton"/>
+      <meta about="#author-2" property="schema:email" content="david.shotton@oerc.ox.ac.uk"/>
+      <link about="#author-2" property="schema:affiliation" href="#affiliation-2"/>
+      <meta about="#author-3" name="dc.creator" property="schema:name" content="Fabio Vitali"/>
+      <meta about="#author-3" property="schema:email" content="fabio.vitali@unibo.it"/>
+      <link about="#author-3" property="schema:affiliation" href="#affiliation-1"/>
       <meta property="prism:keyword" content="change tracking"/>
       <meta property="prism:keyword" content="document changes"/>
       <meta property="prism:keyword" content="RDF changes"/>
@@ -352,8 +324,8 @@ DELETE DATA { :sp foaf:givenName 'Silvio' ; foaf:familyName 'Peroni' }</code>
             </li>
          </ol>
       </section>
-      <section role="doc-footnotes">
-         <section id="ftn0" role="doc-footnote">
+      <section role="doc-endnotes">
+         <section id="ftn0" role="doc-endnote">
             <p>We have not specify any formal domain and range for this property so as to foster its reuse in different contexts. However, in the OpenCitations Corpus, it has been used implicitly on <code>prov:Entity</code> individuals, each referring to a particular snapshot of a certain OCC bibliographic entity.</p>
          </section>
       </section>

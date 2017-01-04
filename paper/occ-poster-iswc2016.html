@@ -1,53 +1,25 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<?xml-model href="./rash.rng" type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0"?>
-<html xmlns="http://www.w3.org/1999/xhtml"
-      prefix="schema: http://schema.org/ prism: http://prismstandard.org/namespaces/basic/2.0/">
+<?xml version="1.0" encoding="UTF-8"?><?xml-model href="./rash.rng" type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0"?><html xmlns="http://www.w3.org/1999/xhtml" prefix="schema: http://schema.org/ prism: http://prismstandard.org/namespaces/basic/2.0/">
    <head>
       <meta charset="UTF-8"/>
       <meta name="viewport" content="width=device-width, initial-scale=1"/>
       <link rel="stylesheet" href="css/bootstrap.min.css"/>
       <link rel="stylesheet" href="css/rash.css"/>
-      <script src="js/jquery.min.js"> </script>
-      <script src="js/bootstrap.min.js"> </script>
-      <script src="js/rash.js"> </script>
-      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"> </script>
+      <script src="js/jquery.min.js"><![CDATA[ ]]></script>
+      <script src="js/bootstrap.min.js"><![CDATA[ ]]></script>
+      <script src="js/rash.js"><![CDATA[ ]]></script>
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"><![CDATA[ ]]></script>
       <title>Jailbreaking your reference lists: OpenCitations strike again</title>
-      <meta about="#affiliation-1"
-            property="schema:name"
-            content="DASPLab, DISI, University of Bologna, Bologna, Italy"/>
-      <meta about="#affiliation-2"
-            property="schema:name"
-            content="Oxford e-Research Centre, University of Oxford, Oxford, UK"/>
-      <meta about="#author-1"
-            name="dc.creator"
-            property="schema:name"
-            content="Silvio Peroni"/>
-      <meta about="#author-1"
-            property="schema:email"
-            content="silvio.peroni@unibo.it"/>
-      <link about="#author-1"
-            property="schema:affiliation"
-            href="#affiliation-1"/>
-      <meta about="#author-2"
-            name="dc.creator"
-            property="schema:name"
-            content="David Shotton"/>
-      <meta about="#author-2"
-            property="schema:email"
-            content="david.shotton@oerc.ox.ac.uk"/>
-      <link about="#author-2"
-            property="schema:affiliation"
-            href="#affiliation-2"/>
-      <meta about="#author-3"
-            name="dc.creator"
-            property="schema:name"
-            content="Fabio Vitali"/>
-      <meta about="#author-3"
-            property="schema:email"
-            content="fabio.vitali@unibo.it"/>
-      <link about="#author-3"
-            property="schema:affiliation"
-            href="#affiliation-1"/>
+      <meta about="#affiliation-1" property="schema:name" content="DASPLab, DISI, University of Bologna, Bologna, Italy"/>
+      <meta about="#affiliation-2" property="schema:name" content="Oxford e-Research Centre, University of Oxford, Oxford, UK"/>
+      <meta about="#author-1" name="dc.creator" property="schema:name" content="Silvio Peroni"/>
+      <meta about="#author-1" property="schema:email" content="silvio.peroni@unibo.it"/>
+      <link about="#author-1" property="schema:affiliation" href="#affiliation-1"/>
+      <meta about="#author-2" name="dc.creator" property="schema:name" content="David Shotton"/>
+      <meta about="#author-2" property="schema:email" content="david.shotton@oerc.ox.ac.uk"/>
+      <link about="#author-2" property="schema:affiliation" href="#affiliation-2"/>
+      <meta about="#author-3" name="dc.creator" property="schema:name" content="Fabio Vitali"/>
+      <meta about="#author-3" property="schema:email" content="fabio.vitali@unibo.it"/>
+      <link about="#author-3" property="schema:affiliation" href="#affiliation-1"/>
       <meta property="prism:keyword" content="OpenCitations"/>
       <meta property="prism:keyword" content="OpenCitations Corpus"/>
       <meta property="prism:keyword" content="Semantic Publishing"/>
@@ -111,8 +83,7 @@
          <p>The workflow introduced in <a href="#refIllustration0"> </a> is a process that runs until no more JSON files can be produced by BEE. Thus, the current instance of the OCC is evolving dynamically in time, and can be easily extended so as to interact with additional REST APIs from different sources, so as to gather additional article metadata and their related references. Currently, each day the workflow adds about 2 million triples to the corpus, describing more than 20,000 new citing/cited bibliographic resources and about 100,000 new authors, about 5% of whom are disambiguated through their ORCID ids.</p>
          <figure id="refIllustration0">
             <p>
-               <img src="img/1000020100000948000004D0192123CB.png"
-                    alt="The steps involving BEE and SPACIN, and their related Python classes, in the production of the OpenCitations Corpus."/>
+               <img src="img/1000020100000948000004D0192123CB.png" alt="The steps involving BEE and SPACIN, and their related Python classes, in the production of the OpenCitations Corpus."/>
             </p>
             <figcaption>The steps involving BEE and SPACIN, and their related Python classes, in the production of the OpenCitations Corpus.</figcaption>
          </figure>
@@ -150,8 +121,8 @@
             </li>
          </ol>
       </section>
-      <section role="doc-footnotes">
-         <section id="ftn0" role="doc-footnote">
+      <section role="doc-endnotes">
+         <section id="ftn0" role="doc-endnote">
             <p>Additional and more user-friendly interfaces will be available in the coming months, and will be described in the project homepage.</p>
          </section>
       </section>

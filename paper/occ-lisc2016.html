@@ -1,53 +1,25 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<?xml-model href="./rash.rng" type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0"?>
-<html xmlns="http://www.w3.org/1999/xhtml"
-      prefix="schema: http://schema.org/ prism: http://prismstandard.org/namespaces/basic/2.0/">
+<?xml version="1.0" encoding="UTF-8"?><?xml-model href="./rash.rng" type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0"?><html xmlns="http://www.w3.org/1999/xhtml" prefix="schema: http://schema.org/ prism: http://prismstandard.org/namespaces/basic/2.0/">
    <head>
       <meta charset="UTF-8"/>
       <meta name="viewport" content="width=device-width, initial-scale=1"/>
       <link rel="stylesheet" href="css/bootstrap.min.css"/>
       <link rel="stylesheet" href="css/rash.css"/>
-      <script src="js/jquery.min.js"> </script>
-      <script src="js/bootstrap.min.js"> </script>
-      <script src="js/rash.js"> </script>
-      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"> </script>
+      <script src="js/jquery.min.js"><![CDATA[ ]]></script>
+      <script src="js/bootstrap.min.js"><![CDATA[ ]]></script>
+      <script src="js/rash.js"><![CDATA[ ]]></script>
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"><![CDATA[ ]]></script>
       <title>Freedom for bibliographic references: OpenCitations arise</title>
-      <meta about="#affiliation-1"
-            property="schema:name"
-            content="DASPLab, DISI, University of Bologna, Bologna, Italy"/>
-      <meta about="#affiliation-2"
-            property="schema:name"
-            content="Oxford e-Research Centre, University of Oxford, Oxford, UK"/>
-      <meta about="#author-1"
-            name="dc.creator"
-            property="schema:name"
-            content="Silvio Peroni"/>
-      <meta about="#author-1"
-            property="schema:email"
-            content="silvio.peroni@unibo.it"/>
-      <link about="#author-1"
-            property="schema:affiliation"
-            href="#affiliation-1"/>
-      <meta about="#author-2"
-            name="dc.creator"
-            property="schema:name"
-            content="David Shotton"/>
-      <meta about="#author-2"
-            property="schema:email"
-            content="david.shotton@oerc.ox.ac.uk"/>
-      <link about="#author-2"
-            property="schema:affiliation"
-            href="#affiliation-2"/>
-      <meta about="#author-3"
-            name="dc.creator"
-            property="schema:name"
-            content="Fabio Vitali"/>
-      <meta about="#author-3"
-            property="schema:email"
-            content="fabio.vitali@unibo.it"/>
-      <link about="#author-3"
-            property="schema:affiliation"
-            href="#affiliation-1"/>
+      <meta about="#affiliation-1" property="schema:name" content="DASPLab, DISI, University of Bologna, Bologna, Italy"/>
+      <meta about="#affiliation-2" property="schema:name" content="Oxford e-Research Centre, University of Oxford, Oxford, UK"/>
+      <meta about="#author-1" name="dc.creator" property="schema:name" content="Silvio Peroni"/>
+      <meta about="#author-1" property="schema:email" content="silvio.peroni@unibo.it"/>
+      <link about="#author-1" property="schema:affiliation" href="#affiliation-1"/>
+      <meta about="#author-2" name="dc.creator" property="schema:name" content="David Shotton"/>
+      <meta about="#author-2" property="schema:email" content="david.shotton@oerc.ox.ac.uk"/>
+      <link about="#author-2" property="schema:affiliation" href="#affiliation-2"/>
+      <meta about="#author-3" name="dc.creator" property="schema:name" content="Fabio Vitali"/>
+      <meta about="#author-3" property="schema:email" content="fabio.vitali@unibo.it"/>
+      <link about="#author-3" property="schema:affiliation" href="#affiliation-1"/>
       <meta property="prism:keyword" content="OpenCitations"/>
       <meta property="prism:keyword" content="OpenCitations Corpus"/>
       <meta property="prism:keyword" content="Semantic Publishing"/>
@@ -108,8 +80,7 @@
             <p>For convenience, all the terms from the aforementioned ontologies are collected within a new ontology called the <a href="https://w3id.org/oc/ontology">OpenCitations Ontology (OCO)</a>. This is not yet another bibliographic ontology, but rather just a mechanism for grouping existing complementary ontological entities from several other ontologies for the purpose of providing descriptive metadata for the OCC.</p>
             <figure id="refIllustration2">
                <p>
-                  <img src="img/10000000000004F1000003C40B1D2514.png"
-                       alt="The Graffoo diagram [14] of the main ontological entities described by the OCC metadata model"/>
+                  <img src="img/10000000000004F1000003C40B1D2514.png" alt="The Graffoo diagram [14] of the main ontological entities described by the OCC metadata model"/>
                </p>
                <figcaption>The Graffoo diagram <a href="#__RefNumPara__6706_524287244"> </a> of the main ontological entities described by the OCC metadata model.</figcaption>
             </figure>
@@ -199,8 +170,7 @@
                <p>Each new resource recorded within the OCC by SPACIN occupies between 0.3 and 4 KB, plus an additional 32 KB dedicated to storage of its provenance data. Each day, the workflow adds about 2 million triples to the corpus, describing more than 20,000 new citing/cited bibliographic resources and about 100,000 new authors, 5% of whom are disambiguated through their ORCID ids.</p>
                <figure id="refIllustration0">
                   <p>
-                     <img src="img/1000020100000948000004D0192123CB.png"
-                          alt="The steps involving BEE and SPACIN, and their related Python classes, in the production of the OpenCitations Corpus."/>
+                     <img src="img/1000020100000948000004D0192123CB.png" alt="The steps involving BEE and SPACIN, and their related Python classes, in the production of the OpenCitations Corpus."/>
                   </p>
                   <figcaption>The steps involving BEE and SPACIN, and their related Python classes, in the production of the OpenCitations Corpus.</figcaption>
                </figure>
@@ -350,8 +320,8 @@
             </li>
          </ol>
       </section>
-      <section role="doc-footnotes">
-         <section id="ftn1" role="doc-footnote">
+      <section role="doc-endnotes">
+         <section id="ftn1" role="doc-endnote">
             <p>All the resources in the exemplar datasets have URLs that starts with “<a href="http://localhost:8000/corpus/">http://localhost:8000/corpus/</a>” and do not refer to any existing IRI included in the current version of the corpus.</p>
          </section>
       </section>

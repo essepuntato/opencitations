@@ -1,8 +1,8 @@
 /*
- * rash.js - Version 0.5.3, March 30, 2016
- * Copyright (c) 2014-2016, Silvio Peroni <essepuntato@gmail.com>
+ * rash.js - Version 0.6, January 1, 2017
+ * Copyright (c) 2014-2016, Silvio Peroni <essepuntato@gmail.com> 
  * 
- * with precious contributions by Ruben Verborgh.
+ * with precious contributions by Ruben Verborgh and Vincenzo Rubano.
  * 
  * Permission to use, copy, modify, and/or distribute this software for any purpose with 
  * or without fee is hereby granted, provided that the above copyright notice and this 
@@ -106,7 +106,7 @@ jQuery.fn.extend({
         $("p.keywords").remove();
     
         /* Header title */
-        var header = $("<header class=\"page-header container cgen\"></header>");
+        var header = $("<header class=\"page-header container cgen\" data-rash-original-content=\"\"></header>");
         header.prependTo($("body"))
         var title_string = "";
         var title_split = $("head title").html().split(" -- ");
@@ -300,25 +300,6 @@ var listingbox_selector_pre = "pre";
 var listingbox_selector = "figure > " + listingbox_selector_pre;
 
 $(function() {
-    /* LaTeX formulas */
-    if (typeof MathJax !== 'undefined') {
-        var s_delim = 's$s';
-        var e_delim = 'e$e';
-        $('body').attr("class", "nomath");
-        $('span[role=math]').each(function() {
-            $(this).attr("class", "math");
-            $(this).html(s_delim + $(this).html() + e_delim);
-        });
-        MathJax.Hub.Config({
-            tex2jax: {
-                inlineMath: [ [s_delim, e_delim] ],
-                processClass: "math",
-                ignoreClass: "nomath"
-            }
-        });
-    }
-    /* /END LaTeX formulas */
-    
     /* Code Block */
     $('pre').each(function() {
         $(this).html($.trim($(this).html()))
@@ -329,7 +310,7 @@ $(function() {
     /* /END Code Block */
 
     /* Bibliographic reference list */
-    $('li[role=doc-biblioentry]').sort(function(a,b) {
+    $('ul > li[role=doc-biblioentry]').sort(function(a,b) {
         var a_text = $(a).text().replace(/\s+/g," ").split();
         var b_text = $(b).text().replace(/\s+/g," ").split();
         if (a_text < b_text) {
@@ -341,23 +322,22 @@ $(function() {
         }
     }).appendTo('section[role=doc-bibliography] ul , section[role=doc-bibliography] ol');
     
-    /* Highlights in light-grey all the bibliographic references that are not cited in the paper */
+    /* Highlights with a red '[X]' all the bibliographic references that are not cited in the paper */
     $('li[role=doc-biblioentry]').each(function() {
         var cur_entry_id = $(this).attr("id");
         if (
             cur_entry_id == undefined || 
             cur_entry_id == false || 
-            $(cur_entry_id) == null) {
-            $(this).addClass("notcited");
-            $(this).attr("title", "This reference is not cited in the document.");
-        }
+            $("a[href=#" + cur_entry_id + "]").length == 0) {
+                $(this).find("p").prepend("<span class=\"cgen notcited\" data-rash-original-content=\"\" title=\"This reference is not cited in the document.\">[X] </span>");
+            }
     })
     /* /END Bibliographic reference list */
     
     /* Footnotes (part one) */
-    $('section[role=doc-footnotes] section[role=doc-footnote]').sort(function(a,b) {
+    $('section[role=doc-endnotes] section[role=doc-endnote]').sort(function(a,b) {
         var all_footnote_pointers = $("a[href]").each(function() {
-            if ($.trim($(this).text()) == '' && $($(this).attr("href")).parents("section[role=doc-footnotes]")) {
+            if ($.trim($(this).text()) == '' && $($(this).attr("href")).parents("section[role=doc-endnotes]")) {
                 return $(this);
             }
         });
@@ -370,30 +350,34 @@ $(function() {
         } else {
             return 0;
         }
-    }).appendTo('section[role=doc-footnotes]');
-    $("section[role=doc-footnotes]").prepend("<h1>Footnotes</h1>");
+    }).appendTo('section[role=doc-endnotes]');
+    $("section[role=doc-endnotes]").prepend("<h1 class=\"cgen\" data-rash-original-content=\"\">Footnotes</h1>");
     /* /END Footnotes (part one) */
     
     /* Captions */
     $(figurebox_selector).each(function() {
         var cur_caption = $(this).parents("figure").find("figcaption");
         var cur_number = $(this).findNumber(figurebox_selector);
-        cur_caption.html("<strong class=\"cgen\">Figure " + cur_number + ". </strong>" + cur_caption.html());
+        cur_caption.html("<strong class=\"cgen\" data-rash-original-content=\"\">Figure " + cur_number +
+            ". </strong>" + cur_caption.html());
     });
     $(tablebox_selector).each(function() {
         var cur_caption = $(this).parents("figure").find("figcaption");
         var cur_number = $(this).findNumber(tablebox_selector);
-        cur_caption.html("<strong class=\"cgen\">Table " + cur_number + ". </strong>" + cur_caption.html());
+        cur_caption.html("<strong class=\"cgen\" data-rash-original-content=\"\">Table " + cur_number +
+            ". </strong>" + cur_caption.html());
     });
     $(formulabox_selector).each(function() {
         var cur_caption = $(this).parents("figure").find("p");
         var cur_number = $(this).findNumber(formulabox_selector);
-        cur_caption.html(cur_caption.html() + "<span class=\"cgen\"> (" + cur_number + ")</span>");
+        cur_caption.html(cur_caption.html() + "<span class=\"cgen\" data-rash-original-content=\"\"> (" +
+            cur_number + ")</span>");
     });
     $(listingbox_selector).each(function() {
         var cur_caption = $(this).parents("figure").find("figcaption");
         var cur_number = $(this).findNumber(listingbox_selector);
-        cur_caption.html("<strong class=\"cgen\">Listing " + cur_number + ". </strong>" + cur_caption.html());
+        cur_caption.html("<strong class=\"cgen\" data-rash-original-content=\"\">Listing " + cur_number +
+            ". </strong>" + cur_caption.html());
     });
     /* /END Captions */
     
@@ -404,26 +388,29 @@ $(function() {
            referenced_element = $(cur_id); 
            
            if (referenced_element.length > 0) { 
-                referenced_element_figure = referenced_element.find(figurebox_selector_img + "," + figurebox_selector_svg);
+                referenced_element_figure = referenced_element.find(
+                    figurebox_selector_img + "," + figurebox_selector_svg);
                 referenced_element_table = referenced_element.find(tablebox_selector_table);
                 referenced_element_formula = referenced_element.find(
                     formulabox_selector_img + "," + formulabox_selector_span + "," + formulabox_selector_math);
                 referenced_element_listing = referenced_element.find(listingbox_selector_pre);
+                original_content = $(this).html()
                 /* Special sections */
                 if (
                     $("section[role=doc-abstract]" + cur_id).length > 0 ||
                     $("section[role=doc-bibliography]" + cur_id).length > 0 ||
-                    $("section[role=doc-footnotes]" + cur_id).length > 0 ||
+                    $("section[role=doc-endnotes]" + cur_id).length > 0 ||
                     $("section[role=doc-acknowledgements]" + cur_id).length > 0) {
-                    $(this).html("Section <q>" + $(cur_id + " h1").text() + "</q>");
+                    $(this).html("<span class=\"cgen\" data-rash-original-content=\"" + original_content +
+                        "\">Section <q>" + $(cur_id + " > h1").text() + "</q></span>");
                 /* Bibliographic references */
                 } else if ($(cur_id).parents("section[role=doc-bibliography]").length > 0) {
                     var cur_count = $(cur_id).prevAll("li").length + 1;
-                    $(this).html("[" + cur_count + "]");
-                    $(this).attr("title", $(cur_id).text().replace(/\s+/g, " ").trim());
-                    $(this).addClass("cgen");
+                    $(this).html("<span class=\"cgen\" data-rash-original-content=\"" + original_content +
+                        "\" title=\"Bibliographic reference " + cur_count + ": " +
+                        $(cur_id).text().replace(/\s+/g, " ").trim() + "\">[" + cur_count + "]</span>");
                 /* Footnote references */
-                } else if ($(cur_id).parents("section[role=doc-footnotes]").length > 0) {
+                } else if ($(cur_id).parents("section[role=doc-endnotes]").length > 0) {
                     var cur_contents = $(this).parent().contents();
                     var cur_index = cur_contents.index($(this));
                     var prev_tmp = null;
@@ -438,78 +425,77 @@ $(function() {
                     var prev_el = $(prev_tmp);
                     var current_id = $(this).attr("href");
                     var footnote_element = $(current_id);
-                    if (footnote_element.length > 0 && footnote_element.parent("section[role=doc-footnotes]").length > 0) {
+                    if (footnote_element.length > 0 && 
+                        footnote_element.parent("section[role=doc-endnotes]").length > 0) {
                         var count = $(current_id).prevAll("section").length + 1;
-                        $(this).after("<sup class=\"fn cgen\">" + (prev_el.hasClass("fn") ? "," : "") +
+                        if (prev_el.find("sup").hasClass("fn")) {
+                            $(this).before("<sup class=\"cgen\" data-rash-original-content=\"\">,</sup>");
+                        }
+                        $(this).html("<sup class=\"fn cgen\" data-rash-original-content=\"" + original_content + "\">" + 
                             "<a name=\"fn_pointer_" + current_id.replace("#", "") + 
-                            "\" href=\"" + current_id + "\"" + 
-                            "\" title=\"" + $(current_id).text().replace(/\s+/g," ").trim() + "\">" + count + "</a></sup>");
-                        $(this).remove()
+                            "\" title=\"Footnote " + count + ": " +
+                            $(current_id).text().replace(/\s+/g," ").trim() + "\">" + count + "</a></sup>");
                     } else {
-                        $(this).replaceWith("<span class=\"error cgen\">ERR: footnote '" + current_id.replace("#","") + "' does not exist</span>");
+                        $(this).html("<span class=\"error cgen\" data-rash-original-content=\"" + original_content + 
+                            "\">ERR: footnote '" + current_id.replace("#","") + "' does not exist</span>");
                     }
                 /* Common sections */
                 } else if ($("section" + cur_id).length > 0) {
                     var cur_count = $(cur_id).findHierarchicalNumber(
                         "section:not([role=doc-abstract]):not([role=doc-bibliography]):" + 
-                        "not([role=doc-footnotes]):not([role=doc-acknowledgements])");
+                        "not([role=doc-endnotes]):not([role=doc-acknowledgements])");
                     if (cur_count != null && cur_count != "") {
-                        $(this).html("Section " + cur_count);
-                        $(this).addClass("cgen");
+                        $(this).html("<span class=\"cgen\" data-rash-original-content=\"" + original_content + 
+                        "\">Section " + cur_count + "</span>");
                     }
                 /* Reference to figure boxes */
                 } else if (referenced_element_figure.length > 0) {
                     var cur_count = referenced_element_figure.findNumber(figurebox_selector);
                     if (cur_count != 0) {
-                        $(this).html("Figure " + cur_count);
-                        $(this).addClass("cgen");
+                        $(this).html("<span class=\"cgen\" data-rash-original-content=\"" + original_content + 
+                            "\">Figure " + cur_count + "</span>");
                     }
                 /* Reference to table boxes */
                 } else if (referenced_element_table.length > 0) {
                     var cur_count = referenced_element_table.findNumber(tablebox_selector);
                     if (cur_count != 0) {
-                        $(this).html("Table " + cur_count);
-                        $(this).addClass("cgen");
+                        $(this).html("<span class=\"cgen\" data-rash-original-content=\"" + original_content + 
+                            "\">Table " + cur_count + "</span>");
                     }
                 /* Reference to formula boxes */
                 } else if (referenced_element_formula.length > 0) {
                     var cur_count = referenced_element_formula.findNumber(formulabox_selector);
                     if (cur_count != 0) {
-                        $(this).html("Formula " + cur_count);
-                        $(this).addClass("cgen");
+                        $(this).html("<span class=\"cgen\" data-rash-original-content=\"" + original_content + 
+                            "\">Formula " + cur_count + "</span>");
                     }
                 /* Reference to listing boxes */
                 } else if (referenced_element_listing.length > 0) {
                     var cur_count = referenced_element_listing.findNumber(listingbox_selector);
                     if (cur_count != 0) {
-                        $(this).html("Listing " + cur_count);
-                        $(this).addClass("cgen");
+                        $(this).html("<span class=\"cgen\" data-rash-original-content=\"" + original_content + 
+                        "\">Listing " + cur_count + "</span>");
                     }
                 } else {
-                    $(this).replaceWith("<span class=\"error cgen\">ERR: referenced element '" + cur_id.replace("#","") + 
+                    $(this).html("<span class=\"error cgen\" data-rash-original-content=\"" + original_content + 
+                        "\">ERR: referenced element '" + cur_id.replace("#","") + 
                         "' has not the correct type (it should be either a figure, a table, a formula, a listing, or a section)</span>");
                 }
            } else {
-               $(this).replaceWith("<span class=\"error cgen\">ERR: referenced element '" + 
-                                    cur_id.replace("#","") + "' does not exist</span>");
+               $(this).replaceWith("<span class=\"error cgen\" data-rash-original-content=\"" + original_content + 
+                    "\">ERR: referenced element '" + cur_id.replace("#","") + "' does not exist</span>");
            }
         }
     });
     /* /END References */
 
     /* Footnotes (part 2) */
-    $("section[role=doc-footnotes] > section[role=doc-footnote]").each(function() {
+    $("section[role=doc-endnotes] > section[role=doc-endnote]").each(function() {
         var current_id = $(this).attr("id");
-        $(this).children(":last-child").append("<sup class=\"hidden-print cgen\"> <a href=\"#fn_pointer_" + 
-                                                current_id + "\">[back]</a></sup>");
+        $(this).children(":last-child").append("<sup class=\"hidden-print cgen\" data-rash-original-content=\"" + original_content + 
+            "\"> <a href=\"#fn_pointer_" + current_id + "\">[back]</a></sup>");
     });
     /* /END Footnotes (part 2) */
-    
-    /* Container sections */
-    $(
-        "body > section , section[role=doc-abstract] , section[role=doc-acknowledgements] , " + 
-        "section[role=doc-bibliography], section[role=doc-footnotes]").addClass("container");
-    /* /END Container sections */
     
     /* Heading dimensions */
     $("h1").each(function () {
@@ -527,12 +513,8 @@ $(function() {
     $(this).addHeaderHTML();
     /* /END Set header */
     
-    /* Bibliography */
-    $("section[role=doc-bibliography] ul").replaceWith("<ol>" +$("section[role=doc-bibliography] ul").html() + "</ol>");
-    /* /END Bibliography */
-    
     /* Footer */
-    var footer = $("<footer class=\"footer hidden-print cgen\">" + 
+    var footer = $("<footer class=\"footer hidden-print cgen\" data-rash-original-content=\"\">" + 
         "<p><span>Words: " + $("body").countWords() + "</span>" +
         "<span>Figures: " + $("body").countElements(figurebox_selector) + "</span>" +
         "<span>Tables: " + $("body").countElements(tablebox_selector) + "</span>" +
@@ -550,6 +532,48 @@ $(function() {
         "</p></footer>");
     footer.appendTo($("body"))
     /* /END Footer */
+    
+    /* AsciiMath and LaTeX formulas */
+    if (typeof MathJax !== 'undefined') {
+      // MathJax should parse *only* math content within span with role=math
+      var ignore_math_class = 'rash-nomath';
+      var process_math_class = 'rash-math';
+              $('body').attr("class", ignore_math_class);
+      var ascii_math_left_delimiter = '``';
+      var ascii_math_right_delimiter = '``';
+                var tex_math_left_delimiter = '$$';
+          var tex_math_right_delimiter = '$$';
+        $('span[role=math]').each(function() {
+          //We need to keep the outer span to let MathJax know that it should process its content
+          // but we *must* absolutely change its role.
+          $(this).attr("role", "presentation");
+          $(this).attr("class", process_math_class);
+          var tex_math_regex = /\\.+(?![\ ])/g;
+          if(tex_math_regex.test($(this).text())) {
+            $(this).html(tex_math_left_delimiter+$(this).html()+tex_math_right_delimiter);
+          }
+          else {
+            $(this).html(ascii_math_left_delimiter+$(this).html()+ascii_math_right_delimiter);
+          }
+        });
+        MathJax.Hub.Config({
+          asciimath2jax: {
+            // delimiters for AsciiMath formulas
+            delimiters: [ [ascii_math_left_delimiter, ascii_math_right_delimiter] ],
+              processClass: process_math_class,
+              ignoreClass: ignore_math_class
+          },
+            tex2jax: {
+              // delimiters for LaTeX formulas
+                inlineMath: [ [tex_math_left_delimiter, tex_math_right_delimiter] ],
+                processClass: process_math_class,
+                ignoreClass: ignore_math_class
+            }
+        });
+        // we changed the DOM, so we make MathJax typeset the document again.
+                MathJax.Hub.Queue([ "Typeset", MathJax.Hub ]);
+    }
+    /* /END AsciiMath and LaTeX formulas */
     
     /* General function for loading CSS */
     var currentStyle = document.location.hash;
