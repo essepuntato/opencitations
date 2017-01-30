@@ -73,6 +73,16 @@ queries = [
         ?cited a fabio:Expression .
         FILTER EXISTS { ?cited ^cito:cites [] }
       }
+    }""",
+    """
+    PREFIX datacite: <http://purl.org/spar/datacite/>
+    PREFIX pro: <http://purl.org/spar/pro/>
+    PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+    SELECT (count(?auth) as ?tot) {
+        GRAPH <https://w3id.org/oc/corpus/ra/> {
+            ?auth a foaf:Agent .
+            FILTER EXISTS { ?auth ^pro:isHeldBy/pro:withRole pro:author }
+        }
     }"""
 ]
 
