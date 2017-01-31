@@ -80,8 +80,7 @@ queries = [
     PREFIX foaf: <http://xmlns.com/foaf/0.1/>
     SELECT (count(?auth) as ?tot) {
         GRAPH <https://w3id.org/oc/corpus/ra/> {
-            ?auth a foaf:Agent .
-            FILTER EXISTS { ?auth ^pro:isHeldBy/pro:withRole pro:author }
+            ?auth a foaf:Agent
         }
     }"""
 ]
