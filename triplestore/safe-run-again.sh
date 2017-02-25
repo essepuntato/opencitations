@@ -32,6 +32,7 @@ sleep 2
 ./check-and-run.sh
 
 # Gently run all the processes
+/home/essepuntato/OC/statistics.sh
 /home/essepuntato/OC/script/gently-run.sh
 
 cd $CUR_DIR

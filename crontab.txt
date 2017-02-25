@@ -7,7 +7,8 @@
 */5     *   *   *   *   /srv/oc/triplestore/check-and-run.sh
 
 # 3. retrieve the updated statistics of the corpus (it runs every day at 4:00)
-0       4   *   *   *   /home/essepuntato/OC/statistics.sh
+# Removed, since done in the context of the re-run of the triplestore
+# 0       4   *   *   *   /home/essepuntato/OC/statistics.sh
 
 # 4. try to run SPACIN every 10 minutes
 */10    *   *   *   *   /home/essepuntato/OC/script/spacin-check-and-run.sh
