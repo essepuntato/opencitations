@@ -22,15 +22,15 @@ from SPARQLWrapper import SPARQLWrapper, JSON
 
 queries = [
     # 0
-    # """
-    # PREFIX fabio: <http://purl.org/spar/fabio/>
-    # PREFIX cito: <http://purl.org/spar/cito/>
-    # SELECT (count(?citing) as ?tot) {
-    #     GRAPH <https://w3id.org/oc/corpus/br/> {
-    #         ?citing a fabio:Expression .
-    #         FILTER EXISTS { ?citing cito:cites | ^cito:cites [] }
-    #   }
-    # }""",
+    """
+    PREFIX fabio: <http://purl.org/spar/fabio/>
+    PREFIX cito: <http://purl.org/spar/cito/>
+    SELECT (count(?citing) as ?tot) {
+        GRAPH <https://w3id.org/oc/corpus/br/> {
+            ?citing a fabio:Expression .
+            FILTER EXISTS { ?citing cito:cites | ^cito:cites [] }
+      }
+    }""",
     # 1
     """
     PREFIX cito: <http://purl.org/spar/cito/>
@@ -40,25 +40,25 @@ queries = [
         }
     }""",
     # 2
-    # """
-    # PREFIX fabio: <http://purl.org/spar/fabio/>
-    # PREFIX frbr: <http://purl.org/vocab/frbr/core#>
-    # SELECT (count(DISTINCT ?container) as ?tot) {
-    #     GRAPH <https://w3id.org/oc/corpus/br/> {
-    #         ?container ^frbr:partOf ?something .
-    #         FILTER NOT EXISTS { ?container frbr:partOf ?other_container }
-    #     }
-    # }""",
+    """
+    PREFIX fabio: <http://purl.org/spar/fabio/>
+    PREFIX frbr: <http://purl.org/vocab/frbr/core#>
+    SELECT (count(DISTINCT ?container) as ?tot) {
+        GRAPH <https://w3id.org/oc/corpus/br/> {
+            ?container ^frbr:partOf ?something .
+            FILTER NOT EXISTS { ?container frbr:partOf ?other_container }
+        }
+    }""",
     # 3
-    # """
-    # PREFIX datacite: <http://purl.org/spar/datacite/>
-    # PREFIX pro: <http://purl.org/spar/pro/>
-    # PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-    # SELECT (count(?id) as ?tot) {
-    #     GRAPH <https://w3id.org/oc/corpus/id/> {
-    #         ?id datacite:usesIdentifierScheme datacite:orcid
-    #     }
-    # }""",
+    """
+    PREFIX datacite: <http://purl.org/spar/datacite/>
+    PREFIX pro: <http://purl.org/spar/pro/>
+    PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+    SELECT (count(?id) as ?tot) {
+        GRAPH <https://w3id.org/oc/corpus/id/> {
+            ?id datacite:usesIdentifierScheme datacite:orcid
+        }
+    }""",
     # 4
     """
     PREFIX fabio: <http://purl.org/spar/fabio/>
@@ -78,18 +78,17 @@ queries = [
         ?cited a fabio:Expression .
         FILTER EXISTS { ?cited ^cito:cites [] }
       }
-    }"""
+    }""",
     # 6
-    # ,
-    # """
-    # PREFIX datacite: <http://purl.org/spar/datacite/>
-    # PREFIX pro: <http://purl.org/spar/pro/>
-    # PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-    # SELECT (count(?auth) as ?tot) {
-    #     GRAPH <https://w3id.org/oc/corpus/ra/> {
-    #         ?auth a foaf:Agent
-    #     }
-    # }"""
+    """
+    PREFIX datacite: <http://purl.org/spar/datacite/>
+    PREFIX pro: <http://purl.org/spar/pro/>
+    PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+    SELECT (count(?auth) as ?tot) {
+        GRAPH <https://w3id.org/oc/corpus/ra/> {
+            ?auth a foaf:Agent
+        }
+    }"""
 ]
 
 tp = SPARQLWrapper(triplestore_url)
