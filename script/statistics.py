@@ -16,21 +16,22 @@
 
 __author__ = 'essepuntato'
 
-import json
 from conf_spacin import *
 from datetime import datetime
 from SPARQLWrapper import SPARQLWrapper, JSON
 
 queries = [
-    """
-    PREFIX fabio: <http://purl.org/spar/fabio/>
-    PREFIX cito: <http://purl.org/spar/cito/>
-    SELECT (count(?citing) as ?tot) {
-        GRAPH <https://w3id.org/oc/corpus/br/> {
-            ?citing a fabio:Expression .
-            FILTER EXISTS { ?citing cito:cites | ^cito:cites [] }
-      }
-    }""",
+    # 0
+    # """
+    # PREFIX fabio: <http://purl.org/spar/fabio/>
+    # PREFIX cito: <http://purl.org/spar/cito/>
+    # SELECT (count(?citing) as ?tot) {
+    #     GRAPH <https://w3id.org/oc/corpus/br/> {
+    #         ?citing a fabio:Expression .
+    #         FILTER EXISTS { ?citing cito:cites | ^cito:cites [] }
+    #   }
+    # }""",
+    # 1
     """
     PREFIX cito: <http://purl.org/spar/cito/>
     SELECT (count(?citing) as ?tot) {
@@ -38,24 +39,27 @@ queries = [
             ?citing cito:cites ?cited
         }
     }""",
-    """
-    PREFIX fabio: <http://purl.org/spar/fabio/>
-    PREFIX frbr: <http://purl.org/vocab/frbr/core#>
-    SELECT (count(DISTINCT ?container) as ?tot) {
-        GRAPH <https://w3id.org/oc/corpus/br/> {
-            ?container ^frbr:partOf ?something .
-            FILTER NOT EXISTS { ?container frbr:partOf ?other_container }
-        }
-    }""",
-    """
-    PREFIX datacite: <http://purl.org/spar/datacite/>
-    PREFIX pro: <http://purl.org/spar/pro/>
-    PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-    SELECT (count(?id) as ?tot) {
-        GRAPH <https://w3id.org/oc/corpus/id/> {
-            ?id datacite:usesIdentifierScheme datacite:orcid
-        }
-    }""",
+    # 2
+    # """
+    # PREFIX fabio: <http://purl.org/spar/fabio/>
+    # PREFIX frbr: <http://purl.org/vocab/frbr/core#>
+    # SELECT (count(DISTINCT ?container) as ?tot) {
+    #     GRAPH <https://w3id.org/oc/corpus/br/> {
+    #         ?container ^frbr:partOf ?something .
+    #         FILTER NOT EXISTS { ?container frbr:partOf ?other_container }
+    #     }
+    # }""",
+    # 3
+    # """
+    # PREFIX datacite: <http://purl.org/spar/datacite/>
+    # PREFIX pro: <http://purl.org/spar/pro/>
+    # PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+    # SELECT (count(?id) as ?tot) {
+    #     GRAPH <https://w3id.org/oc/corpus/id/> {
+    #         ?id datacite:usesIdentifierScheme datacite:orcid
+    #     }
+    # }""",
+    # 4
     """
     PREFIX fabio: <http://purl.org/spar/fabio/>
     PREFIX cito: <http://purl.org/spar/cito/>
@@ -65,6 +69,7 @@ queries = [
             FILTER EXISTS { ?citing cito:cites [] }
       }
     }""",
+    # 5
     """
     PREFIX fabio: <http://purl.org/spar/fabio/>
     PREFIX cito: <http://purl.org/spar/cito/>
@@ -73,29 +78,34 @@ queries = [
         ?cited a fabio:Expression .
         FILTER EXISTS { ?cited ^cito:cites [] }
       }
-    }""",
-    """
-    PREFIX datacite: <http://purl.org/spar/datacite/>
-    PREFIX pro: <http://purl.org/spar/pro/>
-    PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-    SELECT (count(?auth) as ?tot) {
-        GRAPH <https://w3id.org/oc/corpus/ra/> {
-            ?auth a foaf:Agent
-        }
     }"""
+    # 6
+    # ,
+    # """
+    # PREFIX datacite: <http://purl.org/spar/datacite/>
+    # PREFIX pro: <http://purl.org/spar/pro/>
+    # PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+    # SELECT (count(?auth) as ?tot) {
+    #     GRAPH <https://w3id.org/oc/corpus/ra/> {
+    #         ?auth a foaf:Agent
+    #     }
+    # }"""
 ]
 
 tp = SPARQLWrapper(triplestore_url)
 tp.setMethod('GET')
 
 res = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
-for query in queries:
-    tp.setQuery(query)
-    tp.setReturnFormat(JSON)
-    results = tp.query().convert()
+for idx, query in enumerate(queries):
+    if idx in (0, 2, 3, 6):
+        res += ",-"
+    else:
+        tp.setQuery(query)
+        tp.setReturnFormat(JSON)
+        results = tp.query().convert()
 
-    for result in results["results"]["bindings"]:
-        res += "," + result["tot"]["value"]
+        for result in results["results"]["bindings"]:
+            res += "," + result["tot"]["value"]
 
 with open(base_home + "statistics.csv", "a") as f:
     f.write(res + "\n")
