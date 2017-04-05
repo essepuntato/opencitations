@@ -8,7 +8,7 @@ $def with (pages, active)
 
 
         <link rel="icon" href="/static/favicon.ico" />
-        <title>OpenCitations - SPARQL endpoint GUI</title>
+        <title>OpenCitations - Licenses</title>
 
         <!-- Bootstrap core CSS -->
         <link href="/static/css/bootstrap.min.css" rel="stylesheet" />
@@ -18,9 +18,6 @@ $def with (pages, active)
 
         <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
         <link href="/static/css/ie10-viewport-bug-workaround.css" rel="stylesheet" />
-
-        <!-- YASGUI CSS -->
-        <link href='/static/css/yasgui.css' rel='stylesheet' type='text/css' />
 
         <!-- Custom styles for this template -->
         <link href="/static/css/cover.css" rel="stylesheet" />
@@ -55,12 +52,15 @@ $def with (pages, active)
                 </nav>
             </div>
 
-            <div class="cover">
-                <h2 class="cover-heading">
-                    <span class="oc-purple">O</span><span class="oc-blue">C</span>C SPARQL endpoint GUI
-                </h2>
-                <div id="yasqe"></div>
-                <div id="yasr"></div>
+            <div class="cover left">
+                <h3>$active.title()</h3>
+                <h4 class="mt-more">Data</h4>
+                <p>The data held in the OpenCitations Corpus is made freely available under a <a href="https://creativecommons.org/publicdomain/zero/1.0/">Creative Commons public domain dedication (CC0)</a>.</p>
+                <h4 class="mt-more">Text</h4>
+                <p>The text of the web pages that comprise the <a href="http://opencitations.net">OpenCitations web site</a> is made freely available under a <a href="https://creativecommons.org/licenses/by/4.0/legalcode">Creative Commons Attribution 4.0 International Public License</a>.</p>
+                <h4 class="mt-more">Software</h4>
+                <p>The software used by the OpenCitations Corpus is made freely available on <a href="https://github.com/essepuntato/opencitations">GitHub</a> under the <a href="https://opensource.org/licenses/ISC">ISC License</a>.</p>
+
             </div>
         </div>
 
@@ -91,10 +91,5 @@ $def with (pages, active)
         <script src="/static/js/bootstrap.min.js"><![CDATA[ ]]></script>
         <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
         <script src="/static/js/ie10-viewport-bug-workaround.js"><![CDATA[ ]]></script>
-
-        <!-- SPARQL GUI -->
-        <script src='/static/js/yasr.bundled.min.js'></script>
-        <script src='/static/js/yasqe.bundled.min.js'></script>
-        <script src="/static/js/sparql.js"></script>
     </body>
 </html>

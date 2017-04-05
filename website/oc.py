@@ -31,7 +31,7 @@ from datetime import datetime
 with open("conf.json") as f:
     c = json.load(f)
 
-pages = ["/", "about", "corpus", "model", "download", "sparql", "publications", "contacts"]
+pages = ["/", "about", "corpus", "model", "download", "sparql", "publications", "licenses", "contacts"]
 
 # For redirecting to classes
 urls = (
@@ -44,6 +44,7 @@ urls = (
     "/(download)", "Download",
     "/(sparql)", "Sparql",
     "/(publications)", "Publications",
+    "/(licenses)", "Licenses",
     "/(contacts)", "Contacts",
     "/ontology(.+)?", "Ontology",
     "(/paper/.+)", "RawGit"
@@ -142,6 +143,10 @@ class Publications:
         web_logger.mes()
         return render.publications(pages, active)
 
+class Licenses:
+    def GET(self, active):
+        web_logger.mes()
+        return render.licenses(pages, active)
 
 class Contacts:
     def GET(self, active):

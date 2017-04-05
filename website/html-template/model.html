@@ -54,24 +54,24 @@ $def with (pages, active)
 
             <div class="cover left">
                  <h3>$active.title()</h3>
-                 <p>The metadata model used for the data stored in the OCC is briefly summarised in <a class="cgen" href="#refIllustration0">Figure 1</a> and described in:
+                 <p>The metadata model used for the data stored in the OCC is briefly summarised in <a class="cgen" href="#refIllustration0">Figure 1</a> and is described in:
                  <blockquote><p>Silvio Peroni, David Shotton (2016). Metadata for the OpenCitations Corpus. figshare. <a href="https://dx.doi.org/10.6084/m9.figshare.3443876">https://dx.doi.org/10.6084/m9.figshare.3443876</a></p></blockquote>
-                 <p>The model is explicitly aligned with the <a href="http://www.sparontologies.net">SPAR Ontologies</a> and other well-known vocabularies. In particular:</p>
+                 <p>The model is explicitly aligned with the <a href="http://www.sparontologies.net">SPAR Ontologies</a> and other well-known vocabularies, including:</p>
             <ul>
                <li>
-                  <p>the <a href="http://purl.org/spar/fabio">FRBR-aligned Bibliographic Ontology (FaBiO)</a> is used for providing a description of all the metadata of citing/cited resources (conference papers, book chapters, journal articles, etc.), their related container resources (academic proceedings, books, journals, etc.), as well as metadata about the particular formats in which they have been embodied (digital vs. print, first and ending pages, etc.);</p>
+                  <p>the <a href="http://purl.org/spar/fabio">FRBR-aligned Bibliographic Ontology (FaBiO)</a>, shich is used to describe of all the metadata of the citing and the cited resources (conference papers, book chapters, journal articles, etc.) and their related container resources (academic proceedings, books, journals, etc.), as well as metadata about the particular formats in which they have been embodied (digital vs. print, first and ending pages, etc.);</p>
                </li>
                <li>
-                  <p>the <a href="http://purl.org/spar/pro">Publishing Roles Ontology (PRO)</a> is used for describing the roles of agents (author, editor, publisher, etc.) related to bibliographic resource – while the order among roles, e.g. the list of authors of a paper, is handled by extending PRO with an additional property, i.e. <code>oco:hasNext</code>;</p>
+                  <p>the <a href="http://purl.org/spar/pro">Publishing Roles Ontology (PRO)</a>, which is used to describe the roles of agents (author, editor, publisher, etc.) related to bibliographic resource – while the order among these roles, specifying the order of author names in the list of authors of a paper, is handled by extending PRO with an additional property, i.e. <code>oco:hasNext</code>;</p>
                </li>
                <li>
                   <p>the <a href="http://purl.org/spar/biro">Bibliographic Reference Ontology (BiRO)</a> and the <a href="http://purl.org/spar/c4o">Citation Counting and Context Characterization Ontology (C4O)</a> are used for describing the textual content of each reference in the reference list of a citing bibliographic resource;</p>
                </li>
                <li>
-                  <p>finally, the <a href="http://purl.org/spar/datacite">DataCite Ontology</a> is used for defining all the identifiers (e.g. DOI, PubMed ID, PubMed Central ID, ORCID, ISSN, etc.) for bibliographic resources and all the agents involved – the <a href="http://xmlns.com/foaf/spec/">Friend Of A Friend (FOAF)</a> ontology is used for defining additional data (e.g. names) about agents.</p>
+                  <p>and finally, the <a href="http://purl.org/spar/datacite">DataCite Ontology</a>, which is used to define all the identifiers (e.g. DOI, PubMed ID, PubMed Central ID, ORCID, ISSN, etc.) for the bibliographic resources and all the agents involved, while the <a href="http://xmlns.com/foaf/spec/">Friend Of A Friend (FOAF)</a> ontology is used to define additional data about agents (specifically their names).</p>
                </li>
             </ul>
-            <p>All the terms from the aforementioned ontologies are collected within a new ontology called <a href="https://w3id.org/oc/ontology">OpenCitations Ontology (OCO)</a>. This is not yet another bibliographic ontology, rather just a place where existing complementary ontological entities from several other ontologies are grouped together for the purpose of providing descriptive metadata for the OCC.</p>
+            <p>For convenience, all the terms from the aforementioned ontologies are collected within a new ontology called <a href="https://w3id.org/oc/ontology">OpenCitations Ontology (OCO)</a>. This is not yet another bibliographic ontology, but rather just a place where existing complementary ontological entities from several other ontologies are grouped together for the purpose of providing descriptive metadata for the OCC.</p>
             <figure id="refIllustration0">
                <p>
                   <img class="img-responsive center-block" src="/static/img/model.png" alt="The Graffoo diagram of the main ontological entities described by the OCC metadata model.">
@@ -96,6 +96,7 @@ $def with (pages, active)
                 <a class="social oc-purple" href="mailto:contact@opencitations.net"><i class="fa fa-envelope" aria-hidden="true"></i></a>
                 <a class="social oc-purple" href="http://www.twitter.com/opencitations"><i class="fa fa-twitter" aria-hidden="true"></i></a>
                 <a class="social oc-blue" href="http://github.com/essepuntato/opencitations"><i class="fa fa-github" aria-hidden="true"></i></a>
+                <a class="social oc-blue" href="https://opencitations.wordpress.com/"><i class="fa fa-wordpress" aria-hidden="true"></i></a>
             </p>
         </footer>
 
