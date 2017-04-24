@@ -250,12 +250,11 @@ class OC2Figshare(object):
         </head>
         <body>
              <p>Dump created on """+DATE_NAME+""". It includes:</p>
-             <ul>
-			 <li><p>"""+statistics[1]+"""</p></li>
-			 <li><p>"""+statistics[2]+"""</p></li>
-			 <li><p>"""+statistics[3]+"""</p></li>
-			 <li><p>"""+statistics[4]+"""</p></li>
-			 <li><p>"""+statistics[5]+"""</p></li>
+             <ul>"""
+        for cur_stat in statistics[1:]:
+            html_str += """
+            <li><p>""" + cur_stat + """</p></li>"""
+        html_str +="""
              </ul>
              <div class="table-responsive">
                  <table class="table">
@@ -282,7 +281,10 @@ if __name__ == '__main__':
     if __name__ == "__main__":
         arg_parser = argparse.ArgumentParser("oc2figshare.py",
                                              description="An application for storing data and metadata related "
-                                                         "to OpenCitations Corpus to Figshare.com.")
+                                                         "to OpenCitations Corpus to Figshare.com. Example of usage:"
+                                                         "\n\n"
+                                                         "python oc2fighshare.py -t XXX -c conf_oc2fig.json "
+                                                         "-d 2017-03-24 -m corpus/dump -dt 2017-03-24")
         arg_parser.add_argument("-t", "--token", dest="token", required=True,
                                 help="The token to use to call the Figshare APIs.")
         arg_parser.add_argument("-c", "--conf", dest="conf", required=True,
