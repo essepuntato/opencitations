@@ -27,6 +27,13 @@ done
 # Get last statistics
 /home/essepuntato/OC/statistics.sh
 
+# Wait for complete statistics
+while ps -ef | grep "[p]ython statistics.py" > /dev/null; do
+    # If some of the processes is still active, wait for 60 seconds and check again
+    sleep 60
+done
+sleep 3
+
 # Backup of the OCC
 
 # ar
