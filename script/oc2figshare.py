@@ -301,24 +301,31 @@ if __name__ == '__main__':
         date = ''
         date_name = ''
 
+        print "\n\n\n# Start new process"
+
         with open(args.conf) as f:
             conf = json.load(f)
             oc2fig = OC2Figshare(args.token, conf, args.dump, args.material)
             date = args.date
             file_path_info = oc2fig.material + os.sep + date + '-info.txt'
             for index, item in enumerate(conf):  # item is the key of object json and value is conf[item]
-                date_i = time.strptime(date, '%Y-%m-%d')  # control if the format is YYYY-MM-DD
-                date_name = strftime("%B %d, %Y", date_i)
-                title = conf[item]['title'] + ', as of ' + date_name
-                description = oc2fig.material + os.sep + conf[item]['desc_file']
-                zip_file = glob.glob(oc2fig.dump + os.sep+ '*' + item + '.zip')
-                categories = conf[item]['categories']
-                keywords = conf[item]['keywords']
-                license_type = conf[item]['license']
-                references = conf[item]['references']
-                doi_set[item] = oc2fig.upload_a_list(title, description, zip_file[0], categories,
-                                                     keywords, license_type, references, file_path_info)
-                time.sleep(5)  # after each upload need 5 sec of pause
+                print "\n\n### Processing item '%s'\n" % item
+                zip_file = glob.glob(oc2fig.dump + os.sep + '*' + item + '.zip')
+                if len(zip_file):
+                    date_i = time.strptime(date, '%Y-%m-%d')  # control if the format is YYYY-MM-DD
+                    date_name = strftime("%B %d, %Y", date_i)
+                    title = conf[item]['title'] + ', as of ' + date_name
+                    description = oc2fig.material + os.sep + conf[item]['desc_file']
+                    categories = conf[item]['categories']
+                    keywords = conf[item]['keywords']
+                    license_type = conf[item]['license']
+                    references = conf[item]['references']
+                    doi_set[item] = oc2fig.upload_a_list(title, description, zip_file[0], categories,
+                                                         keywords, license_type, references, file_path_info)
+                    time.sleep(5)  # after each upload need 5 sec of pause
+                else:
+                    print "No ZIP file has been found for item '%s'" % item
 
             oc2fig.create_html_file(".", doi_set, date, date_name, file_path_info)
 
+        print "\n# Process finished"
