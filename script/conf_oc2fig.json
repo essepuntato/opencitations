@@ -95,7 +95,7 @@
       "categories": [ "Library and Information Studies" ],
       "references": [ "http://opencitations.net" ]
   },
-  "corpus_triplestore": {
+  "triplestore": {
       "title": "OCC triplestore of all the data",
       "desc_file": "README-triplestore.txt",
       "license": "CC-0",
