@@ -1,6 +1,6 @@
 {
   "corpus_ar": {
-      "title": "OCC dataset of all the author roles",
+      "title": "OCC dataset of all the agent roles",
       "desc_file": "README-ar.txt",
       "license": "CC-0",
       "keywords": [ "OCC" ,"OpenCitations", "Semantic Publishing" ],
