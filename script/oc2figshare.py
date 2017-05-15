@@ -314,7 +314,7 @@ if __name__ == '__main__':
                 if len(zip_file):
                     date_i = time.strptime(date, '%Y-%m-%d')  # control if the format is YYYY-MM-DD
                     date_name = strftime("%B %d, %Y", date_i)
-                    title = conf[item]['title'] + ', as of ' + date_name
+                    title = conf[item]['title'] + ', made on ' + date_name
                     description = oc2fig.material + os.sep + conf[item]['desc_file']
                     categories = conf[item]['categories']
                     keywords = conf[item]['keywords']

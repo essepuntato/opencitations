@@ -96,7 +96,7 @@
       "references": [ "http://opencitations.net" ]
   },
   "triplestore": {
-      "title": "OCC triplestore of all the data",
+      "title": "The entire OCC triplestore data dump",
       "desc_file": "README-triplestore.txt",
       "license": "CC-0",
       "keywords": [ "OCC" ,"OpenCitations", "Semantic Publishing" ],
