@@ -344,6 +344,6 @@ if __name__ == '__main__':
 
             oc2fig.store_processed_documents()
 
-            oc2fig.create_html_file(".", oc2fig.processed_documents, date, date_name, file_path_info)
+            oc2fig.create_html_file(args.dump, oc2fig.processed_documents, date, date_name, file_path_info)
 
         print "\n# Process finished"
