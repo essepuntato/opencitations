@@ -277,9 +277,12 @@ class OC2Figshare(object):
         </body>
     </html>
     """
-        html_file = open(BASE_PATH + os.sep + DATE + '.html', 'w')
+        html_file_path = BASE_PATH + os.sep + DATE + '.html'
+        html_file = open(html_file_path, 'w')
         html_file.write(html_str)
         html_file.close()
+        print "HTML file '%s' stored." % html_file_path
+
 
     def store_processed_documents(self):
         with open(self.processed_documents_path, "w") as f:
