@@ -34,6 +34,12 @@ class OC2Figshare(object):
         self.material = material
         self.fg_api = 'https://api.figshare.com/v2/{endpoint}'
         self.chick_size = 1048576
+        self.processed_documents_path = self.dump + os.sep + "processed_documents.json"
+        if os.path.exists(self.processed_documents_path):
+            with open(self.processed_documents_path) as f:
+                self.processed_documents = json.load(f)
+        else:
+            self.processed_documents = {}
 
     def raw_issue_request(self, method, url, data=None, binary=False):
         headers = {'Authorization': 'token ' + self.token}
@@ -297,7 +303,6 @@ if __name__ == '__main__':
                                 help="The date of the dump, in YYYY-MM-DD format.")
         args = arg_parser.parse_args()
 
-        doi_set = {}
         date = ''
         date_name = ''
 
@@ -308,23 +313,34 @@ if __name__ == '__main__':
             oc2fig = OC2Figshare(args.token, conf, args.dump, args.material)
             date = args.date
             file_path_info = oc2fig.material + os.sep + date + '-info.txt'
-            for index, item in enumerate(conf):  # item is the key of object json and value is conf[item]
-                print "\n\n### Processing item '%s'\n" % item
-                zip_file = glob.glob(oc2fig.dump + os.sep + '*' + item + '.zip')
-                if len(zip_file):
-                    date_i = time.strptime(date, '%Y-%m-%d')  # control if the format is YYYY-MM-DD
-                    date_name = strftime("%B %d, %Y", date_i)
-                    title = conf[item]['title'] + ', made on ' + date_name
-                    description = oc2fig.material + os.sep + conf[item]['desc_file']
-                    categories = conf[item]['categories']
-                    keywords = conf[item]['keywords']
-                    license_type = conf[item]['license']
-                    references = conf[item]['references']
-                    doi_set[item] = oc2fig.upload_a_list(title, description, zip_file[0], categories,
-                                                         keywords, license_type, references, file_path_info)
-                    time.sleep(5)  # after each upload need 5 sec of pause
-                else:
-                    print "No ZIP file has been found for item '%s'" % item
+            try:
+                for index, item in enumerate(conf):  # item is the key of object json and value is conf[item]
+                    if item not in oc2fig.processed_documents:
+                        print "\n\n### Processing item '%s'\n" % item
+                        zip_file = glob.glob(oc2fig.dump + os.sep + '*' + item + '.zip')
+                        if len(zip_file):
+                            date_i = time.strptime(date, '%Y-%m-%d')  # control if the format is YYYY-MM-DD
+                            date_name = strftime("%B %d, %Y", date_i)
+                            title = conf[item]['title'] + ', made on ' + date_name
+                            description = oc2fig.material + os.sep + conf[item]['desc_file']
+                            categories = conf[item]['categories']
+                            keywords = conf[item]['keywords']
+                            license_type = conf[item]['license']
+                            references = conf[item]['references']
+                            cur_doi = oc2fig.upload_a_list(title, description, zip_file[0], categories,
+                                                                 keywords, license_type, references, file_path_info)
+                            oc2fig.processed_documents[item] = cur_doi
+                            time.sleep(5)  # after each upload need 5 sec of pause
+                        else:
+                            print "No ZIP file has been found for item '%s'" % item
+            except Exception as e:
+                with open(oc2fig.processed_documents_path, "w") as f:
+                    json.dump(oc2fig.processed_documents, f)
+
+            doi_set = {}
+            for v in oc2fig.processed_documents.values():
+                for k in v:
+                    doi_set[k] = v[k]
 
             oc2fig.create_html_file(".", doi_set, date, date_name, file_path_info)
 
