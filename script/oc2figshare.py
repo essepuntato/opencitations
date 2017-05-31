@@ -259,7 +259,7 @@ class OC2Figshare(object):
              <ul>"""
         for cur_stat in statistics[1:]:
             html_str += """
-            <li><p>""" + cur_stat + """</p></li>"""
+                <li><p>""" + cur_stat + """</p></li>"""
         html_str +="""
              </ul>
              <div class="table-responsive">
