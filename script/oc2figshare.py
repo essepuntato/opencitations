@@ -271,7 +271,7 @@ class OC2Figshare(object):
                      <tr><td>identifiers (id)</td><td><a href="https://dx.doi.org/"""+str(DOI_SET['corpus_id'])+"""">data</a>, <a href="https://dx.doi.org/"""+str(DOI_SET['corpus_id_prov'])+"""">provenance</a></td></tr>
                      <tr><td>responsible agents (ra)</td><td><a href="https://dx.doi.org/"""+str(DOI_SET['corpus_ra'])+"""">data</a>, <a href="https://dx.doi.org/"""+str(DOI_SET['corpus_ra_prov'])+"""">provenance</a></td></tr>
                      <tr><td>resource embodiment (re)</td><td><a href="https://dx.doi.org/"""+str(DOI_SET['corpus_re'])+"""">data</a>, <a href="https://dx.doi.org/"""+str(DOI_SET['corpus_re_prov'])+"""">provenance</a></td></tr>
-                     <tr><td>corpus</td><td><a href="https://dx.doi.org/"""+str(DOI_SET['corpus_triplestore'])+"""">triplestore</a>, <a href="https://dx.doi.org/"""+str(DOI_SET['corpus_prov'])+"""">provenance</a></td></tr>
+                     <tr><td>corpus</td><td><a href="https://dx.doi.org/"""+str(DOI_SET['triplestore'])+"""">triplestore</a>, <a href="https://dx.doi.org/"""+str(DOI_SET['corpus_prov'])+"""">provenance</a></td></tr>
                  </table>
              </div>
         </body>
@@ -281,6 +281,9 @@ class OC2Figshare(object):
         html_file.write(html_str)
         html_file.close()
 
+    def store_processed_documents(self):
+        with open(self.processed_documents_path, "w") as f:
+            json.dump(self.processed_documents, f)
 
 
 if __name__ == '__main__':
@@ -334,14 +337,10 @@ if __name__ == '__main__':
                         else:
                             print "No ZIP file has been found for item '%s'" % item
             except Exception as e:
-                with open(oc2fig.processed_documents_path, "w") as f:
-                    json.dump(oc2fig.processed_documents, f)
+                print "\nAn error has occurred:", e.message
 
-            doi_set = {}
-            for v in oc2fig.processed_documents.values():
-                for k in v:
-                    doi_set[k] = v[k]
+            oc2fig.store_processed_documents()
 
-            oc2fig.create_html_file(".", doi_set, date, date_name, file_path_info)
+            oc2fig.create_html_file(".", oc2fig.processed_documents, date, date_name, file_path_info)
 
         print "\n# Process finished"
