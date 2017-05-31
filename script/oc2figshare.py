@@ -255,7 +255,7 @@ class OC2Figshare(object):
             <title>Dump """+DATE_NAME+"""</title>
         </head>
         <body>
-             <p>Dump created on """+DATE_NAME+""". It includes:</p>
+             <p>Dump created on """+DATE_NAME+""". This dump includes information on:</p>
              <ul>"""
         for cur_stat in statistics[1:]:
             html_str += """
