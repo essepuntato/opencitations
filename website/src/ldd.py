@@ -148,16 +148,12 @@ class LinkedDataDirector(object):
                         cur_url = url
 
                     if any(mime in accept_types for mime in self.__rdfxml):
-                        web.header('Content-Type', self.__rdfxml[0])
                         raise web.seeother(self.corpus_local_url + cur_url + ".rdf")
                     elif any(mime in accept_types for mime in self.__turtle):
-                        web.header('Content-Type', self.__turtle[0])
                         raise web.seeother(self.corpus_local_url + cur_url + ".ttl")
                     elif any(mime in accept_types for mime in self.__jsonld):
-                        web.header('Content-Type', self.__jsonld[0])
                         raise web.seeother(self.corpus_local_url + cur_url + ".json")
                     else:  # HTML
-                        web.header('Content-Type', self.__html[0])
                         raise web.seeother(self.corpus_local_url + cur_url + ".html")
 
     @staticmethod
