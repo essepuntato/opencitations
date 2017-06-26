@@ -28,6 +28,7 @@ import json
 
 class LinkedDataDirector(object):
     __extensions = (".rdf", ".ttl", ".json", ".html")
+    __html = ("text/html",)
     __rdfxml = ("application/rdf+xml",)
     __turtle = ("text/turtle", "text/n3")
     __jsonld = ("application/ld+json", "application/json")
@@ -147,12 +148,16 @@ class LinkedDataDirector(object):
                         cur_url = url
 
                     if any(mime in accept_types for mime in self.__rdfxml):
+                        web.header('Content-Type', self.__rdfxml[0])
                         raise web.seeother(self.corpus_local_url + cur_url + ".rdf")
                     elif any(mime in accept_types for mime in self.__turtle):
+                        web.header('Content-Type', self.__turtle[0])
                         raise web.seeother(self.corpus_local_url + cur_url + ".ttl")
                     elif any(mime in accept_types for mime in self.__jsonld):
+                        web.header('Content-Type', self.__jsonld[0])
                         raise web.seeother(self.corpus_local_url + cur_url + ".json")
                     else:  # HTML
+                        web.header('Content-Type', self.__html[0])
                         raise web.seeother(self.corpus_local_url + cur_url + ".html")
 
     @staticmethod
@@ -221,12 +226,15 @@ class LinkedDataDirector(object):
             if len(cur_graph):
                 if url.endswith(".rdf"):
                     LinkedDataDirector.__add_license(cur_graph)
+                    web.header('Content-Type', self.__rdfxml[0])
                     return self.serialise(cur_graph, "xml")
                 elif url.endswith(".ttl"):
                     LinkedDataDirector.__add_license(cur_graph)
+                    web.header('Content-Type', self.__turtle[0])
                     return self.serialise(cur_graph, "turtle")
                 elif url.endswith(".json"):
                     LinkedDataDirector.__add_license(cur_graph)
+                    web.header('Content-Type', self.__jsonld[0])
                     return self.serialise(cur_graph, "json-ld")
                 elif url.endswith(".html"):
                     # {
@@ -295,6 +303,7 @@ class LinkedDataDirector(object):
                                     cur_data[str_p] += [str_o]
 
                                 cur_data[str_p].sort()
+                    web.header('Content-Type', self.__html[0])
                     return self.render.ldd(cur_data, sorted(cur_data.keys()), self.label_iri)
 
     def load_graph(self, file_path, subj_iri, temp_dir_for_rdf_loading=None):
