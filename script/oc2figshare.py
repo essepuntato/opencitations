@@ -319,7 +319,7 @@ if __name__ == '__main__':
             oc2fig = OC2Figshare(args.token, conf, args.dump, args.material)
             date = args.date
             date_i = time.strptime(date, '%Y-%m-%d')  # control if the format is YYYY-MM-DD
-            date_name = strftime("%B %d, %Y", date_i)
+            date_name = strftime("%d %B %Y", date_i)
             file_path_info = oc2fig.material + os.sep + date + '-info.txt'
             try:
                 for index, item in enumerate(conf):  # item is the key of object json and value is conf[item]
@@ -327,7 +327,7 @@ if __name__ == '__main__':
                         print "\n\n### Processing item '%s'\n" % item
                         zip_file = glob.glob(oc2fig.dump + os.sep + '*' + item + '.zip')
                         if len(zip_file):
-                            title = conf[item]['title'] + ', made on ' + date_name
+                            title = conf[item]['title'] + ', made on ' + date_i
                             description = oc2fig.material + os.sep + conf[item]['desc_file']
                             categories = conf[item]['categories']
                             keywords = conf[item]['keywords']
