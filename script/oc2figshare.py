@@ -251,11 +251,10 @@ class OC2Figshare(object):
     def create_html_file(self, BASE_PATH, DOI_SET, DATE, DATE_NAME, INFO_FILE_PATH):
         statistics = self.get_info(INFO_FILE_PATH)
         html_str = """<html>
-        <head>
-            <title>Dump """+DATE_NAME+"""</title>
-        </head>
+        <head></head>
         <body>
-             <p>Dump created on """+DATE_NAME+""". This dump includes information on:</p>
+             <h4>"""+DATE_NAME+""" Dump</h4>
+             <p>Dump created on """+DATE+""". This dump includes information on:</p>
              <ul>"""
         for cur_stat in statistics[1:]:
             html_str += """
