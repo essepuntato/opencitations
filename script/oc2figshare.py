@@ -327,7 +327,7 @@ if __name__ == '__main__':
                         print "\n\n### Processing item '%s'\n" % item
                         zip_file = glob.glob(oc2fig.dump + os.sep + '*' + item + '.zip')
                         if len(zip_file):
-                            title = conf[item]['title'] + ', made on ' + date_i
+                            title = conf[item]['title'] + ', made on ' + date
                             description = oc2fig.material + os.sep + conf[item]['desc_file']
                             categories = conf[item]['categories']
                             keywords = conf[item]['keywords']
