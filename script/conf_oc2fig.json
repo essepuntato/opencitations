@@ -1,6 +1,6 @@
 {
   "corpus_ar": {
-      "title": "OCC dataset of all the agent roles",
+      "title": "OpenCitations Corpus dataset of all the agent roles",
       "desc_file": "README-ar.txt",
       "license": "CC0",
       "keywords": [ "OCC" ,"OpenCitations", "Semantic Publishing" ],
@@ -8,7 +8,7 @@
       "references": [ "http://opencitations.net" ]
   },
   "corpus_ar_prov": {
-      "title": "OCC provenance data of all the agent roles",
+      "title": "OpenCitations Corpus provenance data of all the agent roles",
       "desc_file": "README-ar-prov.txt",
       "license": "CC0",
       "keywords": [ "OCC" ,"OpenCitations", "Semantic Publishing" ],
@@ -16,7 +16,7 @@
       "references": [ "http://opencitations.net" ]
   },
   "corpus_be": {
-      "title": "OCC dataset of all the bibliographic entries",
+      "title": "OpenCitations Corpus dataset of all the bibliographic entries",
       "desc_file": "README-be.txt",
       "license": "CC0",
       "keywords": [ "OCC" ,"OpenCitations", "Semantic Publishing" ],
@@ -24,7 +24,7 @@
       "references": [ "http://opencitations.net" ]
   },
   "corpus_be_prov": {
-      "title": "OCC provenance data of all the bibliographic entries",
+      "title": "OpenCitations Corpus provenance data of all the bibliographic entries",
       "desc_file": "README-be-prov.txt",
       "license": "CC0",
       "keywords": [ "OCC" ,"OpenCitations", "Semantic Publishing" ],
@@ -32,7 +32,7 @@
       "references": [ "http://opencitations.net" ]
   },
   "corpus_br": {
-      "title": "OCC dataset of all the bibliographic resources",
+      "title": "OpenCitations Corpus dataset of all the bibliographic resources",
       "desc_file": "README-br.txt",
       "license": "CC0",
       "keywords": [ "OCC" ,"OpenCitations", "Semantic Publishing" ],
@@ -40,7 +40,7 @@
       "references": [ "http://opencitations.net" ]
   },
   "corpus_br_prov": {
-      "title": "OCC provenance data of all the bibliographic resources",
+      "title": "OpenCitations Corpus provenance data of all the bibliographic resources",
       "desc_file": "README-br-prov.txt",
       "license": "CC0",
       "keywords": [ "OCC" ,"OpenCitations", "Semantic Publishing" ],
@@ -48,7 +48,7 @@
       "references": [ "http://opencitations.net" ]
   },
   "corpus_id": {
-      "title": "OCC dataset of all the identifiers",
+      "title": "OpenCitations Corpus dataset of all the identifiers",
       "desc_file": "README-id.txt",
       "license": "CC0",
       "keywords": [ "OCC" ,"OpenCitations", "Semantic Publishing" ],
@@ -56,7 +56,7 @@
       "references": [ "http://opencitations.net" ]
   },
   "corpus_id_prov": {
-      "title": "OCC provenance data of all the identifiers",
+      "title": "OpenCitations Corpus provenance data of all the identifiers",
       "desc_file": "README-id-prov.txt",
       "license": "CC0",
       "keywords": [ "OCC" ,"OpenCitations", "Semantic Publishing" ],
@@ -64,7 +64,7 @@
       "references": [ "http://opencitations.net" ]
   },
   "corpus_ra": {
-      "title": "OCC dataset of all the responsible agents",
+      "title": "OpenCitations Corpus dataset of all the responsible agents",
       "desc_file": "README-ra.txt",
       "license": "CC0",
       "keywords": [ "OCC" ,"OpenCitations", "Semantic Publishing" ],
@@ -72,7 +72,7 @@
       "references": [ "http://opencitations.net" ]
   },
   "corpus_ra_prov": {
-      "title": "OCC provenance data of all the responsible agents",
+      "title": "OpenCitations Corpus provenance data of all the responsible agents",
       "desc_file": "README-ra-prov.txt",
       "license": "CC0",
       "keywords": [ "OCC" ,"OpenCitations", "Semantic Publishing" ],
@@ -80,7 +80,7 @@
       "references": [ "http://opencitations.net" ]
   },
   "corpus_re": {
-      "title": "OCC dataset of all the resource embodiments",
+      "title": "OpenCitations Corpus dataset of all the resource embodiments",
       "desc_file": "README-re.txt",
       "license": "CC0",
       "keywords": [ "OCC" ,"OpenCitations", "Semantic Publishing" ],
@@ -88,7 +88,7 @@
       "references": [ "http://opencitations.net" ]
   },
   "corpus_re_prov": {
-      "title": "OCC provenance data of all the resource embodiments",
+      "title": "OpenCitations Corpus provenance data of all the resource embodiments",
       "desc_file": "README-re-prov.txt",
       "license": "CC0",
       "keywords": [ "OCC" ,"OpenCitations", "Semantic Publishing" ],
@@ -96,7 +96,7 @@
       "references": [ "http://opencitations.net" ]
   },
   "triplestore": {
-      "title": "The entire OCC triplestore data dump",
+      "title": "The entire OpenCitations Corpus triplestore data dump",
       "desc_file": "README-triplestore.txt",
       "license": "CC0",
       "keywords": [ "OCC" ,"OpenCitations", "Semantic Publishing" ],
@@ -104,7 +104,7 @@
       "references": [ "http://opencitations.net" ]
   },
   "corpus_prov": {
-      "title": "OCC provenance data of all the provenance agents shared by the whole corpus",
+      "title": "OpenCitations Corpus provenance data of all the provenance agents",
       "desc_file": "README-prov.txt",
       "license": "CC0",
       "keywords": [ "OCC" ,"OpenCitations", "Semantic Publishing" ],

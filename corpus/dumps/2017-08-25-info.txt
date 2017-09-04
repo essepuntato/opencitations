@@ -1,0 +1,4 @@
+The set of whole the dumps created on 25 August 2017 (available at http://opencitations.net/download) includes:
+* 225,645 citing bibliographic resources;
+* 5,358,479 cited bibliographic resources;
+* 9,607,259 citation links.
