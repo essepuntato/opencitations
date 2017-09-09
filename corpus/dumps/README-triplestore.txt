@@ -1,4 +1,4 @@
-This archive contains the dump of the OpenCitation Corpus (OCC, http://opencitations.net) triplestore (Blazegraph, https://www.blazegraph.com/, licensed in GPLv2) containing all the data of the corpus, and created regularly every month.
+This archive contains the dump of the OpenCitations Corpus (OCC, http://opencitations.net) triplestore (Blazegraph, https://www.blazegraph.com/, licensed in GPLv2) containing all the data of the corpus, and created regularly every month.
 
 After unzipping the archive, Disk ARchive (DAR, http://dar.linux.free.fr/, a multi-platform archive tool for managing huge amount of data) is needed for recreating the whole structure. For extracting the DAR archive, please run the command
 

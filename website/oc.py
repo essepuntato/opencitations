@@ -156,6 +156,12 @@ class Contacts:
 
 class Sparql:
     def GET(self, active):
+        return self.__run_query(active)
+
+    def POST(self, active):
+        return self.__run_query(active)
+
+    def __run_query(self, active):
         web.header('Access-Control-Allow-Origin', '*')
         web.header('Access-Control-Allow-Credentials', 'true')
         query_string = web.ctx.env.get("QUERY_STRING")
