@@ -156,14 +156,15 @@ class Contacts:
 
 class Sparql:
     def GET(self, active):
-        return self.__run_query_string(active, web.ctx.env.get("QUERY_STRING"))
+        content_type = web.ctx.env.get('CONTENT_TYPE')
+        return self.__run_query_string(active, web.ctx.env.get("QUERY_STRING"), content_type)
 
     def POST(self, active):
         content_type = web.ctx.env.get('CONTENT_TYPE')
         cur_data = web.data()
-        if content_type == "application/x-www-form-urlencoded":
+        if "application/x-www-form-urlencoded" in content_type:
             return self.__run_query_string(active, cur_data, True, content_type)
-        elif content_type == "application/sparql-query":
+        elif "application/sparql-query" in content_type:
             return self.__contact_tp(cur_data, True, content_type)
         else:
             raise web.redirect("/sparql")
