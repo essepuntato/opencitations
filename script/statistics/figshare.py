@@ -24,6 +24,13 @@ import os
 import subprocess
 import glob
 import requests
+import itertools
+import json
+
+figshare_api = "https://stats.figshare.com/timeline/"
+figshare_granularity = ["month"]
+figshare_counter = ["view", "downloads", "shares"]
+figshare_item = ["article"]
 
 
 def get_ids():
@@ -33,6 +40,7 @@ def get_ids():
         ids += [re.sub("^.+\.([0-9]+)$", "\\1", u)]
 
     return ids
+
 
 if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser("unpack.py",
@@ -48,6 +56,18 @@ if __name__ == "__main__":
 
     args = arg_parser.parse_args()
 
-    print get_ids()
+    json_result = {}
+
+    for id in get_ids():
+        for granularity, counter, item in \
+                list(itertools.product(*[figshare_granularity, figshare_counter, figshare_item])):
+            api_url = "%s%s/%s/%s/%s" % (figshare_api, granularity, counter, item, id)
+            r = requests.get(api_url)
+            json_r = json.load(r.text)["timeline"]
+            if id not in json_result:
+                pass # initialize the json with all the values in figshare_granularity, figshare_counter, and figshare_item
+
+    # Calculate what we need (i.e. accesses views and etc. by month)
+
 
     print "\n\nDONE"

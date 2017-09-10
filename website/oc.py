@@ -156,22 +156,26 @@ class Contacts:
 
 class Sparql:
     def GET(self, active):
-        return self.__run_query(active)
+        return self.__run_query_string(active, web.ctx.env.get("QUERY_STRING"))
 
     def POST(self, active):
-        return self.__run_query(active)
+        content_type = web.ctx.env.get('CONTENT_TYPE')
+        if content_type == "application/x-www-form-urlencoded":
+            return self.__run_query_string(active, web.data(), True)
 
-    def __run_query(self, active):
+    def __run_query_string(self, active, query_string, is_post = False):
         web.header('Access-Control-Allow-Origin', '*')
         web.header('Access-Control-Allow-Credentials', 'true')
-        query_string = web.ctx.env.get("QUERY_STRING")
         parsed_query = urlparse.parse_qs(query_string)
         if query_string is None or query_string.strip() == "":
             web_logger.mes()
             return render.sparql(pages, active)
         if re.search("updates?", query_string, re.IGNORECASE) is None:
             if "query" in parsed_query:
-                req = requests.get("%s?%s" % (c["sparql_endpoint"], query_string))
+                if is_post:
+                    req = requests.post(c["sparql_endpoint"], data=parsed_query)
+                else:
+                    req = requests.get("%s?%s" % (c["sparql_endpoint"], query_string))
                 if req.status_code == 200:
                     web_logger.mes()
                     return req.text
