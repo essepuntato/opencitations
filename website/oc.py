@@ -183,7 +183,7 @@ class Sparql:
         if req.status_code == 200:
             web.header('Access-Control-Allow-Origin', '*')
             web.header('Access-Control-Allow-Credentials', 'true')
-            web.header('Content-Type', accept)
+            web.header('Content-Type', req.headers["content-type"])
             web_logger.mes()
             return req.text
         else:
