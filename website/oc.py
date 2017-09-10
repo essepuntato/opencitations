@@ -160,28 +160,44 @@ class Sparql:
 
     def POST(self, active):
         content_type = web.ctx.env.get('CONTENT_TYPE')
+        cur_data = web.data()
         if content_type == "application/x-www-form-urlencoded":
-            return self.__run_query_string(active, web.data(), True)
+            return self.__run_query_string(active, cur_data, True, content_type)
+        elif content_type == "application/sparql-query":
+            return self.__contact_tp(cur_data, True, content_type)
+        else:
+            raise web.redirect("/sparql")
 
-    def __run_query_string(self, active, query_string, is_post = False):
-        web.header('Access-Control-Allow-Origin', '*')
-        web.header('Access-Control-Allow-Credentials', 'true')
+    def __contact_tp(self, data, is_post, content_type):
+        accept = web.ctx.env.get('HTTP_ACCEPT')
+        if accept is None or accept == "*/*" or accept == "":
+            accept = "application/sparql-results+xml"
+        if is_post:
+            req = requests.post(c["sparql_endpoint"], data=data,
+                                headers={'content-type': content_type, "accept": accept})
+        else:
+            req = requests.get("%s?%s" % (c["sparql_endpoint"], data),
+                               headers={'content-type': content_type, "accept": accept})
+
+        if req.status_code == 200:
+            web.header('Access-Control-Allow-Origin', '*')
+            web.header('Access-Control-Allow-Credentials', 'true')
+            web.header('Content-Type', accept)
+            web_logger.mes()
+            return req.text
+        else:
+            raise web.HTTPError(
+                str(req.status_code), {"Content-Type": req.headers["content-type"]}, req.text)
+
+    def __run_query_string(self, active, query_string, is_post=False,
+                           content_type="application/x-www-form-urlencoded"):
         parsed_query = urlparse.parse_qs(query_string)
         if query_string is None or query_string.strip() == "":
             web_logger.mes()
             return render.sparql(pages, active)
         if re.search("updates?", query_string, re.IGNORECASE) is None:
             if "query" in parsed_query:
-                if is_post:
-                    req = requests.post(c["sparql_endpoint"], data=parsed_query)
-                else:
-                    req = requests.get("%s?%s" % (c["sparql_endpoint"], query_string))
-                if req.status_code == 200:
-                    web_logger.mes()
-                    return req.text
-                else:
-                    raise web.HTTPError(
-                        str(req.status_code), {"Content-Type": req.headers["content-type"]}, req.text)
+                return self.__contact_tp(query_string, is_post, content_type)
             else:
                 raise web.redirect("/sparql")
         else:
