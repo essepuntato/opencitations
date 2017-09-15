@@ -28,3 +28,6 @@ triplestore/run-local.sh
 website/*-local.sh
 ontology/catalog-v001.xml
 script/*.rep.*
+statistics/statistics.csv
+statistics/*/website.csv
+statistics/ip.json

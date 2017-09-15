@@ -23,6 +23,7 @@ import operator
 import argparse
 import urllib2, json
 import os
+from time import sleep
 
 from rdflib import ConjunctiveGraph, URIRef
 from rdflib.namespace import RDF
@@ -71,7 +72,7 @@ def filter_out(file_log, no_list, columns=field_names):
     return final_csv
 
 
-def accesses(file_log):
+def accesses(file_log, except_date):
     print "Start accesses"
     final_csv = []
 
@@ -87,13 +88,16 @@ def accesses(file_log):
             months[cur_month] += 1
 
         for key, value in sorted(months.items(), key=operator.itemgetter(0)):
-            final_csv += [(key, value)]
+            if key < except_date:
+                final_csv += [(key, value)]
+
+    final_csv.insert(0, ("month", "accesses"))
 
     print "End accesses"
     return final_csv
 
 
-def statistics(file_log):
+def statistics(file_log, except_date):
     print "Start statistics"
     final_csv = []
 
@@ -122,43 +126,57 @@ def statistics(file_log):
                         pages[cur_key] = 1
 
         for key, value in sorted(pages.items(), key=operator.itemgetter(1)):
-            final_csv += [(key, value)]
+            if key < except_date:
+                final_csv += [(key, value)]
+
+        final_csv.insert(0, ("page", "accesses"))
 
     print "End statistics"
     return final_csv
 
 
-def countries(file_log):
+def countries(file_log, except_date, ip_country_path):
     print "Start countries"
     final_csv = []
 
     with open(file_log) as f:
         access_countries = {}
+
         ip_country = {}
+        if os.path.exists(ip_country_path):
+            with open(ip_country_path) as f:
+                ip_country = json.load(f)
+        else:
+            ip_country = {}
 
         r = csv.reader(f, delimiter=',', quotechar='"')
         next(r)
         for row in r:
-            cur_ip = row[1]
-            try:
-                if cur_ip not in ip_country:
-                    response = urllib2.urlopen("http://ipinfo.io/" + cur_ip + "/json")
-                    source = response.read()
-                    j = json.loads(source)
-                    ip_country[cur_ip] = j["country"]
+            if row[0][:7] < except_date:
+                cur_ip = row[1]
+                try:
+                    if cur_ip not in ip_country:
+                        print("Check IP: %s" % cur_ip)
+                        response = urllib2.urlopen("http://freegeoip.net/json/" + cur_ip)
+                        source = response.read()
+                        j = json.loads(source)
+                        ip_country[cur_ip] = j["country_code"]
+                        sleep(1)
 
-                cur_country = ip_country[cur_ip]
-                if cur_country not in access_countries:
-                    access_countries[cur_country] = 0
-                access_countries[cur_country] += 1
-            except Exception:
-                print "Exception IP:", cur_ip
+                    cur_country = ip_country[cur_ip]
+                    if cur_country not in access_countries:
+                        access_countries[cur_country] = 0
+                    access_countries[cur_country] += 1
+                except Exception:
+                    print "Exception IP:", cur_ip
 
         for key, value in sorted(access_countries.items(), key=operator.itemgetter(1)):
             final_csv += [(key, value)]
 
+        final_csv.insert(0, ("country", "accesses"))
+
     print "End countries"
-    return final_csv
+    return final_csv, ip_country
 
 
 def __load_jsonld(file_full_path, context_json):
@@ -247,7 +265,7 @@ def occ(base_occ_dir, context_file):
     return final_csv
 
 # Things to eliminate in HTTP_USER_AGENT "crawler" "spider" "bot" "yahoo! slurp" "bubing"
-# Excluding 127.0.0.1 from REMOTE_ADDRESS
+# Excluding 127.0.0.1 from REMOTE_ADDR
 
 if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser("filter.py",
@@ -272,20 +290,35 @@ if __name__ == "__main__":
                             help="Statistics of the OCC.")
     arg_parser.add_argument("-cx", "--context", dest="context", default=None,
                             help="The file defining the context of OCC.")
+    arg_parser.add_argument("-e", "--except_after", dest="except_after",
+                            help="The date from which the data should not be considered (format yyyy-mm).")
+    arg_parser.add_argument("-ip", "--ip_country", dest="ip_country",
+                            help="The JSON containing the mapping between IP and countries.")
 
     args = arg_parser.parse_args()
     final_result = None
+
+    if args.except_after is None:
+        except_date = "3000-01"
+    else:
+        except_date = args.except_after
 
     if args.sum_column is not None:
         final_result = sum_column(args.input, args.sum_column)
     elif args.filter_out is not None:
         final_result = filter_out(args.input, [fld.lower() for fld in args.filter_out], [args.filter_column])
     elif args.accesses:
-        final_result = accesses(args.input)
+        final_result = accesses(args.input, except_date)
     elif args.statistics:
-        final_result = statistics(args.input)
+        final_result = statistics(args.input, except_date)
     elif args.countries:
-        final_result = countries(args.input)
+        if args.ip_country is None:
+            ip_country_path = os.path.basename(args.output)
+        else:
+            ip_country_path =args.ip_country
+        final_result, ip_country = countries(args.input, except_date, ip_country_path)
+        with open(ip_country_path, "w") as f:
+            json.dump(ip_country, f)
     elif args.occ and args.context is not None:
         final_result = occ(args.input, args.context)
 

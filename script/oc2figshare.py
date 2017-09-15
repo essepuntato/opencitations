@@ -264,13 +264,13 @@ class OC2Figshare(object):
              <div class="table-responsive">
                  <table class="table">
                      <tr><th>Type</th><th>Archive</th></tr>
-                     <tr><td>agent roles (ar)</td><td><a href="https://dx.doi.org/"""+str(DOI_SET['corpus_ar'])+"""">data</a>, <a href="https://dx.doi.org/"""+str(DOI_SET['corpus_ar_prov'])+"""">provenance</a></td></tr>
-                     <tr><td>bibliographic entries (be)</td><td><a href="https://dx.doi.org/"""+str(DOI_SET['corpus_be'])+"""">data</a>, <a href="https://dx.doi.org/"""+str(DOI_SET['corpus_be_prov'])+"""">provenance</a></td></tr>
-                     <tr><td>bibliographic resources (br)</td><td><a href="https://dx.doi.org/"""+str(DOI_SET['corpus_br'])+"""">data</a>, <a href="https://dx.doi.org/"""+str(DOI_SET['corpus_br_prov'])+"""">provenance</a></td></tr>
-                     <tr><td>identifiers (id)</td><td><a href="https://dx.doi.org/"""+str(DOI_SET['corpus_id'])+"""">data</a>, <a href="https://dx.doi.org/"""+str(DOI_SET['corpus_id_prov'])+"""">provenance</a></td></tr>
-                     <tr><td>responsible agents (ra)</td><td><a href="https://dx.doi.org/"""+str(DOI_SET['corpus_ra'])+"""">data</a>, <a href="https://dx.doi.org/"""+str(DOI_SET['corpus_ra_prov'])+"""">provenance</a></td></tr>
-                     <tr><td>resource embodiment (re)</td><td><a href="https://dx.doi.org/"""+str(DOI_SET['corpus_re'])+"""">data</a>, <a href="https://dx.doi.org/"""+str(DOI_SET['corpus_re_prov'])+"""">provenance</a></td></tr>
-                     <tr><td>corpus</td><td><a href="https://dx.doi.org/"""+str(DOI_SET['triplestore'])+"""">triplestore</a>, <a href="https://dx.doi.org/"""+str(DOI_SET['corpus_prov'])+"""">provenance</a></td></tr>
+                     <tr><td>agent roles (ar)</td><td><a href="https://doi.org/"""+str(DOI_SET['corpus_ar'])+"""">data</a>, <a href="https://doi.org/"""+str(DOI_SET['corpus_ar_prov'])+"""">provenance</a></td></tr>
+                     <tr><td>bibliographic entries (be)</td><td><a href="https://doi.org/"""+str(DOI_SET['corpus_be'])+"""">data</a>, <a href="https://doi.org/"""+str(DOI_SET['corpus_be_prov'])+"""">provenance</a></td></tr>
+                     <tr><td>bibliographic resources (br)</td><td><a href="https://doi.org/"""+str(DOI_SET['corpus_br'])+"""">data</a>, <a href="https://doi.org/"""+str(DOI_SET['corpus_br_prov'])+"""">provenance</a></td></tr>
+                     <tr><td>identifiers (id)</td><td><a href="https://doi.org/"""+str(DOI_SET['corpus_id'])+"""">data</a>, <a href="https://doi.org/"""+str(DOI_SET['corpus_id_prov'])+"""">provenance</a></td></tr>
+                     <tr><td>responsible agents (ra)</td><td><a href="https://doi.org/"""+str(DOI_SET['corpus_ra'])+"""">data</a>, <a href="https://doi.org/"""+str(DOI_SET['corpus_ra_prov'])+"""">provenance</a></td></tr>
+                     <tr><td>resource embodiment (re)</td><td><a href="https://doi.org/"""+str(DOI_SET['corpus_re'])+"""">data</a>, <a href="https://doi.org/"""+str(DOI_SET['corpus_re_prov'])+"""">provenance</a></td></tr>
+                     <tr><td>corpus</td><td><a href="https://doi.org/"""+str(DOI_SET['triplestore'])+"""">triplestore</a>, <a href="https://doi.org/"""+str(DOI_SET['corpus_prov'])+"""">provenance</a></td></tr>
                  </table>
              </div>
         </body>
