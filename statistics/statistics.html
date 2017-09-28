@@ -9,45 +9,31 @@
         <meta name="viewport" content="width=device-width, initial-scale=1" />
 
         <link rel="stylesheet" href="css/metricsgraphics.css" />
-        <link rel="stylesheet" href="css/font-awesome.min.css"></link>
-        <link rel="stylesheet" href="css/bootstrap.min.css"></link>
+        <link rel="stylesheet" href="css/font-awesome.min.css" />
+        <link rel="stylesheet" href="css/bootstrap.min.css" />
+        <link rel="stylesheet" href="css/billboard.min.css" />
+        <link rel="stylesheet" href="css/stats.css" />
 
         <script src="js/conf.js"> </script>
         <script src="js/jquery.min.js"> </script>
+        <script src="js/underscore.min.js"> </script>
         <script src="js/d3.min.js"> </script>
         <script src="js/bootstrap.min.js"> </script>
         <script src="js/metricsgraphics.min.js"> </script>
-
+        <script src="js/hooks.js"> </script>
+        <script src="js/stats.js"> </script>
+        <script src="js/billboard.min.js"> </script>
 
         <script>
-            function createGraph(jQuery) {
-                d3.csv(conf.figshare, function(data) {
-                    data = MG.convert.date(data, 'month', '%Y-%m');
-                    data = MG.convert.number(data, 'views');
-                    data = MG.convert.number(data, 'downloads');
-
-                    MG.data_graphic({
-                        title: "Figshare views and downloads",
-                        description: "This graphic shows a time-series of downloads.",
-                        data: data,
-                        width: 600,
-                        height: 250,
-                        target: '#figshare',
-                        legend_target: '#figshare-legend',
-                        x_accessor: 'month',
-                        y_accessor: ['views', 'downloads'],
-                        legend: ['Views','Downloads'],
-                        aggregate_rollover: true,
-                        interpolate: d3.curveLinear
-                    })
-                });
-            }
-
             $(document).ready(createGraph);
         </script>
     </head>
     <body>
         <div id="figshare"></div>
-        <div id="figshare-legend"></div>
+        <div id="website"></div>
+        <div id="twitter"></div>
+        <div id="access_page"></div>
+        <div id="access_country"></div>
+
     </body>
 </html>

@@ -160,7 +160,10 @@ def countries(file_log, except_date, ip_country_path):
                         response = urllib2.urlopen("http://freegeoip.net/json/" + cur_ip)
                         source = response.read()
                         j = json.loads(source)
-                        ip_country[cur_ip] = j["country_code"]
+                        country_code = j["country_code"]
+                        if country_code == None or country_code == "":
+                             country_code = "OTHER"
+                        ip_country[cur_ip] = country_code
                         sleep(1)
 
                     cur_country = ip_country[cur_ip]
