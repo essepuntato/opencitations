@@ -22,6 +22,50 @@
      return final_array;
  }
 
+ function calculate_residual(data, all_headers, acceptable=[]) {
+     var result = [];
+     var residual_name = _.clone(all_headers);
+     data.forEach(function(item) {
+         var c_row = {};
+         var residual_value = 0;
+         _.keys(item).forEach(function(c_key) {
+             if (_.contains(all_headers, c_key)) {
+                 c_row[c_key] = Number(item[c_key]);
+                 residual_name = _.difference(residual_name, [c_key]);
+             } else if (_.contains(acceptable, c_key)) {
+                 c_row[c_key] = item[c_key];
+                 residual_name = _.difference(residual_name, [c_key]);
+             } else {
+                 residual_value += Number(item[c_key]);
+             }
+         });
+         c_row[residual_name] = residual_value;
+         result.push(c_row);
+     });
+
+     return result;
+ }
+
+ function create_matrix_of_categories(data, grouping_header, field_to_header, value_to_field) {
+     var final_data = [];
+     var tmp_data = _.groupBy(data, function(item) { return item[grouping_header] });
+     for (key in tmp_data) {
+         var new_row = {};
+         new_row[grouping_header] = key;
+         var cur_row = tmp_data[key];
+         cur_row.forEach(function(item) {
+             new_row[item[field_to_header]] = item[value_to_field];
+         });
+         final_data.push(new_row);
+     }
+     return final_data;
+ }
+
+/* This function convert a bb object into another where the axis are inverted. */
+function bb_transpose(data) {
+    return data[0].map((col, i) => data.map(row => row[i]));
+}
+
 /* This function convert a string month like "YYYY-DD" into a Javascript
  * Date object */
 function yyyy_mm(data, headers) {
@@ -32,6 +76,19 @@ function yyyy_mm(data, headers) {
         });
     });
     return data;
+}
+
+function subSameDate(d, d_key, n_key) {
+    var result = {};
+    d.forEach(function (item) {
+        var cur_value = item[d_key];
+        if (_.findKey(result, cur_value) == undefined) {
+            result[cur_value] = 0
+        }
+        result[cur_value] += Number(item[n_key]);
+    });
+
+    return result;
 }
 
 /* This function allows one to keep only the top n results,
