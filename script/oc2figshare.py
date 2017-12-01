@@ -20,6 +20,7 @@ import os
 import argparse #added later
 import time  
 from time import strftime
+import sys
 
 import glob
 import requests
@@ -340,6 +341,7 @@ if __name__ == '__main__':
                             print "No ZIP file has been found for item '%s'" % item
             except Exception as e:
                 print "\nAn error has occurred:", e.message
+                print sys.exc_info()
 
             oc2fig.store_processed_documents()
 
