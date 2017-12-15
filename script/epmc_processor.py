@@ -45,15 +45,15 @@ class EuropeanPubMedCentralProcessor(ReferenceProcessor):
         else:
             page_size = str(p_size)
         self.provider = "Europe PubMed Central"
-        self.all_papers_api = "http://www.ebi.ac.uk/europepmc/webservices/rest/search?query=" \
+        self.all_papers_api = "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=" \
                               "has_reflist:y+sort_date:y&resulttype=lite&pageSize=%s&format=json" \
                               "&cursorMark=" % page_size
-        self.ref_list_api = "http://www.ebi.ac.uk/europepmc/webservices/rest/XXX/YYY/references/" \
+        self.ref_list_api = "https://www.ebi.ac.uk/europepmc/webservices/rest/XXX/YYY/references/" \
                             "1/1000/json"
-        self.paper_api = "http://www.ebi.ac.uk/europepmc/webservices/rest/search?resulttype=lite&" \
+        self.paper_api = "https://www.ebi.ac.uk/europepmc/webservices/rest/search?resulttype=lite&" \
                          "format=json&query="
-        self.xml_source_api = "http://www.ebi.ac.uk/europepmc/webservices/rest/XXX/fullTextXML"
-        self.open_access_api = "http://www.ebi.ac.uk/europepmc/webservices/rest/search?query=" \
+        self.xml_source_api = "https://www.ebi.ac.uk/europepmc/webservices/rest/XXX/fullTextXML"
+        self.open_access_api = "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=" \
                                "open_access:y+sort_date:y&resulttype=lite&pageSize=%s&format=json" \
                                "&cursorMark=" % page_size
         self.pagination_file = pagination_file
@@ -414,7 +414,7 @@ class EuropeanPubMedCentralProcessor(ReferenceProcessor):
 
             doi = dg(entry, ["doi"])
             if doi is not None and doi.strip() != "":
-                entry_string += "%s http://dx.doi.org/%s" % \
+                entry_string += "%s https://doi.org/%s" % \
                                 ("" if entry_string[-1] == "." else ".", doi.strip())
 
             result = (entry_string, to_process)
