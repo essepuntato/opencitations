@@ -43,6 +43,7 @@ urls = (
     "/(download)", "Download",
     "/(sparql)", "Sparql",
     "/(search)", "Search",
+    "(/static/.+)", "Static",
     "/(publications)", "Publications",
     "/(licenses)", "Licenses",
     "/(contacts)", "Contacts",
@@ -79,6 +80,16 @@ class RawGit:
     def GET(self, u):
         web_logger.mes()
         raise web.seeother("http://rawgit.com/essepuntato/opencitations/master" + u)
+
+
+class Static:
+    def GET(self, u):
+        web.header('Access-Control-Allow-Origin', '*')
+        web.header('Access-Control-Allow-Credentials', 'true')
+        web.header('Content-Type', req.headers["content-type"])
+        web_logger.mes()
+        req = requests.get(u)
+        return req.text
 
 
 class Redirect:
