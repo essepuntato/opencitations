@@ -1,0 +1,69 @@
+$def with (data_path)
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="/static/favicon.ico">
+
+
+    <!-- Bootstrap core CSS -->
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="/static/js/html5shiv.min.js"></script>
+      <script src="/static/js/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- Custom styles for this template -->
+    <link href="/static/css/oc.css" rel="stylesheet">
+
+    <!-- ldd style -->
+    <link href="/static/css/browser.css" rel="stylesheet">
+  </head>
+<!-- NAVBAR
+================================================== -->
+  <body>
+    <!-- Wrap the rest of the page in another container to center all the content. -->
+
+    <div id="browser" class="browser">
+      <div id="browser_info" class="browser-info">
+        <div id="browser_header" class="browser-header"></div>
+        <div id="browser_details" class="browser-details"></div>
+      </div>
+      <div id="browser_metrics" class="browser-metrics"></div>
+
+      <!-- use this div to build a table of results -->
+      <div id="search" class="search">
+        <div id="search_body" class="search-body">
+          <div id="search_results" class="search-results"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="/static/js/ie10-viewport-bug-workaround.js"></script>
+
+    <script src="/static/js/search.js"></script>
+    <link href="/static/css/search.css" rel="stylesheet">
+    <!--<script type="text/javascript" src="/static/js/search-conf.js"></script>-->
+
+    <script src="/static/js/browser.js"></script>
+    <script>
+        browser.do_sparql_query("$data_path");
+    </script>
+
+  </body>
+</html>

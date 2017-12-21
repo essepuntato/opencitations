@@ -27,13 +27,15 @@ from src.oh import OntologyHandler
 import csv
 from datetime import datetime
 
+#new scripts
+from src.sparql_endpoint import SparqlEndPoint
+
 # Load the configuration file
 with open("conf.json") as f:
     c = json.load(f)
 
-pages = ["/", "about", "corpus", "model", "download", "sparql", "publications", "licenses", "contacts"]
+pages = ["/", "about", "corpus", "model", "download", "sparql", "search", "publications", "licenses", "contacts"]
 
-# For redirecting to classes
 urls = (
     "(/)", "Home",
     "/(about)", "About",
@@ -43,6 +45,8 @@ urls = (
     "/corpus/", "Corpus",
     "/(download)", "Download",
     "/(sparql)", "Sparql",
+    "/(search)", "Search",
+    "/browser/(.+)", "Browser",
     "/(publications)", "Publications",
     "/(licenses)", "Licenses",
     "/(contacts)", "Contacts",
@@ -50,10 +54,8 @@ urls = (
     "(/paper/.+)", "RawGit"
 )
 
-# For rendering
 render = web.template.render(c["html"])
 
-# Additional rewrite rules for any URLs
 rewrite = RewriteRuleHandler(
     "Redirect",
     [
@@ -76,6 +78,12 @@ web_logger = WebLogger("opencitations.net", "opencitations_log.txt", [
     {"REMOTE_ADDR": ["130.136.2.47", "127.0.0.1"]}  # uncomment this for real app
 )
 
+# Load the sparql configuration file
+#with open("sparql-conf.json") as f:
+#    s = json.load(f)
+
+# Set the SPARQL endpoint
+#sparql_ep = SparqlEndPoint(c["sparql_endpoint"],s["prefixes"])
 
 class RawGit:
     def GET(self, u):
@@ -131,6 +139,22 @@ class Download:
         web_logger.mes()
         return render.download(pages, active)
 
+class Browser:
+    def GET(self, path):
+        web.debug(path)
+        data_path = "https://w3id.org/oc"+"/corpus/"+path
+        web.debug(data_path)
+        return render.browser(data_path)
+
+class Search:
+    def GET(self, active):
+        web_logger.mes()
+        query_string = web.ctx.env.get("QUERY_STRING")
+        parsed_query = urlparse.parse_qs(query_string)
+        if "text" in parsed_query:
+            return render.search(pages, active, parsed_query['text'][0])
+        else:
+            return render.search(pages, active, "")
 
 class Model:
     def GET(self, active):
@@ -161,6 +185,9 @@ class Sparql:
 
     def POST(self, active):
         content_type = web.ctx.env.get('CONTENT_TYPE')
+        web.debug("The content_type value: ")
+        web.debug(content_type)
+
         cur_data = web.data()
         if "application/x-www-form-urlencoded" in content_type:
             return self.__run_query_string(active, cur_data, True, content_type)
@@ -225,6 +252,7 @@ class Corpus:
             tmp_dir=c["tmp_dir"],
             dir_split_number=int(c["dir_split_number"]),
             file_split_number=int(c["file_split_number"]))
+        web.debug(file_path)
         cur_page = director.redirect(file_path)
         if cur_page is None:
             raise web.notfound()

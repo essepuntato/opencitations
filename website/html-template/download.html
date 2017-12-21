@@ -30,27 +30,52 @@ $def with (pages, active)
     </head>
     <body>
         <div class="cover-container">
-            <div class="masthead clearfix">
-                <h3 class="masthead-brand">
-                    <a href="/"><span class="oc-purple">Open</span><span class="oc-blue">Citations</span></a>
-                </h3>
-                <nav>
-                    <ul class="nav masthead-nav">
-                        $for page in pages:
-                            $if page == active:
-                                <li class="active">
-                            $else:
-                                <li>
-                            <a href="$page">
-                                $if page == "/":
-                                    Home
-                                $else:
-                                    $page.title()
-                            </a>
-                            </li>
-                    </ul>
-                </nav>
-            </div>
+          <div class="masthead clearfix">
+
+              <nav class="navbar">
+                  <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                       <span class="icon-bar"></span>
+                       <span class="icon-bar"></span>
+                       <span class="icon-bar"></span>
+                    </button>
+                    <h3 class="masthead-brand">
+                        <a href="/"><span class="oc-purple">Open</span><span class="oc-blue">Citations</span></a>
+                    </h3>
+                  </div>
+
+                  <div class="navbar-collapse collapse">
+
+                    <div class="masthead-search">
+                      <form class="input-group" action="search" method="get">
+                        <input type="text" class="form-control oc-purple" placeholder="Search..." name="text">
+                        <div class="input-group-btn">
+                          <button class="btn btn-default oc-purple" type="submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                      </form>
+                    </div>
+
+                    <div class="masthead-pages">
+                      <ul class="nav masthead-nav navbar-nav">
+                          $for page in pages:
+                              $if page == active:
+                                  <li class="active">
+                              $else:
+                                  <li>
+                              <a href="$page">
+                                  $if page == "/":
+                                      Home
+                                  $else:
+                                      $page.title()
+                              </a>
+                              </li>
+                      </ul>
+                    </div>
+
+                  </div>
+              </nav>
+
+          </div>
 
             <div class="cover left">
                  <h3>$active.title()</h3>
@@ -58,47 +83,7 @@ $def with (pages, active)
                 <p>Each dump is composed by several zip archives, each containing either data or provenance information relating to a particular sub-dataset within the OCC.</p>
                 <p>After unzipping an archive, one needs to use <a href="http://dar.linux.free.fr/">Disk ARchive (DAR)</a> - a multi-platform archive tool for managing huge amount of data - to recreate the whole OCC structure.</p>
 
-                <h4>Most recent OCC data dump - November 2017 Dump</h4>
-                <h4>25 November 2017 Dump</h4>
-                 <p>Dump created on 2017-11-25. This dump includes information on:</p>
-                 <ul>
-                    <li><p>283,215 citing bibliographic resources;</p></li>
-                    <li><p>6,251,266 cited bibliographic resources;</p></li>
-                    <li><p>11,976,217 citation links.</p></li>
-                 </ul>
-                 <div class="table-responsive">
-                     <table class="table">
-                         <tr><th>Type</th><th>Archive</th></tr>
-                         <tr><td>agent roles (ar)</td><td><a href="https://doi.org/10.6084/m9.figshare.5702173">data</a>, <a href="https://doi.org/10.6084/m9.figshare.5702158">provenance</a></td></tr>
-                         <tr><td>bibliographic entries (be)</td><td><a href="https://doi.org/10.6084/m9.figshare.5702116">data</a>, <a href="https://doi.org/10.6084/m9.figshare.5702125">provenance</a></td></tr>
-                         <tr><td>bibliographic resources (br)</td><td><a href="https://doi.org/10.6084/m9.figshare.5702146">data</a>, <a href="https://doi.org/10.6084/m9.figshare.5702122">provenance</a></td></tr>
-                         <tr><td>identifiers (id)</td><td><a href="https://doi.org/10.6084/m9.figshare.5702149">data</a>, <a href="https://doi.org/10.6084/m9.figshare.5702176">provenance</a></td></tr>
-                         <tr><td>responsible agents (ra)</td><td><a href="https://doi.org/10.6084/m9.figshare.5702140">data</a>, <a href="https://doi.org/10.6084/m9.figshare.5702047">provenance</a></td></tr>
-                         <tr><td>resource embodiment (re)</td><td><a href="https://doi.org/10.6084/m9.figshare.5702188">data</a>, <a href="https://doi.org/10.6084/m9.figshare.5702131">provenance</a></td></tr>
-                         <tr><td>corpus</td><td><a href="https://doi.org/10.6084/m9.figshare.5702053">triplestore</a>, <a href="https://doi.org/10.6084/m9.figshare.5702155">provenance</a></td></tr>
-                     </table>
-                 </div>
-
-                <h4>25 October 2017 Dump</h4>
-                 <p>Dump created on 2017-10-25. This dump includes information on:</p>
-                 <ul>
-                    <li><p>264,835 citing bibliographic resources;</p></li>
-                    <li><p>5,967,178 cited bibliographic resources;</p></li>
-                    <li><p>11,207,388 citation links.</p></li>
-                 </ul>
-                 <div class="table-responsive">
-                     <table class="table">
-                         <tr><th>Type</th><th>Archive</th></tr>
-                         <tr><td>agent roles (ar)</td><td><a href="https://doi.org/10.6084/m9.figshare.5572396">data</a>, <a href="https://doi.org/10.6084/m9.figshare.5572384">provenance</a></td></tr>
-                         <tr><td>bibliographic entries (be)</td><td><a href="https://doi.org/10.6084/m9.figshare.5572357">data</a>, <a href="https://doi.org/10.6084/m9.figshare.5572363">provenance</a></td></tr>
-                         <tr><td>bibliographic resources (br)</td><td><a href="https://doi.org/10.6084/m9.figshare.5572375">data</a>, <a href="https://doi.org/10.6084/m9.figshare.5572360">provenance</a></td></tr>
-                         <tr><td>identifiers (id)</td><td><a href="https://doi.org/10.6084/m9.figshare.5572378">data</a>, <a href="https://doi.org/10.6084/m9.figshare.5572399">provenance</a></td></tr>
-                         <tr><td>responsible agents (ra)</td><td><a href="https://doi.org/10.6084/m9.figshare.5572372">data</a>, <a href="https://doi.org/10.6084/m9.figshare.5572312">provenance</a></td></tr>
-                         <tr><td>resource embodiment (re)</td><td><a href="https://doi.org/10.6084/m9.figshare.5572405">data</a>, <a href="https://doi.org/10.6084/m9.figshare.5572366">provenance</a></td></tr>
-                         <tr><td>corpus</td><td><a href="https://doi.org/10.6084/m9.figshare.5572315">triplestore</a>, <a href="https://doi.org/10.6084/m9.figshare.5572381">provenance</a></td></tr>
-                     </table>
-                 </div>
-
+                <h4>Most recent OCC data dump - September 2017 OCC Dump</h4>
                 <h4>25 September 2017 Dump</h4>
                  <p>Dump created on 2017-09-25. This dump includes information on:</p>
                  <ul>
@@ -207,7 +192,7 @@ $def with (pages, active)
                      <li><p>3,781,435 cited bibliographic resources;</p></li>
                      <li><p>5,976,771 citation links.</p></li>
                  </ul>
-                
+
                  <div class="table-responsive">
                      <table class="table">
                          <tr><th>Type</th><th>Archive</th></tr>

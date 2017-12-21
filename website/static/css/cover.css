@@ -1,18 +1,78 @@
-/*
- * Globals
- */
 
 /* Links */
 a, a:focus {
     color: #9931FC;
 }
-
 a:hover {
   color: #2D22DE;
 }
 
+.oc-basic {
+    color: #191919;
+}
+
+.oc-blue {
+    color: #2D22DE;
+}
+
+.oc-purple {
+    color: #9931FC;
+}
+
+.social {
+    color: #9931FC;
+}
+
+.social:hover {
+    color: #2D22DE;
+}
+
+.navbar-toggle .icon-bar {
+    background-color: black;
+}
+
+.left {
+    text-align: left;
+}
+
 #logo {
     max-width: 200px;
+}
+
+footer img {
+    max-height: 70px;
+}
+
+footer #ox img {
+    max-height: 60px;
+}
+
+footer #is4oa img {
+    max-height: 60px;
+}
+
+#yasqe, #yasr, .CodeMirror-hints {
+    text-align: left !important;
+}
+
+blockquote {
+  font-size: 100%;
+}
+
+figure img {
+  max-weight: 90% !important;
+}
+
+.center {
+    text-align: center;
+}
+
+.mt-more {
+    margin-top: 3%;
+}
+
+.search-entry .form-control{
+  font-size:20px;
 }
 
 /*
@@ -34,30 +94,6 @@ body {
   margin-left: auto;
 }
 
-.oc-basic {
-    color: #191919;
-}
-
-.oc-blue {
-    color: #2D22DE;
-}
-
-.oc-purple {
-    color: #9931FC;
-}
-
-footer img {
-    max-height: 70px;
-}
-
-footer #ox img {
-    max-height: 60px;
-}
-
-footer #is4oa img {
-    max-height: 60px;
-}
-
 footer .row div {
     float:none;
     display:inline-block;
@@ -65,14 +101,14 @@ footer .row div {
     margin-right:-4px;
 }
 
-.masthead {
-    height: 50px;
-    background-color: white;
+.mastfoot {
+  color: darkgrey; /* IE8 proofing */
 }
 
 .masthead-brand {
   margin-top: 10px;
   margin-bottom: 10px;
+  float:left;
 }
 
 .masthead-nav > li {
@@ -88,12 +124,13 @@ footer .row div {
   font-weight: bold;
   color: darkgrey; /* IE8 proofing */
   border-bottom: 2px solid transparent;
+
 }
 .masthead-nav > li > a:hover {
   background-color: transparent;
   border-bottom-color: darkgrey;
-
 }
+
 .masthead-nav > .active > a,
 .masthead-nav > .active > a:hover,
 .masthead-nav > .active > a:focus {
@@ -101,100 +138,125 @@ footer .row div {
   border-bottom-color: #2D22DE ;
 }
 
-.left {
-    text-align: left;
+
+/*when the resolution is bigger than min-width*/
+@media (min-width: 1251px) {
+
+      .cover {
+        padding-top:12%;
+        padding-bottom:50px;
+      }
+
+      /* Handle the widths */
+      .masthead,
+      .mastfoot,
+      .cover-container {
+        width: 70%; /* Must be percentage or pixels for horizontal alignment */
+      }
+
+      /* Start the vertical centering */
+      .site-wrapper-inner {
+        vertical-align: middle;
+      }
+
+      /* Pull out the header and footer */
+      .masthead {
+        height: 100px;
+        background-color: white !important;
+        z-index: 10 !important;
+        position: fixed;
+        top: 0;
+      }
+      .mastfoot {
+        position: fixed;
+        bottom: 0;
+      }
+
+      /*the header inside elements*/
+      .masthead-search {
+        margin-top: 10px;
+        margin-bottom: 10px;
+        padding-left: 30%;
+        width: 80%;
+        float: right;
+      }
+      .masthead-pages {
+        display: block;
+        float:right;
+      }
 }
 
-@media (min-width: 768px) {
-  .masthead-brand {
-    float: left;
-  }
-  .masthead-nav {
-    float: right;
-  }
-}
 
-.social {
-    color: #9931FC;
-}
+/*when the resolution is less than max-width*/
+@media (max-width: 1250px) {
 
-.social:hover {
-    color: #2D22DE;
-}
+      /*make the website page larger*/
+      .cover-container {
+        width: 97%;
+      }
 
-/*
- * Cover
- */
+      /*the navbar*/
+      .navbar-nav {
+        margin: 7.5px -15px;
+      }
+      .navbar-header {
+          float: none;
+      }
+      .navbar-toggle {
+          display: block;
+      }
+      .navbar-collapse {
+          z-index:20;
+          background-color: white;
+          border-bottom: 1px solid;
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      }
+      .navbar-collapse.collapse {
+           display: none !important;
+      }
+      .collapse.in{
+           display: block !important;
+      }
 
-.cover {
-    padding-top:50px;
-    padding-bottom:50px;
-}
+      /*elements of the new header*/
+      .masthead-pages{
+        padding-top: 10px;
+        float:left;
+        display: block;
+      }
+      .masthead-brand{
+        padding-left:20px;
+      }
 
+      /*elements to display once the dropdown button is clicked*/
+      .masthead-search {
+        display: block;
+        padding-left: 0%;
+        width: 100%;
+        float:none;
+      }
+      .form-control{
+        width:100%;
+        font-size:18px;
+      }
 
-/*
- * Footer
- */
-
-.mastfoot {
-  color: darkgrey; /* IE8 proofing */
-}
-
-.masthead {
-    background-color: white !important;
-    z-index: 10 !important;
-}
-
-#yasqe, #yasr, .CodeMirror-hints {
-    text-align: left !important;
-}
-
-blockquote {
-    font-size: 100%;
-}
-
-figure img {
-    max-weight: 90% !important;
-}
-
-.center {
-    text-align: center;
-}
-
-.mt-more {
-    margin-top: 3%;
-}
-
-/*
- * Affix and center
- */
-
-@media (min-width: 768px) {
-  /* Pull out the header and footer */
-  .masthead {
-    position: fixed;
-    top: 0;
-  }
-  .mastfoot {
-    position: fixed;
-    bottom: 0;
-  }
-  /* Start the vertical centering */
-  .site-wrapper-inner {
-    vertical-align: middle;
-  }
-  /* Handle the widths */
-  .masthead,
-  .mastfoot,
-  .cover-container {
-    width: 70%; /* Must be percentage or pixels for horizontal alignment */
-  }
-}
-
-@media (min-width: 992px) {
-  .masthead,
-  .mastfoot,
-  .cover-container {
-    width: 70%;
-  }
+      /*the nav pages must be displayed in blocks*/
+      .masthead-nav > li {
+        margin-left: 20px;
+        display: block;
+      }
+      .masthead-nav > li + li {
+          display: block;
+          float: none;
+       }
+       .masthead-nav > li > a {
+          padding: 8px 15px 10px 0px;
+          float: left;
+       }
+      .masthead-nav > .active > a,
+      .masthead-nav > .active > a:hover,
+      .masthead-nav > .active > a:focus {
+        color: #9931FC;
+        border-bottom-color: transparent ;
+      }
 }

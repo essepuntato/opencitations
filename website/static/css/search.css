@@ -1,0 +1,299 @@
+
+@charset "UTF-8";
+
+
+/* (0) Fixed search skeleton */
+/* ========================= */
+
+#search{
+  padding-top: 5%;
+  width:100%;
+}
+
+#search_header{
+  width:100%;
+  height: 50px;
+}
+
+#rows_per_page {
+  float:left;
+  margin-left:26%;
+}
+
+#sort_results {
+  float:right;
+  margin-right:3%;
+}
+
+#search_filters{
+  float:left;
+  width: 25%;
+}
+
+#filter_values_list{
+  width:90%;
+  margin:0;
+}
+
+#search_results{
+  float:left;
+  width: 75%;
+  padding-bottom: 200px;
+}
+
+/* ===================== (0) Fixed search skeleton*/
+
+
+
+/* (1) The table of results */
+/* ======================== */
+
+.search-results{
+  font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+  color: black;
+}
+
+.results-tab {
+  table-layout: fixed;
+  width: 100%;
+  background-color: rgba(243, 230, 255,0.2);
+  border-left: solid;
+  border-right: solid;
+  border-bottom: solid;
+  border-width: medium;
+  border-color: #f2f2f2;
+  text-align:left;
+  word-wrap:break-word;
+}
+.results-tab th {}
+
+.results-tab td a{color: black;}
+.results-tab td a:active,
+.results-tab td a:hover,
+.results-tab td a:focus {
+  color: #9931FC;
+}
+
+/* (1.1) the tab footer ---------------*/
+.tab-footer {
+  margin-bottom: 70px;
+  table-layout:fixed;
+  width: 100%;
+  border-top: solid;
+  border-width: medium;
+  border-color: #f2f2f2;
+}
+
+.noresults {
+  font-size: 125%;
+  color: #9931FC;
+}
+
+.tab-nav-btn {
+  display:inline-block;
+  font-size: 125%;
+}
+.tab-nav-btn.next{ margin-right: 50px;}
+.tab-nav-btn.prev{ margin-left: 50px;}
+
+.pages-nav {
+  display:inline-block;
+}
+.pages-nav > li {
+  display: inline-block;
+}
+.pages-nav > li + li {
+  margin-left: 8px;
+}
+.pages-nav > li > a {
+  padding-right: 0;
+  padding-left: 0;
+  font-size: 16px;
+  font-weight: bold;
+  color: darkgrey; /* IE8 proofing */
+  border-bottom: 2px solid transparent;
+}
+.pages-nav > li > a:hover {
+  background-color: transparent;
+  border-bottom-color: darkgrey;
+}
+.pages-nav > .active > a,
+.pages-nav > .active > a:hover,
+.pages-nav > .active > a:focus {
+  color: #9931FC;
+  border-bottom-color: #2D22DE ;
+}
+
+spanfooter + spanfooter {
+  /*span between btns and the pages index in footer*/
+  margin-left: 40px;
+}
+/*----------------------------(1.1) the tab footer*/
+/* ==========================(1) The table of results*/
+
+
+
+/* (2) The search header */
+/* ===================== */
+
+.search-header{font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;}
+
+.search-header .rows-per-page{font-size: 130%;}
+.search-header .rows-per-page .input
+{
+  width: 50px;
+  display: inline-block;
+  color: #9931FC;
+  font-size:medium;
+}
+
+.search-header .sort-results{font-size: 130%;}
+.search-header .sort-results .input
+{
+  width: 80px;
+  display: inline-block;
+  color: #9931FC;
+  font-size:medium;
+}
+
+/* ========================== (2) The search header */
+
+
+/* (3) The search filter section */
+/* ============================= */
+
+.search-filters{font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;}
+
+.limit-results {
+  display: inline-block;
+  font-size: 140%;
+  float:left;
+}
+
+.limit-results-value {
+  display: inline-block;
+  color: #9931FC;
+  font-size: 120%;
+}
+
+.slider-container {
+    width: 95%;
+    float:left;
+    display: inline-block;
+}
+
+.filters-btns {
+  float: left;
+  margin-top: 8%;
+  margin-bottom:4%;
+}
+
+.btn-primary {
+    background: #ffffff;
+    color: #9931FC;
+    border-color: #9931FC;
+}
+
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active, .btn-primary.active, .open > .dropdown-toggle.btn-primary {
+    background: #9931FC;
+    color: #ffffff;
+}
+
+.btn-primary:active, .btn-primary.active {
+    background: #9931FC;
+    box-shadow: none;
+    border-color: #9931FC;
+}
+
+.filter-values-tab{
+  table-layout: fixed;
+  display:table;
+}
+.filter-values-tab>tbody>tr>td{
+  border-top: none;
+  padding:2px;
+}
+.filter-values-tab th{
+  font-size: 140%;
+  font-weight: normal;
+}
+.filter-values-tab th > a > arrow {
+  margin-left:10px;
+  float: right;
+}
+.filter-values-tab td{
+  float:left;
+  word-wrap:break-word;
+  text-align:left;
+  width:100%;
+}
+
+.arrow-nav{
+  font-size: 200%;
+}
+.arrow-nav.left{float:left;}
+.arrow-nav.right{float:right;}
+td ar + ar {
+  margin-left: 30px;
+}
+
+/* ========================== (3) The search filter section */
+
+
+/* (4) The search entry (first page) */
+/* ================================= */
+.search-entry{
+  font-size: 230%;
+  margin-top: 70px;
+  width: 75%;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.search-entry .search-box{
+  margin-top: 10px;
+}
+
+#search_loader{
+  font-size: 140%;
+}
+/* ========================== (4) The search entry (first page) */
+
+
+
+
+/* Slider class */
+/* ================================= */
+
+.slider {
+    -webkit-appearance: none;
+    width: 85%;
+    height: 25px;
+    background: #f2f2f2;
+    outline: none;
+    opacity: 0.5;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+}
+
+.slider:hover {
+    opacity: 1;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    background: #9931FC;
+    cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+    width: 25px;
+    height: 25px;
+    background: #9931FC;
+    cursor: pointer;
+}
+
+/* ========================== Slider class */
