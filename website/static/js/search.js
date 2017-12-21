@@ -14,7 +14,7 @@ var search = (function () {
 		    var xreq_obj = new XMLHttpRequest();
 		    xreq_obj.overrideMimeType("application/json");
 				// with false it becomes an synchronous request
-		    xreq_obj.open('GET', 'static/js/search-conf.json', false);
+		    xreq_obj.open('GET', 'https://w3id.org/oc/static/js/search-conf.json', false);
 		    xreq_obj.onreadystatechange = function () {
 		          if (xreq_obj.readyState == 4 && xreq_obj.status == "200") {
 		            callback(xreq_obj.responseText);
