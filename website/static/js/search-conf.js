@@ -1,4 +1,4 @@
-{
+var search_conf = {
 "sparql_endpoint": "https://w3id.org/oc/sparql",
 "prefixes": [
     {"prefix":"cito","iri":"http://purl.org/spar/cito/"},

@@ -68,8 +68,8 @@ var search = (function () {
 			if (qtext != "") {
 
 				//initialize and get the search_config_json
-				_get_search_conf();
-				//search_conf_json = search_conf;
+				//_get_search_conf();
+				search_conf_json = search_conf;
 
 				//get the rule of my input qtext
 				var rule =  _get_rule(qtext);
