@@ -6,28 +6,8 @@ var search = (function () {
 				data: null,
 				category: "",
 				filters : {"limit":null, "arr_entries":[], "fields":[], "data":null},
-				view: {"page": 0, "page_limit": null, "fields_filter_index":{}}
+				view: {"data": null, "page": 0, "page_limit": null, "fields_filter_index":{}, "sort": {"field":null, "order":null, "type":null}}
 		}
-
-		/* an sync GET request for the search configuration file */
-		function _request_search_conf(callback) {
-		    var xreq_obj = new XMLHttpRequest();
-		    xreq_obj.overrideMimeType("application/json");
-				// with false it becomes an synchronous request
-		    xreq_obj.open('GET', 'https://w3id.org/oc/static/js/search-conf.json', false);
-		    xreq_obj.onreadystatechange = function () {
-		          if (xreq_obj.readyState == 4 && xreq_obj.status == "200") {
-		            callback(xreq_obj.responseText);
-		          }
-		    };
-		    xreq_obj.send(null);
-		 }
-
-		 function _get_search_conf() {
-				var json_data = _request_search_conf(function(response) {
-					 search_conf_json = JSON.parse(response);
-				});
-		 }
 
 		/* get the rule which matches my query_text*/
 		function _get_rule(query_text) {
@@ -63,7 +43,6 @@ var search = (function () {
 		/*THE MAIN FUNCTION CALL
 		call the sparql endpoint and do the query 'qtext'*/
 		function do_sparql_query(qtext){
-			var header_container = document.getElementById("search_header");
 
 			if (qtext != "") {
 
@@ -84,7 +63,7 @@ var search = (function () {
 				var query_contact_tp = String(search_conf_json.sparql_endpoint)+"?query="+ encodeURIComponent(sparql_query) +"&format=json";
 
 				//put a loader div
-				header_container.appendChild(htmldom.loader(true));
+				htmldom.loader(true);
 
 				//call the sparql end point and retrieve results in json format
 				$.ajax({
@@ -94,17 +73,20 @@ var search = (function () {
 	    				success: function( res_data ) {
 									htmldom.loader(false);
 									htmldom.remove_footer();
-									console.log(JSON.parse(JSON.stringify(res_data)));
+									//console.log(JSON.parse(JSON.stringify(res_data)));
 									_init_data(rule,res_data);
-									_apply_limit_filter();
-									_build_tab_filters(rule);
-									_build_tab_header(rule);
-									_update_page();
+
+									_build_filter_sec();
+									_limit_results();
+									_build_header_sec(rule);
+									_sort_results();
+
+									htmldom.update_page(table_conf,search_conf_json);
 	    				}
 			   });
 
 			 }else {
-	 				header_container.innerHTML = htmldom.searching_main_entry();
+	 				htmldom.main_entry();
 			 }
 		}
 
@@ -129,6 +111,9 @@ var search = (function () {
 			}
 			//console.log("After linking and grouping :");
 			//console.log(JSON.parse(JSON.stringify(json_data)));
+
+			//init global data
+			//results_data = JSON.parse(JSON.stringify(json_data));
 
 			//init the data
 			table_conf.data = JSON.parse(JSON.stringify(json_data));
@@ -156,20 +141,18 @@ var search = (function () {
 			//init all the filtered fields
 			//-- filtered data
 			table_conf.filters.data = table_conf.data;
-			//-- maximum number of results
-			table_conf.filters.limit = 100;
-			if (search_conf_json.filters.limit_res.init != undefined) {
-				table_conf.filters.limit = search_conf_json.filters.limit_res.init;
-			}
+
 
 			//-- the filtered checked fields
 			table_conf.filters.arr_entries = [];
 			//init all the view fields
+			table_conf.view.data = table_conf.data;
+
 			table_conf.view.page = 0;
 			table_conf.view.page_limit = 10;
-			if (search_conf_json.filters.page_limit != undefined) {
-				if (search_conf_json.filters.page_limit.length != 0) {
-					table_conf.view.page_limit = search_conf_json.filters.page_limit[0];
+			if (search_conf_json.page_limit != undefined) {
+				if (search_conf_json.page_limit.length != 0) {
+					table_conf.view.page_limit = search_conf_json.page_limit[0];
 				}
 			}
 
@@ -181,6 +164,22 @@ var search = (function () {
 							table_conf.view.fields_filter_index[fields[i].value] = {"i_from": 0,"i_to": fields[i].filter.min};
 				}
 			}
+
+			//-- init my default sort
+			for (var i = 0; i < fields.length; i++) {
+				var sort_def = fields[i].sort.default;
+				if (sort_def != undefined) {
+					if (sort_def == true) {
+						table_conf.view.sort.field = fields[i].value;
+						table_conf.view.sort.order = "desc";
+						if (sort_def.order != undefined) {
+							table_conf.view.sort.order = sort_def.order;
+						}
+						table_conf.view.sort.type = fields[i].type;
+					}
+				}
+			}
+
 		}
 
 		/*map the fields with their corresponding links*/
@@ -225,57 +224,58 @@ var search = (function () {
 			}
 		}
 
-		function _build_tab_header(rule){
+		function _build_header_sec(rule){
 
 			//array of my fields
 			var myfields = search_conf_json.categories[util.index_in_arrjsons(search_conf_json.categories,["name"],[rule.category])].fields;
 
 			//get the possible fields to use as sort options
 			var arr_options = [];
-			for (var i = 0; i < table_conf.data.head.vars.length; i++) {
+			for (var i = 0; i < table_conf.view.data.head.vars.length; i++) {
 				var index = util.index_in_arrjsons(myfields,["value"],[table_conf.data.head.vars[i]]);
 				if (index != -1) {
-					if(myfields[index].hasOwnProperty("sort")){
-						if(myfields[index].sort == true){
+					if(myfields[index].sort.value != undefined ){
+						if(myfields[index].sort.value == true){
 							var str_html = myfields[index].value;
 							if(myfields[index].title != undefined){str_html = myfields[index].title; }
 							arr_options.push({"value": myfields[index].value, "type": myfields[index].type, "order": "asc", "text":str_html+" &#8593;" });
 							arr_options.push({"value": myfields[index].value, "type": myfields[index].type, "order": "desc", "text":str_html+" &#8595;"});
+
+							if(! util.is_undefined_key(myfields[index],"sort.default.order")){
+							//if (myfields[index].sort.default.order != undefined) {
+								table_conf.view.sort.field = myfields[index].value;
+								table_conf.view.sort.order = myfields[index].sort.default.order;
+								table_conf.view.sort.type = myfields[index].type;
+							}
 						}
 					}
-
 				}
 			}
-			var html_container = document.getElementById("sort_results");
-			if (html_container != null) {
-				html_container.innerHTML = htmldom.sort_box(arr_options);
-			}
+
+			htmldom.sort_box(
+					arr_options,
+					table_conf.view.sort.field,
+					table_conf.view.sort.order,
+					table_conf.view.sort.type
+				);
 
 			//get the possible fields to use as page limit options
 			arr_options = [];
-			if(search_conf_json.filters.hasOwnProperty("page_limit")){
-				arr_options = search_conf_json.filters.page_limit;
+			if(search_conf_json.page_limit != undefined){
+				arr_options = search_conf_json.page_limit;
 			}
-
-			html_container = document.getElementById("rows_per_page");
-			if (html_container != null) {
-				html_container.innerHTML = htmldom.page_limit(arr_options);
+			htmldom.page_limit(arr_options);
+		}
+		function _build_filter_sec(){
+			if (_build_limit_res() != -1) {
+				if (htmldom.filter_btns() != -1){
+					_gen_data_checkboxes();
+					htmldom.filter_checkboxes(table_conf);
+				}
 			}
 		}
-
-		function _build_tab_filters(){
-
-			_build_limit_res(table_conf.data.results.bindings);
-			var container = document.getElementById("filter_btns");
-			if (container != null) {
-				container.innerHTML = htmldom.filter_btns();
-
-				_update_data_checkboxes();
-				_update_filter_checkboxes();
-			}
-		}
-
-		function _build_limit_res(data){
+		function _build_limit_res(){
+			var data = table_conf.view.data.results.bindings;
 			//init limit results filter
 			var max_val = data.length;
 			var init_val = max_val;
@@ -285,13 +285,9 @@ var search = (function () {
 			table_conf.filters.limit = init_val;
 			var min_val = 0;
 
-			var container = document.getElementById("limit_results");
-			if (container != null) {
-				container.innerHTML = htmldom.limit_filter(init_val, max_val, min_val, max_val);
-			}
+			return htmldom.limit_filter(init_val, max_val, min_val, max_val);
 		}
-
-		function _update_data_checkboxes(){
+		function _gen_data_checkboxes(){
 
 			table_conf.filters.arr_entries = [];
 
@@ -302,7 +298,7 @@ var search = (function () {
 							var filter_field = myfields[i].value;
 
 							//the data base
-							var list_data = table_conf.filters.data["results"]["bindings"];
+							var list_data = table_conf.view.data.results.bindings;
 
 							//insert a check list for distinct values in the rows
 							var j_to = list_data.length;
@@ -335,222 +331,55 @@ var search = (function () {
 			}
 		}
 
-		function _update_filter_checkboxes(){
-
-			// create dynamic table
-			var table = document.createElement("table");
-			table.className = "table filter-values-tab";
-
-			// build cells of fields to filter
-			var myfields = table_conf.filters.fields;
-			for (var i = 0; i < myfields.length; i++) {
-						//insert the header
-						var tr = table.insertRow(-1);
-						var href_string = "javascript:search.select_filter_field('"+String(myfields[i].value)+"');";
-						tr.innerHTML = htmldom.field_filter_header(myfields[i], href_string, false).outerHTML;
-
-						var arr_check_values = util.get_sub_arr(table_conf.filters.arr_entries,"field",myfields[i].value);
-						//in case i don't have checkbox values i remove header
-						if (arr_check_values.length == 0) {
-							table.deleteRow(table.rows.length -1);
-						}else {
-							if (myfields[i].dropdown_active == true)
-							{
-									arr_check_values = util.sort_json_by_key(arr_check_values, myfields[i].config.order, myfields[i].config.sort, myfields[i].config.type_sort);
-									var j_from = table_conf.view.fields_filter_index[myfields[i].value].i_from;
-									var j_to = table_conf.view.fields_filter_index[myfields[i].value].i_to;
-									if (j_to > arr_check_values.length) { j_to = arr_check_values.length;}
-
-									for (var j = j_from; j < j_to; j++) {
-										//insert a checkbox entry
-										tr = table.insertRow(-1);
-										tr.innerHTML = htmldom.checkbox_value(myfields[i],arr_check_values[j]).outerHTML;
-									}
-									tr = table.insertRow(-1);
-									tr.innerHTML = htmldom.nav_btns_filter(j_from,j_to,arr_check_values.length,myfields[i]).outerHTML;
-							}else {
-								//dropdown is closed
-								var tr = table.rows[table.rows.length -1];
-								tr.innerHTML = htmldom.field_filter_header(myfields[i], href_string, true).outerHTML;
-							}
-						}
-				}
-				//insert in html container
-				var tab_res_container = document.getElementById("filter_values_list");
-				tab_res_container.innerHTML = "";
-				tab_res_container.appendChild(table);
-
-				__update_checkboxes();
-
-				//click and check the enabled checkboxes
-				function __update_checkboxes() {
-
-					var myfields = table_conf.filters.fields;
-					for (var i = 0; i < myfields.length; i++) {
-						if (myfields[i].dropdown_active == true){
-							var arr_check_values = util.get_sub_arr(table_conf.filters.arr_entries,"field",myfields[i].value);
-							var j_to = arr_check_values.length;
-							for (var j = 0; j < j_to; j++) {
-								var dom_id = arr_check_values[j].field+"-"+arr_check_values[j].value;
-								if (arr_check_values[j].checked == true) {
-									document.getElementById(dom_id).click();
-								}
-							}
-						}
-					}
-				}
-		}
-
-		function _update_page(){
-			var tab_res_container = document.getElementById("search_results");
-			if (tab_res_container != null) {
-				var new_arr_tab = __build_page();
-				tab_res_container.innerHTML = "";
-				tab_res_container.appendChild(new_arr_tab[0]);
-				tab_res_container.appendChild(new_arr_tab[1]);
-			}
-
-			function __build_page(){
-				// create new tables
-				var new_tab_res = document.createElement("table");
-				var new_footer_tab = document.createElement("table");
-
-				new_tab_res.id = "tab_res";
-				new_tab_res.className = "table results-tab";
-
-				//create table header
-				var col = table_conf.filters.data["head"]["vars"];
-				var tr = new_tab_res.insertRow(-1);
-				var index_category = util.index_in_arrjsons(search_conf_json.categories,["name"],[table_conf.category]);
-				var category_fields = search_conf_json.categories[index_category].fields;
-
-				tr.innerHTML = htmldom.table_res_header(col, category_fields).outerHTML;
-
-				//create tr of all the other results
-				var results = table_conf.filters.data["results"]["bindings"];
-				if (results.length > 0) {
-					var i_from = table_conf.view.page * table_conf.view.page_limit;
-					var i_to = i_from + table_conf.view.page_limit;
-					if (i_to > results.length){i_to = results.length;}
-
-					for (var i = i_from; i < i_to; i++) {
-							tr = new_tab_res.insertRow(-1);
-							tr.innerHTML = htmldom.table_res_list(col,category_fields,results[i]).outerHTML;
-					}
-
-					//i will build the nav index for the pages
-					new_footer_tab = htmldom.table_footer(false, __init_prev_next_btn());
-				}else {
-					//i have no results
-					new_footer_tab = htmldom.table_footer(true, "No results were found");
-				}
-
-				return [new_tab_res,new_footer_tab];
-
-				function __init_prev_next_btn(){
-					var num_results = table_conf.filters.data["results"]["bindings"].length;
-					var tot_pages = Math.floor(num_results/table_conf.view.page_limit);
-					if(num_results % table_conf.view.page_limit > 0){tot_pages = tot_pages + 1;}
-					var arr_values = __init_page_nav(tot_pages);
-					return htmldom.table_index_and_btns(arr_values, table_conf.view.page, tot_pages, table_conf.filters.data.results.bindings.length, table_conf.view.page_limit);
-				}
-				function __init_page_nav(tot_pages){
-
-					var c_pages = 5;
-
-					//get the number of previous c_pages before me
-					var current_page = table_conf.view.page + 1;
-					var all_arr_values = __prev_values(c_pages,current_page - 1);
-					var min_index = all_arr_values[all_arr_values.length - 1];
-
-					//get the number of next c_pages before me
-					var remaining_values = (c_pages - all_arr_values.length) + c_pages;
-					var index = current_page + 1;
-					var res_obj = __next_values(remaining_values,index,tot_pages);
-					all_arr_values = all_arr_values.concat(res_obj.arr);
-					remaining_values = res_obj["remaining_values"];
-
-					//get other pages numbers previous to me if I have not still reached a c_pages*2 num
-					res_obj = __prev_values(remaining_values,min_index - 1);
-					all_arr_values = all_arr_values.concat(res_obj);
-
-					//push my page also
-					all_arr_values.push(current_page);
-
-					return all_arr_values.sort(util.sort_int);
-
-					//returns an array of the indexes before me
-					function __next_values(rm,i,tot_pages){
-						var arr_values = [];
-						var remaining_values = rm;
-						var index = i;
-						while ((remaining_values > 0) && (index <= tot_pages)) {
-							arr_values.push(index);
-							index = index + 1;
-							remaining_values = remaining_values - 1;
-						}
-						return {"arr": arr_values, "remaining_values": remaining_values};
-					}
-
-					//returns an array of the indexes before me
-					function __prev_values(rm,i){
-						var arr_values = [];
-						var remaining_values = rm;
-						var index = i;
-						while ((remaining_values > 0) && (index > 0)) {
-							arr_values.push(index);
-							index = index - 1;
-							remaining_values = remaining_values - 1;
-						}
-						return arr_values;
-					}
-				}
-			}
-		}
-
 		/*Get only the n limit number of results from all the data*/
-		function _apply_limit_filter(){
-			var new_data = JSON.parse(JSON.stringify(table_conf.data));
+		function _limit_results(){
+			var new_data = JSON.parse(JSON.stringify(table_conf.filters.data));
 			var arr_new_results = [];
 
 			var i_to = table_conf.filters.limit;
-			if (i_to > table_conf.data.results.bindings.length) {
-				i_to = table_conf.data.results.bindings.length;
+			if (i_to > table_conf.filters.data.results.bindings.length) {
+				i_to = table_conf.filters.data.results.bindings.length;
 			}
 
 			for (var i = 0; i < i_to; i++) {
-				var data_obj = table_conf.data.results.bindings[i];
+				var data_obj = table_conf.filters.data.results.bindings[i];
 				arr_new_results.push(data_obj);
 			}
 			new_data.results.bindings = arr_new_results;
-			table_conf.filters.data = new_data;
+			table_conf.view.data = new_data;
 		}
+		function _sort_results(){
 
-		//functions to call from the html interface
-		function next_page(){
-			table_conf.view.page = table_conf.view.page + 1;
-			_update_page();
-		}
-		function prev_page(){
-			table_conf.view.page = table_conf.view.page - 1;
-			_update_page();
-		}
-		function update_page_limit(new_page_limit){
-			table_conf.view.page_limit = parseInt(new_page_limit);
+			var field = table_conf.view.sort.field;
+			var order = table_conf.view.sort.order
+			var val_type = table_conf.view.sort.type
+
+			var field_val = ".value";
+			var index_category = util.index_in_arrjsons(search_conf_json.categories,["name"],[table_conf.category]);
+			if (search_conf_json.categories[index_category]["group_by"].concats.indexOf(field) != -1) {
+				field_val = ".concat-list";
+			}
+
+			table_conf.view.data.results.bindings = util.sort_json_by_key(
+						table_conf.view.data.results.bindings,
+						order,
+						field+field_val,
+						val_type
+			);
 			table_conf.view.page = 0;
-			_update_page();
 		}
-		function update_res_limit(new_res_limit){
-			table_conf.filters.limit = parseInt(new_res_limit);
-			table_conf.view.page = 0;
-			//reset the sort box
-			document.getElementById("sort_box_input").value = "";
-			_apply_limit_filter();
-			_update_data_checkboxes();
-			_update_filter_checkboxes();
-			_update_page();
+		function _update_filter_btns(){
+			var checked_filters_arr = util.get_sub_arr(table_conf.filters.arr_entries,"checked",true);
+			htmldom.disable_filter_btns(checked_filters_arr.length == 0);
 		}
-		function show_or_exclude(flag){
+		function _reset_filters_page(){
+			var fields = table_conf.filters.fields;
+			for (var i = 0; i < fields.length; i++) {
+				var obj = fields[i];
+				table_conf.view.fields_filter_index[obj.value] = {"i_from": 0,"i_to": obj.config.min};
+			}
+		}
+		function _apply_checkboxes_filters(flag){
 			var new_data = JSON.parse(JSON.stringify(table_conf.filters.data));
 			var arr_new_results = [];
 
@@ -563,15 +392,8 @@ var search = (function () {
 			}
 			new_data.results.bindings = arr_new_results;
 			table_conf.filters.data = new_data;
-			table_conf.view.page = 0;
-			//reset the sort box
-			document.getElementById("sort_box_input").value = "";
 
-			_build_limit_res(table_conf.filters.data.results.bindings);
-			_update_data_checkboxes();
-			_update_filter_checkboxes();
-			_update_filter_btns();
-			_update_page();
+			table_conf.view.data = JSON.parse(JSON.stringify(new_data));
 
 			function __check_if_respects_filters(data_obj){
 				//retrieve the entries checked
@@ -614,80 +436,104 @@ var search = (function () {
 				return filters_flag;
 			}
 		}
-		function show_all() {
-			//reset the sort box
-			document.getElementById("sort_box_input").value = "";
 
-			//table_conf.filters.data = table_conf.data;
-			_update_filter_btns();
-			_build_limit_res(table_conf.data.results.bindings);
-			_apply_limit_filter();
-			_update_data_checkboxes();
-			_update_filter_checkboxes();
-			_update_page();
+		//functions to call from the html interface
+		function next_page(){
+			table_conf.view.page = table_conf.view.page + 1;
+			htmldom.update_page(table_conf,search_conf_json);
+		}
+		function prev_page(){
+			table_conf.view.page = table_conf.view.page - 1;
+			htmldom.update_page(table_conf,search_conf_json);
+		}
+		function update_page_limit(new_page_limit){
+			table_conf.view.page_limit = parseInt(new_page_limit);
+			table_conf.view.page = 0;
+			htmldom.update_page(table_conf,search_conf_json);
+		}
+		function update_res_limit(new_res_limit){
+			table_conf.filters.limit = parseInt(new_res_limit);
+			table_conf.view.page = 0;
+
+			_limit_results();
+			_gen_data_checkboxes();
+			htmldom.filter_checkboxes(table_conf);
+			_sort_results();
+			htmldom.update_page(table_conf,search_conf_json);
+		}
+		function show_or_exclude(flag){
+
+			// apply the filters (checkboxes)
+			_apply_checkboxes_filters(flag);
+
+			//reset pages
+			table_conf.view.page = 0;
+			_reset_filters_page();
+
+			//like in the init phase, but the header is not built
+			_build_filter_sec();
+			_limit_results();
+			_sort_results();
+			htmldom.update_page(table_conf,search_conf_json);
+		}
+		function show_all() {
+
+			//reset data and pages
+			table_conf.filters.data = JSON.parse(JSON.stringify(table_conf.data));
+			table_conf.view.data = JSON.parse(JSON.stringify(table_conf.data));
+			table_conf.view.page = 0;
+			_reset_filters_page();
+
+			//like in the init phase, but the header is not built
+			_build_filter_sec();
+			_limit_results();
+			_sort_results();
+			htmldom.update_page(table_conf,search_conf_json);
 		}
 		function select_page(page_num) {
 			table_conf.view.page = page_num;
-			_update_page();
+			htmldom.update_page(table_conf,search_conf_json);
 		}
 		function checkbox_changed(c_box){
 			var index = util.index_in_arrjsons(table_conf.filters.arr_entries,["field","value"],[c_box.getAttribute("field"),c_box.value]);
 			if (index != -1) {
 				table_conf.filters.arr_entries[index].checked = c_box.checked;
 			}
-
 			_update_filter_btns();
 		}
-		function _update_filter_btns(){
-			var checked_filters_arr = util.get_sub_arr(table_conf.filters.arr_entries,"checked",true);
-			if(checked_filters_arr.length == 0){
-				document.getElementById("show-only").disabled = true;
-				document.getElementById("exclude").disabled = true;
-			}else {
-				document.getElementById("show-only").disabled = false;
-				document.getElementById("exclude").disabled = false;
-			}
-		}
-		function sort_results(option){
+		function check_sort_opt(option){
 			//sort according to the field, its type and the order
 			var field = option.getAttribute("value");
 			var order = option.getAttribute("order");
 			var val_type = option.getAttribute("type");
 
-			var field_val = ".value";
-			var index_category = util.index_in_arrjsons(search_conf_json.categories,["name"],[table_conf.category]);
-			if (search_conf_json.categories[index_category]["group_by"].concats.indexOf(field) != -1) {
-				field_val = ".concat-list";
-			}
+			table_conf.view.sort.field = field;
+			table_conf.view.sort.order = order;
+			table_conf.view.sort.type = val_type;
 
-			table_conf.filters.data.results.bindings = util.sort_json_by_key(
-						table_conf.filters.data.results.bindings,
-						order,
-						field+field_val,
-						val_type
-			);
-			table_conf.view.page = 0;
-			_update_page();
+			_sort_results();
+			htmldom.update_page(table_conf,search_conf_json);
 		}
 		function select_filter_field(field_value){
 			var field_index = util.index_in_arrjsons(table_conf.filters.fields,["value"],[field_value]);
 			if(field_index != -1){
 				table_conf.filters.fields[field_index].dropdown_active = !table_conf.filters.fields[field_index].dropdown_active;
 			}
-			_update_filter_checkboxes();
+			htmldom.filter_checkboxes(table_conf);
 		}
 		function next_filter_page(myfield){
 			myfield = JSON.parse(myfield);
 			table_conf.view.fields_filter_index[myfield.value].i_from += myfield.config.min;
 			table_conf.view.fields_filter_index[myfield.value].i_to += myfield.config.min;
-			_update_filter_checkboxes();
+			htmldom.filter_checkboxes(table_conf);
 		}
 		function prev_filter_page(myfield){
 			myfield = JSON.parse(myfield);
 			table_conf.view.fields_filter_index[myfield.value].i_from -= myfield.config.min;
 			table_conf.view.fields_filter_index[myfield.value].i_to -= myfield.config.min;
-			_update_filter_checkboxes();
+			htmldom.filter_checkboxes(table_conf);
 		}
+
 		return {
 				next_page: next_page,
 				prev_page: prev_page,
@@ -696,7 +542,7 @@ var search = (function () {
 				show_or_exclude: show_or_exclude,
 				checkbox_changed: checkbox_changed,
 				show_all: show_all,
-				sort_results: sort_results,
+				check_sort_opt: check_sort_opt,
 				select_page: select_page,
 				select_filter_field: select_filter_field,
 				next_filter_page: next_filter_page,
@@ -707,6 +553,27 @@ var search = (function () {
 
 
 var util = (function () {
+
+	/**
+	 * Returns true if key is not a key in object or object[key] has
+	 * value undefined. If key is a dot-delimited string of key names,
+	 * object and its sub-objects are checked recursively.*/
+	function is_undefined_key(object, key) {
+    var keyChain = Array.isArray(key) ? key : key.split('.'),
+        objectHasKey = keyChain[0] in object,
+        keyHasValue = typeof object[keyChain[0]] !== 'undefined';
+
+    if (objectHasKey && keyHasValue) {
+        if (keyChain.length > 1) {
+            return is_undefined_key(object[keyChain[0]], keyChain.slice(1));
+        }
+
+        return false;
+    }
+    else {
+        return true;
+    }
+	}
 
 	/*group by the 'arr_objs' with distinct 'keys' and by concatinating
 	the fields in 'arr_fields_concat'*/
@@ -864,6 +731,7 @@ var util = (function () {
 	}
 
 	return {
+		is_undefined_key: is_undefined_key,
 		group_by: group_by,
 		collect_values: collect_values,
 		get_sub_arr: get_sub_arr,
@@ -875,6 +743,15 @@ var util = (function () {
 
 
 var htmldom = (function () {
+
+	var results_container = document.getElementById("search_results");
+	var header_container = document.getElementById("search_header");
+	var sort_container = document.getElementById("sort_results");
+	var rowsxpage_container = document.getElementById("rows_per_page");
+	var limitres_container = document.getElementById("limit_results");
+	var filter_btns_container = document.getElementById("filter_btns");
+	var filter_values_container = document.getElementById("filter_values_list");
+
 
 	function table_res_header(cols,fields){
 
@@ -955,19 +832,19 @@ var htmldom = (function () {
 		return new_footer_tab;
 	}
 
-	function table_index_and_btns(arr_values, mypage, tot_pages, tot_res, pages_lim){
+	function _table_index_and_btns(arr_values, mypage, tot_pages, tot_res, pages_lim){
 
-		var str_html = pages_nav(arr_values, mypage + 1, tot_pages);
+		var str_html = _pages_nav(arr_values, mypage + 1, tot_pages);
 		var new_btn = document.createElement("a");
 		//Prev button
 		if(mypage > 0){
-			new_btn = htmldom.pages_prev_btn("javascript:search.prev_page()");
+			new_btn = _pages_prev_btn("javascript:search.prev_page()");
 			str_html = "<spanfooter>"+String(new_btn.outerHTML)+"</spanfooter>" + "<spanfooter>"+str_html+"</spanfooter>";
 		}
 		//Next prev
 		var remaining_results = tot_res - ((mypage + 1) * pages_lim);
 		if(remaining_results > 0) {
-			new_btn = htmldom.pages_next_btn("javascript:search.next_page()");
+			new_btn = _pages_next_btn("javascript:search.next_page()");
 			str_html = "<spanfooter>"+str_html+"</spanfooter>" + "<spanfooter>"+String(new_btn.outerHTML)+"</spanfooter>";
 		}
 		var new_tr = document.createElement("tr");
@@ -975,7 +852,7 @@ var htmldom = (function () {
 		return new_tr;
 	}
 
-	function checkbox_value(myfield, check_value){
+	function _checkbox_value(myfield, check_value){
 		var tr = document.createElement("tr");
 		var tabCell = document.createElement("td");
 		tabCell.innerHTML = "<div class='checkbox'><label><input type='checkbox' field="+
@@ -997,7 +874,7 @@ var htmldom = (function () {
 
 		var title_val = myfield.value;
 		if (myfield.title != undefined) {
-			title_val = generate_text(myfield.title,12);
+			title_val = _generate_text(myfield.title,12);
 		}
 
 		var href_string = "javascript:search.select_filter_field('"+String(myfield.value)+"');";
@@ -1010,7 +887,7 @@ var htmldom = (function () {
 		return tr;
 	}
 
-	function nav_btns_filter(i_from, i_to, tot, myfield) {
+	function _nav_btns_filter(i_from, i_to, tot, myfield) {
 		var new_tr = document.createElement("tr");
 		new_tr.id = "next_prev";
 		var tabCell = new_tr.insertCell(-1);
@@ -1030,33 +907,51 @@ var htmldom = (function () {
 	}
 
 	function page_limit(arr_options){
-		var options_html = "";
-		for (var i = 0; i < arr_options.length; i++) {
-			var str_option = "<option>"+String(arr_options[i])+"</option>";
-			options_html= options_html + str_option;
+		if (rowsxpage_container != null) {
+			var options_html = "";
+			for (var i = 0; i < arr_options.length; i++) {
+				var str_option = "<option>"+String(arr_options[i])+"</option>";
+				options_html= options_html + str_option;
+			}
+
+			var str_html =
+			"<div class='rows-per-page'> Number of rows per page: "+"<select class='form-control input custom' onchange='search.update_page_limit(this.options[selectedIndex].text)'' id='sel1'> </div>"+
+				options_html+"</select>";
+
+			rowsxpage_container.innerHTML = str_html;
+			return str_html;
+		}else {
+			return -1;
 		}
-
-		var str_html =
-		"<div class='rows-per-page'> Number of rows per page: "+"<select class='form-control input' onchange='search.update_page_limit(this.options[selectedIndex].text)'' id='sel1'> </div>"+
-			options_html+"</select>";
-
-		return str_html;
 	}
 
-	function sort_box(arr_options){
-		var options_html = "<option disabled selected value></option>";
-		for (var i = 0; i < arr_options.length; i++) {
-			var str_option = "<option value="+arr_options[i].value+" type="+arr_options[i].type+" order="+arr_options[i].order+">"+arr_options[i].text+"</option>";
-			options_html= options_html + str_option;
-		}
-		var str_html =
-			"<div class='sort-results'>Sort: <select class='form-control input' onchange='search.sort_results(this.options[selectedIndex])' id='sort_box_input'></div>"+
-			options_html+"</select>";
+	function sort_box(arr_options,def_value, def_order, def_type){
+		//var options_html = "<option disabled selected value></option>";
+		if (sort_container != null) {
+			var options_html = "";
+			for (var i = 0; i < arr_options.length; i++) {
+				var str_selected = "";
+				if ((arr_options[i].value == def_value)
+					&& (arr_options[i].order == def_order)
+					&& (arr_options[i].type == def_type)) {
+						str_selected = "selected";
+				}
+				var str_option = "<option "+str_selected+" value="+arr_options[i].value+" type="+arr_options[i].type+" order="+arr_options[i].order+">"+arr_options[i].text+"</option>";
 
-		return str_html;
+				options_html= options_html + str_option;
+			}
+			var str_html =
+				"<div class='sort-results'>Sort: <select class='form-control input custom' onchange='search.check_sort_opt(this.options[selectedIndex])' id='sort_box_input'></div>"+
+				options_html+"</select>";
+
+			sort_container.innerHTML = str_html;
+			return str_html;
+		}else {
+			return -1;
+		}
 	}
 
-	function searching_main_entry(){
+	function main_entry(){
 		var str_html = "<div class='search-entry'>"+
 											"Search inside the <a href='/'><span class='oc-purple'>Open</span><span class='oc-blue'>Citations</span></a> corpus"+
 											"<form class='input-group search-box' action='search' method='get'>"+
@@ -1067,31 +962,109 @@ var htmldom = (function () {
 											"</form>"+
 										 "</div>";
 
+		header_container.innerHTML = str_html;
 		return str_html;
 	}
 
 	function filter_btns(){
-		str_html =
-			"<div class='btn-group filters-btns' active='false' role='group'>"+
-			"<button type='button' class='btn btn-primary' id='all' onclick='search.show_all();'>All</button>"+
-			"<button type='button' class='btn btn-primary' id='show-only' onclick='search.show_or_exclude("+true+");' disabled>Show only</button>"+
-			"<button type='button' class='btn btn-primary' id='exclude' onclick='search.show_or_exclude("+false+");' disabled>Exclude</button>"+
-			"</div>";
-		return str_html;
+		if (filter_btns_container != null) {
+			str_html =
+				"<div class='btn-group filters-btns' active='false' role='group'>"+
+				"<button type='button' class='btn btn-primary' id='all' onclick='search.show_all();'>All</button>"+
+				"<button type='button' class='btn btn-primary' id='show-only' onclick='search.show_or_exclude("+true+");' disabled>Show only</button>"+
+				"<button type='button' class='btn btn-primary' id='exclude' onclick='search.show_or_exclude("+false+");' disabled>Exclude</button>"+
+				"</div>";
+			filter_btns_container.innerHTML = str_html;
+			return str_html;
+		}else {
+			return -1;
+		}
 	}
 
 	function limit_filter(init_val, tot_res, slider_min, slider_max){
-		str_html =
-		"<div class='limit-results'>"+
-		"Limit to <myrange class='limit-results-value' id='lbl_range' for='final_text'> "+String(init_val)+"</myrange>/"+String(tot_res)+" results"+
-		"</div>"+
-		"<div class='slider-container'>"+
-		"<input type='range' min="+String(slider_min)+" max="+String(slider_max)+" value="+String(init_val)+" class='slider' oninput='lbl_range.innerHTML=this.value; search.update_res_limit(this.value);' id='myRange'>"+
-		"</div>";
-		return str_html;
+		if (limitres_container != null) {
+			str_html =
+			"<div class='limit-results'>"+
+			"Limit to <myrange class='limit-results-value' id='lbl_range' for='final_text'> "+String(init_val)+"</myrange>/"+String(tot_res)+" results"+
+			"</div>"+
+			"<div class='slider-container'>"+
+			"<input type='range' min="+String(slider_min)+" max="+String(slider_max)+" value="+String(init_val)+" class='slider' oninput='lbl_range.innerHTML=this.value; search.update_res_limit(this.value);' id='myRange'>"+
+			"</div>";
+			limitres_container.innerHTML = str_html;
+			return str_html;
+		}else {
+			return -1;
+		}
 	}
 
-	function pages_nav(arr_values, mypage, tot_pages){
+	function filter_checkboxes(table_conf) {
+		if (filter_values_container != null) {
+
+			// create dynamic table
+			var table = document.createElement("table");
+			table.className = "table filter-values-tab";
+
+			// build cells of fields to filter
+			var myfields = table_conf.filters.fields;
+			for (var i = 0; i < myfields.length; i++) {
+						//insert the header
+						var tr = table.insertRow(-1);
+						var href_string = "javascript:search.select_filter_field('"+String(myfields[i].value)+"');";
+						tr.innerHTML = htmldom.field_filter_header(myfields[i], href_string, false).outerHTML;
+
+						var arr_check_values = util.get_sub_arr(table_conf.filters.arr_entries,"field",myfields[i].value);
+						//in case i don't have checkbox values i remove header
+						if (arr_check_values.length == 0) {
+							table.deleteRow(table.rows.length -1);
+						}else {
+							if (myfields[i].dropdown_active == true)
+							{
+									arr_check_values = util.sort_json_by_key(arr_check_values, myfields[i].config.order, myfields[i].config.sort, myfields[i].config.type_sort);
+									var j_from = table_conf.view.fields_filter_index[myfields[i].value].i_from;
+									var j_to = table_conf.view.fields_filter_index[myfields[i].value].i_to;
+									if (j_to > arr_check_values.length) { j_to = arr_check_values.length;}
+
+									for (var j = j_from; j < j_to; j++) {
+										//insert a checkbox entry
+										tr = table.insertRow(-1);
+										tr.innerHTML = _checkbox_value(myfields[i],arr_check_values[j]).outerHTML;
+									}
+									tr = table.insertRow(-1);
+									tr.innerHTML = _nav_btns_filter(j_from,j_to,arr_check_values.length,myfields[i]).outerHTML;
+							}else {
+								//dropdown is closed
+								var tr = table.rows[table.rows.length -1];
+								tr.innerHTML = field_filter_header(myfields[i], href_string, true).outerHTML;
+							}
+						}
+				}
+
+				filter_values_container.innerHTML = "";
+				filter_values_container.appendChild(table);
+
+				__update_checkboxes();
+
+				//click and check the enabled checkboxes
+				function __update_checkboxes() {
+
+					var myfields = table_conf.filters.fields;
+					for (var i = 0; i < myfields.length; i++) {
+						if (myfields[i].dropdown_active == true){
+							var arr_check_values = util.get_sub_arr(table_conf.filters.arr_entries,"field",myfields[i].value);
+							var j_to = arr_check_values.length;
+							for (var j = 0; j < j_to; j++) {
+								var dom_id = arr_check_values[j].field+"-"+arr_check_values[j].value;
+								if (arr_check_values[j].checked == true) {
+									document.getElementById(dom_id).click();
+								}
+							}
+						}
+					}
+				}
+		}
+	}
+
+	function _pages_nav(arr_values, mypage, tot_pages){
 		var str_html = "";
 		var str_start = "<ul class='nav pages-nav'>";
 		if (arr_values[0] > 1) { str_start = str_start + "...";}
@@ -1109,7 +1082,7 @@ var htmldom = (function () {
 		return str_html;
 	}
 
-	function pages_prev_btn(href){
+	function _pages_prev_btn(href){
 		var new_btn = document.createElement("a");
 		new_btn.className = "tab-nav-btn prev";
 		new_btn.innerHTML = "&laquo; Previous";
@@ -1117,7 +1090,7 @@ var htmldom = (function () {
 		return new_btn;
 	}
 
-	function pages_next_btn(href){
+	function _pages_next_btn(href){
 		var new_btn = document.createElement("a");
 		new_btn.className = "tab-nav-btn next";
 		new_btn.innerHTML = "Next &raquo;";
@@ -1129,14 +1102,15 @@ var htmldom = (function () {
 		if (build_bool) {
 			var str_html = "<div id='search_loader' class='searchloader'> Searching in the corpus ...</div>";
 			parser = new DOMParser()
-  		return parser.parseFromString(str_html, "text/xml").firstChild;
+  		var dom = parser.parseFromString(str_html, "text/xml").firstChild;
+			header_container.appendChild(dom);
 		}else {
 			var element = document.getElementById("search_loader");
 			element.parentNode.removeChild(element);
 		}
 	}
 
-	function generate_text(text,numchar) {
+	function _generate_text(text,numchar) {
 		var new_text = text;
 		if(text.length > numchar){
 			new_text = text.substring(0, numchar-3)+"...";
@@ -1149,23 +1123,140 @@ var htmldom = (function () {
 		footer.parentNode.removeChild(footer);
 	}
 
+	function update_page(table_conf,search_conf_json){
+
+		if (results_container != null) {
+
+				var new_arr_tab = __build_page(table_conf);
+				results_container.innerHTML = "";
+				results_container.appendChild(new_arr_tab[0]);
+				results_container.appendChild(new_arr_tab[1]);
+
+				function __build_page(){
+					// create new tables
+					var new_tab_res = document.createElement("table");
+					var new_footer_tab = document.createElement("table");
+
+					new_tab_res.id = "tab_res";
+					new_tab_res.className = "table results-tab";
+
+					//create table header
+					var col = table_conf.view.data["head"]["vars"];
+					var tr = new_tab_res.insertRow(-1);
+					var index_category = util.index_in_arrjsons(search_conf_json.categories,["name"],[table_conf.category]);
+					var category_fields = search_conf_json.categories[index_category].fields;
+
+					tr.innerHTML = htmldom.table_res_header(col, category_fields).outerHTML;
+
+					//create tr of all the other results
+					var results = table_conf.view.data["results"]["bindings"];
+					if (results.length > 0) {
+						var i_from = table_conf.view.page * table_conf.view.page_limit;
+						var i_to = i_from + table_conf.view.page_limit;
+						if (i_to > results.length){i_to = results.length;}
+
+						for (var i = i_from; i < i_to; i++) {
+								tr = new_tab_res.insertRow(-1);
+								tr.innerHTML = htmldom.table_res_list(col,category_fields,results[i]).outerHTML;
+						}
+
+						//i will build the nav index for the pages
+						new_footer_tab = htmldom.table_footer(false, __init_prev_next_btn());
+					}else {
+						//i have no results
+						new_footer_tab = htmldom.table_footer(true, "No results were found");
+					}
+
+					return [new_tab_res,new_footer_tab];
+
+					function __init_prev_next_btn(){
+						var num_results = table_conf.view.data["results"]["bindings"].length;
+						var tot_pages = Math.floor(num_results/table_conf.view.page_limit);
+						if(num_results % table_conf.view.page_limit > 0){tot_pages = tot_pages + 1;}
+						var arr_values = __init_page_nav(tot_pages);
+						return _table_index_and_btns(arr_values, table_conf.view.page, tot_pages, table_conf.view.data.results.bindings.length, table_conf.view.page_limit);
+					}
+					function __init_page_nav(tot_pages){
+
+						var c_pages = 5;
+
+						//get the number of previous c_pages before me
+						var current_page = table_conf.view.page + 1;
+						var all_arr_values = __prev_values(c_pages,current_page - 1);
+						var min_index = all_arr_values[all_arr_values.length - 1];
+
+						//get the number of next c_pages before me
+						var remaining_values = (c_pages - all_arr_values.length) + c_pages;
+						var index = current_page + 1;
+						var res_obj = __next_values(remaining_values,index,tot_pages);
+						all_arr_values = all_arr_values.concat(res_obj.arr);
+						remaining_values = res_obj["remaining_values"];
+
+						//get other pages numbers previous to me if I have not still reached a c_pages*2 num
+						res_obj = __prev_values(remaining_values,min_index - 1);
+						all_arr_values = all_arr_values.concat(res_obj);
+
+						//push my page also
+						all_arr_values.push(current_page);
+
+						return all_arr_values.sort(util.sort_int);
+
+						//returns an array of the indexes before me
+						function __next_values(rm,i,tot_pages){
+							var arr_values = [];
+							var remaining_values = rm;
+							var index = i;
+							while ((remaining_values > 0) && (index <= tot_pages)) {
+								arr_values.push(index);
+								index = index + 1;
+								remaining_values = remaining_values - 1;
+							}
+							return {"arr": arr_values, "remaining_values": remaining_values};
+						}
+
+						//returns an array of the indexes before me
+						function __prev_values(rm,i){
+							var arr_values = [];
+							var remaining_values = rm;
+							var index = i;
+							while ((remaining_values > 0) && (index > 0)) {
+								arr_values.push(index);
+								index = index - 1;
+								remaining_values = remaining_values - 1;
+							}
+							return arr_values;
+						}
+					}
+				}
+			}
+	}
+
+	function disable_filter_btns(flag) {
+		var show_only_btn = document.getElementById("show-only");
+		var exclude_btn = document.getElementById("exclude");
+
+		if (show_only_btn != null) {
+			show_only_btn.disabled = flag;
+		}
+		if (exclude_btn != null) {
+			exclude_btn.disabled = flag;
+		}
+	}
+
+
 	return {
-		generate_text: generate_text,
 		table_res_header: table_res_header,
 		table_res_list: table_res_list,
 		table_footer: table_footer,
-		table_index_and_btns: table_index_and_btns,
-		checkbox_value: checkbox_value,
 		field_filter_header: field_filter_header,
-		nav_btns_filter: nav_btns_filter,
 		page_limit: page_limit,
 		sort_box: sort_box,
-		searching_main_entry: searching_main_entry,
+		main_entry: main_entry,
 		filter_btns: filter_btns,
 		limit_filter: limit_filter,
-		pages_nav: pages_nav,
-		pages_prev_btn: pages_prev_btn,
-		pages_next_btn: pages_next_btn,
+		filter_checkboxes: filter_checkboxes,
+		update_page: update_page,
+		disable_filter_btns:disable_filter_btns,
 		loader: loader,
 		remove_footer: remove_footer
 	}
