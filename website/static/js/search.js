@@ -58,6 +58,10 @@ var search = (function () {
 				var sparql_query = _build_turtle_prefixes() + _build_turtle_query(rule.query);
 				var global_r = new RegExp("<VAR>", "g");
 				sparql_query = sparql_query.replace(global_r, "'"+qtext+"'");
+				//in case there is a url variable
+				global_r = new RegExp("<URL-VAR>", "g");
+				sparql_query = sparql_query.replace(global_r, qtext);
+				//console.log(sparql_query);
 
 				//use this url to contact the sparql_endpoint triple store
 				var query_contact_tp = String(search_conf_json.sparql_endpoint)+"?query="+ encodeURIComponent(sparql_query) +"&format=json";
@@ -73,7 +77,7 @@ var search = (function () {
 	    				success: function( res_data ) {
 									htmldom.loader(false);
 									htmldom.remove_footer();
-									//console.log(JSON.parse(JSON.stringify(res_data)));
+									console.log(JSON.parse(JSON.stringify(res_data)));
 									_init_data(rule,res_data);
 
 									_build_filter_sec();
@@ -167,16 +171,15 @@ var search = (function () {
 
 			//-- init my default sort
 			for (var i = 0; i < fields.length; i++) {
-				var sort_def = fields[i].sort.default;
-				if (sort_def != undefined) {
-					if (sort_def == true) {
+
+				if (! util.is_undefined_key(fields[i], "sort.default")) {
+						var sort_def = fields[i].sort.default;
 						table_conf.view.sort.field = fields[i].value;
 						table_conf.view.sort.order = "desc";
 						if (sort_def.order != undefined) {
 							table_conf.view.sort.order = sort_def.order;
 						}
 						table_conf.view.sort.type = fields[i].type;
-					}
 				}
 			}
 
@@ -234,7 +237,7 @@ var search = (function () {
 			for (var i = 0; i < table_conf.view.data.head.vars.length; i++) {
 				var index = util.index_in_arrjsons(myfields,["value"],[table_conf.data.head.vars[i]]);
 				if (index != -1) {
-					if(myfields[index].sort.value != undefined ){
+					if(! util.is_undefined_key(myfields[index],"sort.value")){
 						if(myfields[index].sort.value == true){
 							var str_html = myfields[index].value;
 							if(myfields[index].title != undefined){str_html = myfields[index].title; }
@@ -267,67 +270,25 @@ var search = (function () {
 			htmldom.page_limit(arr_options);
 		}
 		function _build_filter_sec(){
-			if (_build_limit_res() != -1) {
+			if (__build_limit_res() != -1) {
 				if (htmldom.filter_btns() != -1){
 					_gen_data_checkboxes();
 					htmldom.filter_checkboxes(table_conf);
 				}
 			}
-		}
-		function _build_limit_res(){
-			var data = table_conf.view.data.results.bindings;
-			//init limit results filter
-			var max_val = data.length;
-			var init_val = max_val;
-			if(max_val > 20){
-				init_val = Math.floor(max_val/2);
-			}
-			table_conf.filters.limit = init_val;
-			var min_val = 0;
 
-			return htmldom.limit_filter(init_val, max_val, min_val, max_val);
-		}
-		function _gen_data_checkboxes(){
+			function __build_limit_res(){
+				var data = table_conf.view.data.results.bindings;
+				//init limit results filter
+				var max_val = data.length;
+				var init_val = max_val;
+				if(max_val > 20){
+					init_val = Math.floor(max_val/2);
+				}
+				table_conf.filters.limit = init_val;
+				var min_val = 0;
 
-			table_conf.filters.arr_entries = [];
-
-			// create the list of values I can filter
-			var myfields = table_conf.filters.fields;
-			for (var i = 0; i < myfields.length; i++) {
-
-							var filter_field = myfields[i].value;
-
-							//the data base
-							var list_data = table_conf.view.data.results.bindings;
-
-							//insert a check list for distinct values in the rows
-							var j_to = list_data.length;
-							var arr_check_values = [];
-							for (var j = 0; j < j_to; j++) {
-								var res_obj = list_data[j];
-
-								if(res_obj.hasOwnProperty(filter_field)){
-										var elem = res_obj[filter_field];
-										var arr = [];
-										if(elem.hasOwnProperty("concat-list")){arr = elem["concat-list"];}
-										else {arr.push(elem);}
-
-										for (var k = 0; k < arr.length; k++) {
-											var new_val = arr[k].value;
-											var index_in_arr = util.index_in_arrjsons(arr_check_values,["value"],[new_val]);
-											if (index_in_arr == -1){
-												arr_check_values.push({"field": filter_field,"value":new_val,"sum":1,"checked":false});
-											}else{
-												arr_check_values[index_in_arr]["sum"] = arr_check_values[index_in_arr]["sum"] + 1;
-											}
-										}
-								}
-							}
-
-							//insert them all
-							for (var j = 0; j < arr_check_values.length; j++) {
-								table_conf.filters.arr_entries.push(arr_check_values[j]);
-							}
+				return htmldom.limit_filter(init_val, max_val, min_val, max_val);
 			}
 		}
 
@@ -356,8 +317,11 @@ var search = (function () {
 
 			var field_val = ".value";
 			var index_category = util.index_in_arrjsons(search_conf_json.categories,["name"],[table_conf.category]);
-			if (search_conf_json.categories[index_category]["group_by"].concats.indexOf(field) != -1) {
-				field_val = ".concat-list";
+
+			if (! util.is_undefined_key(search_conf_json.categories[index_category],"group_by.concats")) {
+					if (search_conf_json.categories[index_category]["group_by"].concats.indexOf(field) != -1) {
+						field_val = ".concat-list";
+					}
 			}
 
 			table_conf.view.data.results.bindings = util.sort_json_by_key(
@@ -367,10 +331,6 @@ var search = (function () {
 						val_type
 			);
 			table_conf.view.page = 0;
-		}
-		function _update_filter_btns(){
-			var checked_filters_arr = util.get_sub_arr(table_conf.filters.arr_entries,"checked",true);
-			htmldom.disable_filter_btns(checked_filters_arr.length == 0);
 		}
 		function _reset_filters_page(){
 			var fields = table_conf.filters.fields;
@@ -436,6 +396,49 @@ var search = (function () {
 				return filters_flag;
 			}
 		}
+		function _gen_data_checkboxes(){
+
+			table_conf.filters.arr_entries = [];
+
+			// create the list of values I can filter
+			var myfields = table_conf.filters.fields;
+			for (var i = 0; i < myfields.length; i++) {
+
+							var filter_field = myfields[i].value;
+
+							//the data base
+							var list_data = table_conf.view.data.results.bindings;
+
+							//insert a check list for distinct values in the rows
+							var j_to = list_data.length;
+							var arr_check_values = [];
+							for (var j = 0; j < j_to; j++) {
+								var res_obj = list_data[j];
+
+								if(res_obj.hasOwnProperty(filter_field)){
+										var elem = res_obj[filter_field];
+										var arr = [];
+										if(elem.hasOwnProperty("concat-list")){arr = elem["concat-list"];}
+										else {arr.push(elem);}
+
+										for (var k = 0; k < arr.length; k++) {
+											var new_val = arr[k].value;
+											var index_in_arr = util.index_in_arrjsons(arr_check_values,["value"],[new_val]);
+											if (index_in_arr == -1){
+												arr_check_values.push({"field": filter_field,"value":new_val,"sum":1,"checked":false});
+											}else{
+												arr_check_values[index_in_arr]["sum"] = arr_check_values[index_in_arr]["sum"] + 1;
+											}
+										}
+								}
+							}
+
+							//insert them all
+							for (var j = 0; j < arr_check_values.length; j++) {
+								table_conf.filters.arr_entries.push(arr_check_values[j]);
+							}
+			}
+		}
 
 		//functions to call from the html interface
 		function next_page(){
@@ -499,7 +502,9 @@ var search = (function () {
 			if (index != -1) {
 				table_conf.filters.arr_entries[index].checked = c_box.checked;
 			}
-			_update_filter_btns();
+			//enable/disable buttons
+			var checked_filters_arr = util.get_sub_arr(table_conf.filters.arr_entries,"checked",true);
+			htmldom.disable_filter_btns(checked_filters_arr.length == 0);
 		}
 		function check_sort_opt(option){
 			//sort according to the field, its type and the order
@@ -554,10 +559,11 @@ var search = (function () {
 
 var util = (function () {
 
-	/**
+		/**
 	 * Returns true if key is not a key in object or object[key] has
 	 * value undefined. If key is a dot-delimited string of key names,
-	 * object and its sub-objects are checked recursively.*/
+	 * object and its sub-objects are checked recursively.
+	 */
 	function is_undefined_key(object, key) {
     var keyChain = Array.isArray(key) ? key : key.split('.'),
         objectHasKey = keyChain[0] in object,
@@ -1099,14 +1105,16 @@ var htmldom = (function () {
 	}
 
 	function loader(build_bool){
-		if (build_bool) {
-			var str_html = "<div id='search_loader' class='searchloader'> Searching in the corpus ...</div>";
-			parser = new DOMParser()
-  		var dom = parser.parseFromString(str_html, "text/xml").firstChild;
-			header_container.appendChild(dom);
-		}else {
-			var element = document.getElementById("search_loader");
-			element.parentNode.removeChild(element);
+		if (header_container != null) {
+			if (build_bool) {
+				var str_html = "<div id='search_loader' class='searchloader'> Searching in the corpus ...</div>";
+				parser = new DOMParser()
+	  		var dom = parser.parseFromString(str_html, "text/xml").firstChild;
+				header_container.appendChild(dom);
+			}else {
+				var element = document.getElementById("search_loader");
+				element.parentNode.removeChild(element);
+			}
 		}
 	}
 
@@ -1120,7 +1128,9 @@ var htmldom = (function () {
 
 	function remove_footer(){
 		var footer = document.getElementById("footer");
-		footer.parentNode.removeChild(footer);
+		if (footer != null) {
+			footer.parentNode.removeChild(footer);
+		}
 	}
 
 	function update_page(table_conf,search_conf_json){

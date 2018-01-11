@@ -126,6 +126,44 @@ var search_conf = {
               "}",
             "}GROUP BY ?doc ?short_iri ?doi ?title ?year ?author ?author_iri"
       ]
+    },
+    {
+      "name":"author_works",
+      "category": "document",
+      "rule": "https:\/\/w3id\\.org\/oc\/corpus\/ra\/.*",
+      "query": [
+        "SELECT DISTINCT ?doc ?short_iri ?doi ?title ?year ?author ?author_iri (COUNT(distinct ?cited) AS ?out_cits) (COUNT(distinct ?cited_by) AS ?in_cits)",
+        "WHERE  {",
+          "?a_role_iri pro:isHeldBy <URL-VAR> .",
+          "?iri pro:isDocumentContextFor ?a_role_iri .",
+          "OPTIONAL {",
+            "?iri rdf:type ?type .",
+            "BIND(REPLACE(STR(?iri), 'https://w3id.org/oc/corpus', '', 'i') as ?short_iri) .",
+            "BIND(?iri as ?doc) .",
+            "OPTIONAL {?doc dcterms:title  ?title .}",
+            "OPTIONAL {?doc fabio:hasSubtitle  ?subtitle .}",
+            "OPTIONAL {?doc fabio:hasPublicationYear ?year .}",
+            "OPTIONAL {?doc cito:cites ?cited .}",
+            "OPTIONAL {?cited_by cito:cites ?doc .}",
+            "OPTIONAL {",
+             "?iri datacite:hasIdentifier [",
+              "datacite:usesIdentifierScheme datacite:doi ;",
+           "literal:hasLiteralValue ?doi",
+               "]",
+           "}",
+        "",
+           "OPTIONAL {",
+                 "?iri pro:isDocumentContextFor [",
+                     "pro:withRole pro:author ;",
+                     "pro:isHeldBy ?author_iri",
+                 "].",
+                 "?author_iri foaf:familyName ?fname .",
+                 "?author_iri foaf:givenName ?name .",
+                 "BIND(CONCAT(STR(?name),' ', STR(?fname)) as ?author) .",
+           "}",
+          "}",
+        "}GROUP BY ?doc ?short_iri ?doi ?title ?year ?author ?author_iri"
+      ]
     }
   ],
 
@@ -146,7 +184,7 @@ var search_conf = {
       "name": "author",
       "fields": [
         {"value":"short_iri", "title": "Corpus ID","column_width":"25%", "type": "text", "link":{"field":"author_iri","prefix":""}},
-        {"value":"author", "title": "Author","column_width":"35%", "type": "text","filter":{"type_sort": "text", "min": 8, "sort": "value", "order": "desc"}, "sort": {"value": true}},
+        {"value":"author", "title": "Author","column_width":"35%", "type": "text","filter":{"type_sort": "text", "min": 8, "sort": "value", "order": "desc"}, "sort": {"value": true, "default": {"order": "desc"}}},
         {"value":"orcid", "title": "ORCID","column_width":"25%", "type": "text", "link":{"field":"orcid","prefix":"https://orcid.org/"}},
         {"value":"num_docs", "title": "Works","column_width":"15%", "type": "int"}
       ]
