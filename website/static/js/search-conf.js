@@ -47,7 +47,7 @@ var search_conf = {
     {
       "name":"orcid",
       "category": "author",
-      "regex":"[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{4}$",
+      "regex":"[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9X]{4}$",
       "query": [
         "SELECT ?author_iri ?short_iri ?orcid ?author (COUNT(?doc) AS ?num_docs) WHERE {",
               "?lit bds:search <VAR> . ?lit bds:matchAllTerms 'true' . ?lit bds:relevance ?score . ?lit bds:maxRank '1' .",
