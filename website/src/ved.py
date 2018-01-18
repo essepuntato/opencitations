@@ -35,6 +35,12 @@ class VirtualEntityDirector(object):
 
     __datacite_base = "http://purl.org/spar/datacite/"
     __has_identifier = rdflib.URIRef(__datacite_base + "hasIdentifier")
+    __identifier = rdflib.URIRef(__datacite_base + "Identifier")
+    __uses_identifier_scheme = rdflib.URIRef(__datacite_base + "usesIdentifierScheme")
+    __oci = rdflib.URIRef(__datacite_base + "oci")
+
+    __literal_base = "http://www.essepuntato.it/2010/06/literalreification/"
+    __has_literal_value = rdflib.URIRef(__literal_base + "hasLiteralValue")
 
     __fabio_base = "http://purl.org/spar/fabio/"
     __has_publication_year = rdflib.URIRef(__fabio_base + "hasPublicationYear")
@@ -105,9 +111,25 @@ class VirtualEntityDirector(object):
                     if cited_pub_year:
                         citation_graph.add((
                             citation, self.__has_citation_time_span,
-                            rdflib.Literal(int(citing_pub_year[0][:4]) - int(cited_pub_year[0][:4]), datatype=XSD.integer)))
+                            rdflib.Literal(
+                                int(citing_pub_year[0][:4]) - int(cited_pub_year[0][:4]), datatype=XSD.integer)))
 
                 return self.ldd.get_representation(url, True, citation_graph)
 
     def __handle_identifier(self, url, ex_regex):
-        pass
+        identified_entity_corpus_id = re.sub("^id/([a-z][a-z])-([a-z-0-9]+)%s$" % ex_regex, "\\1/\\2", url)
+        identified_entity_rdf = self.get_representation(identified_entity_corpus_id + ".rdf")
+        if identified_entity_rdf is not None:
+            identifier_graph = rdflib.Graph()
+            identifier_local_id = identified_entity_corpus_id.replace("/", "-")
+            identifier_corpus_id = "id/" + identifier_local_id
+            identifier = rdflib.URIRef(self.virtual_baseurl + identifier_corpus_id)
+            identifier_graph.add((identifier, RDFS.label,
+                                  rdflib.Literal("identifier %s [%s]" % (identifier_local_id, identifier_corpus_id))))
+            identifier_graph.add((identifier, RDF.type, self.__identifier))
+            if identified_entity_corpus_id.startswith("ci/"):  # OCI for citations
+                identifier_graph.add((identifier, self.__uses_identifier_scheme, self.__oci))
+                identifier_graph.add((identifier, self.__has_literal_value,
+                                      rdflib.Literal(identified_entity_corpus_id[3:])))
+
+            return self.ldd.get_representation(url, True, identifier_graph)
