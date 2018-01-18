@@ -77,8 +77,11 @@
     "unpublished": "fabio:Preprint",
     "unique_identifier": "datacite:Identifier",
     "modification": "prov:Modify",
+    "citation_relationship": "cito:Citation",
         
     "citation": { "@id": "cito:cites", "@type": "@vocab" },
+    "citing_document": { "@id": "cito:hasCitingEntity", "@type": "@vocab" },
+    "cited_document": { "@id": "cito:hasCitedEntity", "@type": "@vocab" },
     "contributor": { "@id": "pro:isDocumentContextFor", "@type": "@vocab" },
     "crossref": { "@id": "biro:references", "@type": "@vocab"},
     "curatorial_role_type": { "@id": "prov:hadRole" , "@type": "@vocab" },
@@ -107,7 +110,8 @@
     "type": { "@id": "datacite:usesIdentifierScheme", "@type": "@vocab" },
     "document_url": { "@id": "frbr:exemplar", "@type": "@vocab" },
     "webpage": { "@id": "dcat:landingPage", "@type": "@vocab" },
-    
+
+    "citation_time_span": { "@id": "cito:hasCitationTimeSpan", "@type": "xsd:integer" },
     "byte": { "@id": "dcat:byteSize", "@type": "xsd:decimal" },
     "description": "dcterms:description",
     "edition": "prism:edition",

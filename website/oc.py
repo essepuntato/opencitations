@@ -20,6 +20,7 @@ import json
 from src.wl import WebLogger
 from src.rrh import RewriteRuleHandler
 from src.ldd import LinkedDataDirector
+from src.ved import VirtualEntityDirector
 import requests
 import urlparse
 import re
@@ -39,6 +40,7 @@ urls = (
     "/(model)", "Model",
     "/(corpus)", "CorpusIntro",
     "/corpus/(.+)", "Corpus",
+    "/virtual/(.+)", "Virtual",
     "/corpus/", "Corpus",
     "/(download)", "Download",
     "/(sparql)", "Sparql",
@@ -217,27 +219,31 @@ class Sparql:
                 "403", {"Content-Type": "text/plain"}, "SPARQL Update queries are not permitted.")
 
 
+class Virtual:
+    def GET(self, file_path=None):
+        ldd = LinkedDataDirector(
+            c["occ_base_path"], c["html"], c["oc_base_url"],
+            c["json_context_path"], c["corpus_local_url"],
+            label_conf=c["label_conf"], tmp_dir=c["tmp_dir"],
+            dir_split_number=int(c["dir_split_number"]),
+            file_split_number=int(c["file_split_number"]))
+        ved = VirtualEntityDirector(ldd, c["virtual_local_url"])
+        cur_page = ved.redirect(file_path)
+        if cur_page is None:
+            raise web.notfound()
+        else:
+            web_logger.mes()
+            return cur_page
 
 class Corpus:
     def GET(self, file_path=None):
-        director = LinkedDataDirector(
+        ldd = LinkedDataDirector(
             c["occ_base_path"], c["html"], c["oc_base_url"],
             c["json_context_path"], c["corpus_local_url"],
-            label_conf={
-                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": "is a",
-                "http://xmlns.com/foaf/0.1/givenName": "given name",
-                "http://xmlns.com/foaf/0.1/familyName": "family name",
-                "http://prismstandard.org/namespaces/basic/2.0/startingPage": "first page",
-                "http://prismstandard.org/namespaces/basic/2.0/endingPage": "last page",
-                "http://purl.org/dc/terms/issued": "publication date",
-                "http://purl.org/dc/terms/modified": "modification date",
-                "http://purl.org/spar/biro/references": "references"
-            },
-            tmp_dir=c["tmp_dir"],
+            label_conf=c["label_conf"], tmp_dir=c["tmp_dir"],
             dir_split_number=int(c["dir_split_number"]),
             file_split_number=int(c["file_split_number"]))
-        web.debug(file_path)
-        cur_page = director.redirect(file_path)
+        cur_page = ldd.redirect(file_path)
         if cur_page is None:
             raise web.notfound()
         else:

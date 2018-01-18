@@ -163,144 +163,146 @@ class LinkedDataDirector(object):
             rdflib.URIRef("http://purl.org/dc/terms/license"),
             rdflib.URIRef("https://creativecommons.org/publicdomain/zero/1.0/legalcode")))
 
-    def get_representation(self, url, is_resource=False):
-        local_file = ".".join(url.split(".")[:-1])
-        subj_iri = (self.baseurl + local_file).replace("/index", "/")
+    def get_representation(self, url, is_resource=False, cur_graph=None):
+        if cur_graph is None:
+            local_file = ".".join(url.split(".")[:-1])
+            subj_iri = (self.baseurl + local_file).replace("/index", "/")
 
-        if "/" in local_file:
-            slash_split = local_file.split("/")
-            cur_dir = "/".join(slash_split[:-1])
-            cur_name = slash_split[-1]
-        else:
-            cur_dir = "."
-            cur_name = local_file
-
-        if is_resource and self.dir_split_number and self.file_split_number:
-            is_prov = "/prov/" in cur_dir
-            prov_regex = "(.+/)([0-9]+)(/prov/[^/]+).*$"
-            if is_prov:
-                cur_number = long(re.sub(prov_regex, "\\2", cur_dir))
+            if "/" in local_file:
+                slash_split = local_file.split("/")
+                cur_dir = "/".join(slash_split[:-1])
+                cur_name = slash_split[-1]
             else:
-                cur_number = long(cur_name)
+                cur_dir = "."
+                cur_name = local_file
 
-            # Find the correct directory number where to save the file
-            cur_split = 0
-            while True:
-                if cur_number > cur_split:
-                    cur_split += self.dir_split_number
+            if is_resource and self.dir_split_number and self.file_split_number:
+                is_prov = "/prov/" in cur_dir
+                prov_regex = "(.+/)([0-9]+)(/prov/[^/]+).*$"
+                if is_prov:
+                    cur_number = long(re.sub(prov_regex, "\\2", cur_dir))
                 else:
-                    break
+                    cur_number = long(cur_name)
 
-            # Find the correct file number where to save the resources
-            cur_file_split = 0
-            while True:
-                if cur_number > cur_file_split:
-                    cur_file_split += self.file_split_number
+                # Find the correct directory number where to save the file
+                cur_split = 0
+                while True:
+                    if cur_number > cur_split:
+                        cur_split += self.dir_split_number
+                    else:
+                        break
+
+                # Find the correct file number where to save the resources
+                cur_file_split = 0
+                while True:
+                    if cur_number > cur_file_split:
+                        cur_file_split += self.file_split_number
+                    else:
+                        break
+
+                if is_prov:
+                    cur_file_path = self.basepath + os.sep + \
+                                   re.sub(prov_regex, "\\1", cur_dir) + \
+                                   str(cur_split) + os.sep + \
+                                   str(cur_file_split) + os.sep + \
+                                   re.sub(prov_regex, "\\3", cur_dir)
+                elif cur_dir.startswith("prov"):
+                    cur_full_dir = self.basepath + os.sep + cur_dir
+                    cur_file_path = cur_file_path = cur_full_dir + os.sep + str(cur_name)
                 else:
-                    break
-
-            if is_prov:
-                cur_file_path = self.basepath + os.sep + \
-                               re.sub(prov_regex, "\\1", cur_dir) + \
-                               str(cur_split) + os.sep + \
-                               str(cur_file_split) + os.sep + \
-                               re.sub(prov_regex, "\\3", cur_dir)
-            elif cur_dir.startswith("prov"):
+                    cur_full_dir = self.basepath + os.sep + cur_dir + os.sep + str(cur_split)
+                    cur_file_path = cur_full_dir + os.sep + str(cur_file_split)
+            else:
                 cur_full_dir = self.basepath + os.sep + cur_dir
-                cur_file_path = cur_file_path = cur_full_dir + os.sep + str(cur_name)
-            else:
-                cur_full_dir = self.basepath + os.sep + cur_dir + os.sep + str(cur_split)
-                cur_file_path = cur_full_dir + os.sep + str(cur_file_split)
-        else:
-            cur_full_dir = self.basepath + os.sep + cur_dir
-            cur_file_path = cur_full_dir + os.sep + "index"
+                cur_file_path = cur_full_dir + os.sep + "index"
 
-        cur_file_path += ".json"
+            cur_file_path += ".json"
 
-        if os.path.exists(cur_file_path):
-            cur_graph = self.load_graph(cur_file_path, subj_iri, self.tmp_dir)
-            if len(cur_graph):
-                if url.endswith(".rdf"):
-                    LinkedDataDirector.__add_license(cur_graph)
-                    web.header('Content-Type', self.__rdfxml[0])
-                    return self.serialise(cur_graph, "xml")
-                elif url.endswith(".ttl"):
-                    LinkedDataDirector.__add_license(cur_graph)
-                    web.header('Content-Type', self.__turtle[0])
-                    return self.serialise(cur_graph, "turtle")
-                elif url.endswith(".json"):
-                    LinkedDataDirector.__add_license(cur_graph)
-                    web.header('Content-Type', self.__jsonld[0])
-                    return self.serialise(cur_graph, "json-ld")
-                elif url.endswith(".html"):
-                    # {
-                    #   "__entityiri": "http://..." ,
-                    #   "label": ["donald", "duck"] ,
-                    #   "type": [
-                    #       { "__entityiri": "http://...", "label": ["daisy", "duck"] } , ...]
-                    # }
-                    cur_data = {}
-                    for s, p, o in cur_graph.triples((None, None, None)):
-                        str_s = str(s)
-                        # If the starting URL is not a "current document entity" proceed
-                        if not str_s.startswith("file://"):
-                            cur_data[self.__entityiri] = str_s
+            if os.path.exists(cur_file_path):
+                cur_graph = self.load_graph(cur_file_path, subj_iri, self.tmp_dir)
 
-                            str_p = str(p)
-                            if str_p in self.label_conf:
-                                str_p = self.label_conf[str_p]
+        if cur_graph is not None and len(cur_graph):
+            if url.endswith(".rdf"):
+                LinkedDataDirector.__add_license(cur_graph)
+                web.header('Content-Type', self.__rdfxml[0])
+                return self.serialise(cur_graph, "xml")
+            elif url.endswith(".ttl"):
+                LinkedDataDirector.__add_license(cur_graph)
+                web.header('Content-Type', self.__turtle[0])
+                return self.serialise(cur_graph, "turtle")
+            elif url.endswith(".json"):
+                LinkedDataDirector.__add_license(cur_graph)
+                web.header('Content-Type', self.__jsonld[0])
+                return self.serialise(cur_graph, "json-ld")
+            elif url.endswith(".html"):
+                # {
+                #   "__entityiri": "http://..." ,
+                #   "label": ["donald", "duck"] ,
+                #   "type": [
+                #       { "__entityiri": "http://...", "label": ["daisy", "duck"] } , ...]
+                # }
+                cur_data = {}
+                for s, p, o in cur_graph.triples((None, None, None)):
+                    str_s = str(s)
+                    # If the starting URL is not a "current document entity" proceed
+                    if not str_s.startswith("file://"):
+                        cur_data[self.__entityiri] = str_s
 
-                                str_o = unicode(o)
-                                label_o = None
-                                if str_o in self.label_conf:
-                                    label_o = self.label_conf[str_o]
+                        str_p = str(p)
+                        if str_p in self.label_conf:
+                            str_p = self.label_conf[str_p]
 
-                                if str_p not in cur_data:
-                                    cur_data[str_p] = []
+                            str_o = unicode(o)
+                            label_o = None
+                            if str_o in self.label_conf:
+                                label_o = self.label_conf[str_o]
 
-                                has_label = False
-                                if isinstance(o, rdflib.URIRef):
-                                    cur_entity = {self.__entityiri: str_o}
-                                    if str_o.startswith(self.baseurl):
+                            if str_p not in cur_data:
+                                cur_data[str_p] = []
 
-                                    # The following 'if' is for internal testing
-                                    # (comment the above one if needed)
-                                    # if str_o.startswith(
-                                    #   "http://www.sparontologies.net/mediatype/"):
-                                        try:
-                                            # The following two lines are for internal testing
+                            has_label = False
+                            if isinstance(o, rdflib.URIRef):
+                                cur_entity = {self.__entityiri: str_o}
+                                if str_o.startswith(self.baseurl):
+
+                                # The following 'if' is for internal testing
+                                # (comment the above one if needed)
+                                # if str_o.startswith(
+                                #   "http://www.sparontologies.net/mediatype/"):
+                                    try:
+                                        # The following two lines are for internal testing
+                                        # (comment the above one if needed)
+                                        external_graph = self.load_graph(
+                                            self.basepath + os.sep +
+                                            urllib.unquote_plus(
+                                                str_o.replace(self.baseurl, "")) +
+                                            # The following line is for internal testing
                                             # (comment the above one if needed)
-                                            external_graph = self.load_graph(
-                                                self.basepath + os.sep +
-                                                urllib.unquote_plus(
-                                                    str_o.replace(self.baseurl, "")) +
-                                                # The following line is for internal testing
-                                                # (comment the above one if needed)
-                                                    # str_o.replace(
-                                                    #     "http://www.sparontologies.net/mediatype/", "")) +
-                                                ".rdf", subj_iri, self.tmp_dir)
-                                            is_first = True
-                                            for s2, p2, o2 in \
-                                                    external_graph.triples((o, RDFS.label, None)):
-                                                has_label = True
-                                                if is_first:
-                                                     cur_entity[
-                                                         self.label_conf[self.__rdfs_label]] = []
-                                                cur_entity[
-                                                    self.label_conf[self.__rdfs_label]] += [str(o2)]
-                                        except Exception as e:
-                                            pass  # do not add anything
+                                                # str_o.replace(
+                                                #     "http://www.sparontologies.net/mediatype/", "")) +
+                                            ".rdf", subj_iri, self.tmp_dir)
+                                        is_first = True
+                                        for s2, p2, o2 in \
+                                                external_graph.triples((o, RDFS.label, None)):
+                                            has_label = True
+                                            if is_first:
+                                                 cur_entity[
+                                                     self.label_conf[self.__rdfs_label]] = []
+                                            cur_entity[
+                                                self.label_conf[self.__rdfs_label]] += [str(o2)]
+                                    except Exception as e:
+                                        pass  # do not add anything
 
-                                    if not has_label and label_o is not None:
-                                        cur_entity[self.label_conf[self.__rdfs_label]] = [label_o]
+                                if not has_label and label_o is not None:
+                                    cur_entity[self.label_conf[self.__rdfs_label]] = [label_o]
 
-                                    cur_data[str_p] += [cur_entity]
-                                else:
-                                    cur_data[str_p] += [str_o]
+                                cur_data[str_p] += [cur_entity]
+                            else:
+                                cur_data[str_p] += [str_o]
 
-                                cur_data[str_p].sort()
-                    web.header('Content-Type', self.__html[0])
-                    return self.render.ldd(cur_data, sorted(cur_data.keys()), self.label_iri)
+                            cur_data[str_p].sort()
+                web.header('Content-Type', self.__html[0])
+                return self.render.ldd(cur_data, sorted(cur_data.keys()), self.label_iri)
 
     def load_graph(self, file_path, subj_iri, temp_dir_for_rdf_loading=None):
         current_graph = None

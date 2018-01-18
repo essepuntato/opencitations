@@ -84,8 +84,32 @@ $def with (data, keys, label_iri)
                       </ul>
                   </dd>
 
+              $if 'citing document' in data:
+                  <dt class="bg-info">citing document</dt>
+                  <dd>
+                      <ul class="list-unstyled">
+                          <li property="$label_iri['citing document']">
+                              <a href="$data['citing document'][0]['__entityiri']">
+                                  $data["citing document"][0]["__entityiri"]
+                              </a>
+                          </li>
+                      </ul>
+                  </dd>
+
+              $if 'cited document' in data:
+                  <dt class="bg-info">cited document</dt>
+                  <dd>
+                      <ul class="list-unstyled">
+                          <li property="$label_iri['cited document']">
+                              <a href="$data['cited document'][0]['__entityiri']">
+                                  $data["cited document"][0]["__entityiri"]
+                              </a>
+                          </li>
+                      </ul>
+                  </dd>
+
               $for key in keys:
-                $if key not in ['is a', 'iri', 'label', '__entityiri', 'title', 'subtitle', 'year']:
+                $if key not in ['is a', 'iri', 'label', '__entityiri', 'title', 'subtitle', 'year', 'citing document', 'cited document']:
                     <dt class="bg-info">$key</dt>
                     <dd>
                         <ul class="list-unstyled" rel="$label_iri[key]">
@@ -111,7 +135,7 @@ $def with (data, keys, label_iri)
       <!-- FOOTER -->
       <footer>
         <p>Get it in another format: <a href="$''.join([data['__entityiri'],'.rdf'])">RDF/XML</a>, <a href="$''.join([data['__entityiri'],'.ttl'])">Turtle</a>, <a href="$''.join([data['__entityiri'],'.json'])">JSON-LD</a></p>
-        <p>Try this - All these data (independently from the particular representation used) are licensed under a <a about="" property="$label_iri['license']" href="https://creativecommons.org/publicdomain/zero/1.0/legalcode">Creative Commons CC0 1.0 Universal</a>.</p>
+        <p>All these data (independently from the particular representation used) are licensed under a <a about="" property="$label_iri['license']" href="https://creativecommons.org/publicdomain/zero/1.0/legalcode">Creative Commons CC0 1.0 Universal</a>.</p>
       </footer>
 
     </div><!-- /.container -->

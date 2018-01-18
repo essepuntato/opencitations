@@ -6,11 +6,22 @@
   "json_context_path": "/home/essepuntato/OC/corpus/context.json",
   "sparql_endpoint": "http://localhost:3000/blazegraph/sparql",
   "corpus_local_url": "/corpus/",
+  "virtual_local_url": "/virtual/",
   "ontology_base_url": "https://w3id.org/oc/",
   "documentation_base_path": "ontology/",
   "ontology_url": "../ontology/ontology.owl",
   "onto_acronym": "ontology",
   "dir_split_number": "10000",
   "file_split_number": "1000",
-  "statistics": "/srv/oc/statistics.csv"
+  "statistics": "/srv/oc/statistics.csv",
+  "label_conf": {
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": "is a",
+    "http://xmlns.com/foaf/0.1/givenName": "given name",
+    "http://xmlns.com/foaf/0.1/familyName": "family name",
+    "http://prismstandard.org/namespaces/basic/2.0/startingPage": "first page",
+    "http://prismstandard.org/namespaces/basic/2.0/endingPage": "last page",
+    "http://purl.org/dc/terms/issued": "publication date",
+    "http://purl.org/dc/terms/modified": "modification date",
+    "http://purl.org/spar/biro/references": "references"
+  }
 }
