@@ -32,7 +32,8 @@ from datetime import datetime
 with open("conf.json") as f:
     c = json.load(f)
 
-pages = ["/", "about", "corpus", "model", "download", "sparql", "search", "publications", "licenses", "contacts"]
+pages = ["/", "about", "corpus", "model", "download", "sparql", "search", # "oci",
+         "publications", "licenses", "contacts"]
 
 urls = (
     "(/)", "Home",
@@ -41,6 +42,7 @@ urls = (
     "/(corpus)", "CorpusIntro",
     "/corpus/(.+)", "Corpus",
     "/virtual/(.+)", "Virtual",
+    "/(oci)(/.+)?", "OCI",
     "/corpus/", "Corpus",
     "/(download)", "Download",
     "/(sparql)", "Sparql",
@@ -126,6 +128,20 @@ class CorpusIntro:
         return render.corpus(pages, active)
 
 
+class OCI:
+    def GET(self, active, oci):
+        data = web.input()
+        if "oci" in data:
+            raise web.seeother(c["oc_base_url"] + "/" + active + "/" + data.oci)
+        elif oci is None or oci.strip() == "":
+            web_logger.mes()
+            return render.oci(pages, active)
+        else:
+            web_logger.mes()
+            raise web.seeother(c["oc_base_url"] + c["virtual_local_url"] + "ci" + oci)
+
+
+
 class Download:
     def GET(self, active):
         web_logger.mes()
@@ -141,6 +157,7 @@ class Search:
             return render.search(pages, active, parsed_query['text'][0])
         else:
             return render.search(pages, active, "")
+
 
 class Model:
     def GET(self, active):
