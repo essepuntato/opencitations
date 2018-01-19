@@ -45,6 +45,9 @@ class VirtualEntityDirector(object):
     __fabio_base = "http://purl.org/spar/fabio/"
     __has_publication_year = rdflib.URIRef(__fabio_base + "hasPublicationYear")
 
+    __citation_local_url_re = "((0[1-9]+0)?[1-9][0-9]*)-((0[1-9]+0)?[1-9][0-9]*)"
+    __identifier_local_url_re = "([a-z][a-z])-" + __citation_local_url_re
+
     def __init__(self, ldd, virtual_local_url):
         self.ldd = ldd
         self.virtual_local_url = virtual_local_url
@@ -71,19 +74,21 @@ class VirtualEntityDirector(object):
     def get_representation(self, url):
         if len(url) > 3:  # which means there is a local id specified
             ex_regex = "(\\%s)" % "|\\".join(self.__extensions)
-            if re.match("^ci/([a-z]+-)?[0-9]+-([a-z]+-)?[0-9]+%s$" % ex_regex, url) is not None:  # dealing citations
+            # dealing citations
+            if re.match("^ci/%s%s$" % (self.__citation_local_url_re, ex_regex), url) is not None:
                 return self.__handle_citation(url, ex_regex)
-            elif re.match("^id/[a-z][a-z]-([a-z-0-9]+)%s$" % ex_regex, url) is not None:  # dealing virtual identifiers
+            # dealing virtual identifiers
+            elif re.match("^id/%s%s$" % (self.__identifier_local_url_re, ex_regex), url) is not None:
                 return self.__handle_identifier(url, ex_regex)
 
     def __handle_citation(self, url, ex_regex):
-        citing_entity_local_id = re.sub("^ci/(([a-z]+-)?[0-9]+)-.+%s$" % ex_regex, "\\1", url)
+        citing_entity_local_id = re.sub("^ci/%s%s$" % (self.__citation_local_url_re, ex_regex), "\\1", url)
         citing_entity_corpus_id = "br/" + citing_entity_local_id
         citing_br_rdf = self.ldd.get_representation(citing_entity_corpus_id + ".rdf", True)
         if citing_br_rdf is not None:
             citing_br_g = rdflib.Graph()
             citing_br_g.parse(data=citing_br_rdf, format="xml")
-            cited_entity_local_id = re.sub("^ci/([a-z]+-)?[0-9]+-(([a-z]+-)?[0-9]+)%s$" % ex_regex, "\\2", url)
+            cited_entity_local_id = re.sub("^ci/%s%s$" % (self.__citation_local_url_re, ex_regex), "\\3", url)
             cited_entity_corpus_id = "br/" + cited_entity_local_id
 
             citing_br = rdflib.URIRef(self.ldd.baseurl + citing_entity_corpus_id)
@@ -117,7 +122,9 @@ class VirtualEntityDirector(object):
                 return self.ldd.get_representation(url, True, citation_graph)
 
     def __handle_identifier(self, url, ex_regex):
-        identified_entity_corpus_id = re.sub("^id/([a-z][a-z])-([a-z-0-9]+)%s$" % ex_regex, "\\1/\\2", url)
+        print url
+        identified_entity_corpus_id = re.sub("^id/%s%s$" % (self.__identifier_local_url_re, ex_regex), "\\1/\\2-\\4", url)
+        print identified_entity_corpus_id
         identified_entity_rdf = self.get_representation(identified_entity_corpus_id + ".rdf")
         if identified_entity_rdf is not None:
             identifier_graph = rdflib.Graph()
