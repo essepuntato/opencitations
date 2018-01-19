@@ -82,13 +82,16 @@ $def with (pages, active)
                 <h3>Open Citation Identifier Resolver</h3>
                 <form class="form-inline" action="/oci" method="get">
                     <div class="form-group">
-                        <label for="oci">OCI</label>:
+                        <label for="oci">oci</label>:
                         <input name="oci" type="text" class="form-control" id="oci" placeholder="E.g.: 1-18">
                     </div>
                     <input type="submit" class="btn btn-default" value="Lookup"></input>
                 </form>
                 <div style="margin-top: 30px">
-                    <p>The Open Citation Identifier (a.k.a. OCI) is ...</p>
+                    <p>The Open Citation Identifier (OCI) is a globally unique persistent identifier for bibliographic citations, created and maintained by OpenCitations, and this page provides a resolution service that takes an OCI and returns information about that citation.</p>
+                    <p>Each OCI has a simple structure: the lower-case letters “oci” followed by a colon, followed by two numbers separated by a dash. For example, <a href="/oci/1-18">oci:1-18</a> and <a href="/oci/2544384-7295288">oci:2544384-7295288</a> are both valid OCIs.</p>
+                    <p>The first number is the OCC identifier for the citing bibliographic resource, while the second number is the OCC identifier for the cited bibliographic resource. These bibliographic resource identifiers are unique within the OCC, and every citation recorded in the OpenCitations Corpus (OCC) has an OCI.</p>
+                    <p>While the coverage of OCIs among all bibliographic citations is at present limited, bear in mind that the coverage of DOIs (digital object identifiers) to identify published works was also limited following its launch in 2000.  As the coverage of the OCC expands, the number of OCIs will increase proportionately.</p>
                 </div>
             </div>
 
