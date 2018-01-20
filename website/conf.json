@@ -23,5 +23,21 @@
     "http://purl.org/dc/terms/issued": "publication date",
     "http://purl.org/dc/terms/modified": "modification date",
     "http://purl.org/spar/biro/references": "references"
+  },
+  "ved_conf": {
+    "ci": [
+      {
+        "query": "PREFIX cito: <http://purl.org/spar/cito/> PREFIX fabio: <http://purl.org/spar/fabio/> SELECT ?citing ?cited ?citing_year ?cited_year WHERE { BIND(<https://w3id.org/oc/corpus/br/[[CITING]]> AS ?citing) BIND(<https://w3id.org/oc/corpus/br/[[CITED]]> AS ?cited) ?citing cito:cites ?cited . OPTIONAL { ?citing fabio:hasPublicationYear ?citing_year } OPTIONAL { ?cited fabio:hasPublicationYear ?cited_year } }",
+        "prefix": "",
+        "tp": "https://w3id.org/oc/sparql",
+        "use_it": "yes"
+      },
+      {
+        "query": "SELECT ?citing ?cited ?citing_year ?cited_year WHERE { BIND(wd:Q[[CITING]] AS ?citing) BIND(wd:Q[[CITED]] AS ?cited) ?citing wdt:P2860 ?cited . OPTIONAL { ?citing wdt:P577 ?citing_year } OPTIONAL { ?cited wdt:P577 ?cited_year } } LIMIT 1",
+        "prefix": "010",
+        "tp": "https://query.wikidata.org/sparql",
+        "use_it": "yes"
+      }
+    ]
   }
 }

@@ -17,6 +17,7 @@ import re
 import rdflib
 import web
 from rdflib.namespace import RDF, RDFS, XSD
+from SPARQLWrapper import SPARQLWrapper, JSON
 
 
 class VirtualEntityDirector(object):
@@ -48,10 +49,11 @@ class VirtualEntityDirector(object):
     __citation_local_url_re = "((0[1-9]+0)?[1-9][0-9]*)-((0[1-9]+0)?[1-9][0-9]*)"
     __identifier_local_url_re = "([a-z][a-z])-" + __citation_local_url_re
 
-    def __init__(self, ldd, virtual_local_url):
+    def __init__(self, ldd, virtual_local_url, conf):
         self.ldd = ldd
         self.virtual_local_url = virtual_local_url
         self.virtual_baseurl = self.ldd.baseurl.replace(self.ldd.corpus_local_url, self.virtual_local_url)
+        self.conf = conf
 
     def redirect(self, url):
         if url.endswith(self.__extensions):
@@ -81,50 +83,68 @@ class VirtualEntityDirector(object):
             elif re.match("^id/%s%s$" % (self.__identifier_local_url_re, ex_regex), url) is not None:
                 return self.__handle_identifier(url, ex_regex)
 
+    def __execute_query(self, citing, cited):
+        result = None
+
+        try:
+            i = iter(self.conf["ci"])
+            while result is None:
+                item = next(i)
+                query, prefix, tp, use_it = item["query"], item["prefix"], item["tp"], item["use_it"]
+                if use_it == "yes":
+                    sparql = SPARQLWrapper(tp)
+                    sparql.setQuery(re.sub("\\[\\[CITED\\]\\]", re.sub("^" + prefix, "", cited),
+                                           re.sub("\\[\\[CITING\\]\\]", re.sub("^" + prefix, "", citing), query)))
+                    sparql.setReturnFormat(JSON)
+                    q_res = sparql.query().convert()["results"]["bindings"]
+                    if len(q_res) > 0:
+                        answer = q_res[0]
+                        result = answer["citing"]["value"], answer["cited"]["value"], \
+                                 answer["citing_year"]["value"] if "citing_year" in answer else None, \
+                                 answer["cited_year"]["value"] if "cited_year" in answer else None
+
+        except StopIteration:
+            pass  # No nothing
+
+        return result
+
     def __handle_citation(self, url, ex_regex):
         citing_entity_local_id = re.sub("^ci/%s%s$" % (self.__citation_local_url_re, ex_regex), "\\1", url)
-        citing_entity_corpus_id = "br/" + citing_entity_local_id
-        citing_br_rdf = self.ldd.get_representation(citing_entity_corpus_id + ".rdf", True)
-        if citing_br_rdf is not None:
-            citing_br_g = rdflib.Graph()
-            citing_br_g.parse(data=citing_br_rdf, format="xml")
-            cited_entity_local_id = re.sub("^ci/%s%s$" % (self.__citation_local_url_re, ex_regex), "\\3", url)
-            cited_entity_corpus_id = "br/" + cited_entity_local_id
+        cited_entity_local_id = re.sub("^ci/%s%s$" % (self.__citation_local_url_re, ex_regex), "\\3", url)
 
-            citing_br = rdflib.URIRef(self.ldd.baseurl + citing_entity_corpus_id)
-            cited_br = rdflib.URIRef(self.ldd.baseurl + cited_entity_corpus_id)
-            if len(list(citing_br_g.triples((citing_br, self.__cites, cited_br)))):
-                citation_graph = rdflib.Graph()
-                citation_local_id = citing_entity_local_id + "-" + cited_entity_local_id
-                citation_corpus_id = "ci/" + citation_local_id
-                citation = rdflib.URIRef(self.virtual_baseurl + citation_corpus_id)
-                occ_citation_id = rdflib.URIRef(self.virtual_baseurl + "id/" + citation_corpus_id.replace("/", "-"))
-                citation_graph.add((citation, RDFS.label,
-                                    rdflib.Literal("citation %s [%s]" % (citation_local_id, citation_corpus_id))))
-                citation_graph.add((citation, RDF.type, self.__citation))
-                citation_graph.add((citation, self.__has_citing_entity, citing_br))
-                citation_graph.add((citation, self.__has_cited_entity, cited_br))
-                citation_graph.add((citation, self.__has_identifier, occ_citation_id))
+        res = self.__execute_query(citing_entity_local_id, cited_entity_local_id)
+        if res is not None:
+            citing_url, cited_url, citing_pub_year, cited_pub_year = res
+            print res
 
-                citing_pub_year = list(citing_br_g.objects(citing_br, self.__has_publication_year))
-                if citing_pub_year:
-                    cited_br_rdf = self.ldd.get_representation(cited_entity_corpus_id + ".rdf", True)
-                    cited_br_g = rdflib.Graph()
-                    cited_br_g.parse(data=cited_br_rdf, format="xml")
+            citation_graph = rdflib.Graph()
 
-                    cited_pub_year = list(cited_br_g.objects(cited_br, self.__has_publication_year))
-                    if cited_pub_year:
-                        citation_graph.add((
-                            citation, self.__has_citation_time_span,
-                            rdflib.Literal(
-                                int(citing_pub_year[0][:4]) - int(cited_pub_year[0][:4]), datatype=XSD.integer)))
+            citing_br = rdflib.URIRef(citing_url)
+            cited_br = rdflib.URIRef(cited_url)
 
-                return self.ldd.get_representation(url, True, citation_graph)
+            citation_local_id = citing_entity_local_id + "-" + cited_entity_local_id
+            citation_corpus_id = "ci/" + citation_local_id
+            citation = rdflib.URIRef(self.virtual_baseurl + citation_corpus_id)
+            occ_citation_id = rdflib.URIRef(self.virtual_baseurl + "id/" + citation_corpus_id.replace("/", "-"))
+            citation_graph.add((citation, RDFS.label,
+                                rdflib.Literal("citation %s [%s]" % (citation_local_id, citation_corpus_id))))
+            citation_graph.add((citation, RDF.type, self.__citation))
+            citation_graph.add((citation, self.__has_citing_entity, citing_br))
+            citation_graph.add((citation, self.__has_cited_entity, cited_br))
+            citation_graph.add((citation, self.__has_identifier, occ_citation_id))
+
+            if citing_pub_year is not None and cited_pub_year is not None:
+                citation_graph.add((
+                    citation, self.__has_citation_time_span,
+                    rdflib.Literal(
+                        int(citing_pub_year[:4]) - int(cited_pub_year[:4]), datatype=XSD.integer)))
+
+            return self.ldd.get_representation(url, True, citation_graph)
+
 
     def __handle_identifier(self, url, ex_regex):
-        print url
-        identified_entity_corpus_id = re.sub("^id/%s%s$" % (self.__identifier_local_url_re, ex_regex), "\\1/\\2-\\4", url)
-        print identified_entity_corpus_id
+        identified_entity_corpus_id = re.sub("^id/%s%s$" % (self.__identifier_local_url_re, ex_regex), "\\1/\\2-\\4",
+                                             url)
         identified_entity_rdf = self.get_representation(identified_entity_corpus_id + ".rdf")
         if identified_entity_rdf is not None:
             identifier_graph = rdflib.Graph()

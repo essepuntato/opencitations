@@ -244,7 +244,7 @@ class Virtual:
             label_conf=c["label_conf"], tmp_dir=c["tmp_dir"],
             dir_split_number=int(c["dir_split_number"]),
             file_split_number=int(c["file_split_number"]))
-        ved = VirtualEntityDirector(ldd, c["virtual_local_url"])
+        ved = VirtualEntityDirector(ldd, c["virtual_local_url"], c["ved_conf"])
         cur_page = ved.redirect(file_path)
         if cur_page is None:
             raise web.notfound()
