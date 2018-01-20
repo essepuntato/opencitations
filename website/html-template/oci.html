@@ -83,14 +83,20 @@ $def with (pages, active)
                 <form class="form-inline" action="/oci" method="get">
                     <div class="form-group">
                         <label for="oci">oci</label>:
-                        <input name="oci" type="text" class="form-control" id="oci" placeholder="E.g.: 1-18">
+                        <input style="min-width:350px" name="oci" type="text" class="form-control" id="oci" placeholder="E.g.: 1-18">
                     </div>
-                    <input type="submit" class="btn btn-default" value="Lookup"></input>
+                    <input type="submit" class="btn btn-success" value="Look up citation"></input>
                 </form>
-                <div style="margin-top: 30px">
+                <div class="left" style="margin-top: 30px">
                     <p>The Open Citation Identifier (OCI) is a globally unique persistent identifier for bibliographic citations, created and maintained by OpenCitations, and this page provides a resolution service that takes an OCI and returns information about that citation.</p>
                     <p>Each OCI has a simple structure: the lower-case letters “oci” followed by a colon, followed by two numbers separated by a dash. For example, <a href="/oci/1-18">oci:1-18</a> and <a href="/oci/2544384-7295288">oci:2544384-7295288</a> are both valid OCIs.</p>
-                    <p>The first number is the OCC identifier for the citing bibliographic resource, while the second number is the OCC identifier for the cited bibliographic resource. These bibliographic resource identifiers are unique within the OCC, and every citation recorded in the OpenCitations Corpus (OCC) has an OCI.</p>
+                    <p>The first number is the identifier for the citing bibliographic resource, while the second number is the identifier for the cited bibliographic resource. Within the OCC, these bibliographic resource identifiers are unique, and every citation recorded in the OpenCitations Corpus (OCC) has an OCI.</p>
+                    <p>Some bibliographic resource identifiers have a supplier prefix - a short numerical string delimited by zeros that indicates the supplier of the metadata. For example <q>010</q> indicates that <a href="https://www.wikidata.org">Wikidata</a> is the supplier. Thus <a href="/oci/01027931310-01022252312">oci:01027931310-01022252312</a> represents a citation between two bibliographic resources (i.e. <a href="http://www.wikidata.org/entity/Q27931310">wd:Q27931310</a> and <a href="http://www.wikidata.org/entity/Q22252312">wd:Q22252312</a>) whose metadata was in both cases supplied by Wikidata. A list of existing bibliographic resource identifier prefixes and their meanings can be found in the following table.</p>
+                    <table class="table table-striped">
+                        <tr><th>Prefix</th><th>supplier</th></tr>
+                        <tr><td><em>no prefix</em></td><td><a href="https://w3id.org/oc/corpus">OpenCitations Corpus</a></td></tr>
+                        <tr><td><em>101</em></td><td><a href="https://www.wikidata.org">Wikidata</a></td></tr>
+                    </table>
                     <p>While the coverage of OCIs among all bibliographic citations is at present limited, bear in mind that the coverage of DOIs (digital object identifiers) to identify published works was also limited following its launch in 2000.  As the coverage of the OCC expands, the number of OCIs will increase proportionately.</p>
                 </div>
             </div>

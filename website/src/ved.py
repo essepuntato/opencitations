@@ -91,7 +91,7 @@ class VirtualEntityDirector(object):
             while result is None:
                 item = next(i)
                 query, prefix, tp, use_it = item["query"], item["prefix"], item["tp"], item["use_it"]
-                if use_it == "yes":
+                if use_it == "yes" and citing.startswith(prefix) and cited.startswith(prefix):
                     sparql = SPARQLWrapper(tp)
                     sparql.setQuery(re.sub("\\[\\[CITED\\]\\]", re.sub("^" + prefix, "", cited),
                                            re.sub("\\[\\[CITING\\]\\]", re.sub("^" + prefix, "", citing), query)))
@@ -115,7 +115,6 @@ class VirtualEntityDirector(object):
         res = self.__execute_query(citing_entity_local_id, cited_entity_local_id)
         if res is not None:
             citing_url, cited_url, citing_pub_year, cited_pub_year = res
-            print res
 
             citation_graph = rdflib.Graph()
 

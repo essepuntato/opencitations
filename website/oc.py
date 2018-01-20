@@ -132,7 +132,8 @@ class OCI:
     def GET(self, active, oci):
         data = web.input()
         if "oci" in data:
-            raise web.seeother(c["oc_base_url"] + "/" + active + "/" + data.oci)
+            clean_oci = re.sub("\s+", "", re.sub("^oci:", "", data.oci.strip(), flags=re.IGNORECASE))
+            raise web.seeother(c["oc_base_url"] + "/" + active + "/" + clean_oci)
         elif oci is None or oci.strip() == "":
             web_logger.mes()
             return render.oci(pages, active)
