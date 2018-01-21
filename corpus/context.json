@@ -86,6 +86,7 @@
     "crossref": { "@id": "biro:references", "@type": "@vocab"},
     "curatorial_role_type": { "@id": "prov:hadRole" , "@type": "@vocab" },
     "derived_from": { "@id": "prov:wasDerivedFrom", "@type": "@vocab" },
+    "attributed_to": { "@id": "prov:wasAttributedTo", "@type": "@vocab" },
     "distribution": { "@id": "dcat:distribution", "@type": "@vocab" },
     "download": { "@id": "dcat:downloadURL", "@type": "@vocab" },
     "endpoint": { "@id": "void:sparqlEndpoint", "@type": "@vocab" },

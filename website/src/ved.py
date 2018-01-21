@@ -18,6 +18,7 @@ import rdflib
 import web
 from rdflib.namespace import RDF, RDFS, XSD
 from SPARQLWrapper import SPARQLWrapper, JSON
+from urllib import quote
 
 
 class VirtualEntityDirector(object):
@@ -46,14 +47,20 @@ class VirtualEntityDirector(object):
     __fabio_base = "http://purl.org/spar/fabio/"
     __has_publication_year = rdflib.URIRef(__fabio_base + "hasPublicationYear")
 
+    __prov_base = "http://www.w3.org/ns/prov#"
+    __was_attributed_to = rdflib.URIRef(__prov_base + "wasAttributedTo")
+    __had_primary_source = rdflib.URIRef(__prov_base + "hadPrimarySource")
+
     __citation_local_url_re = "((0[1-9]+0)?[1-9][0-9]*)-((0[1-9]+0)?[1-9][0-9]*)"
     __identifier_local_url_re = "([a-z][a-z])-" + __citation_local_url_re
+
 
     def __init__(self, ldd, virtual_local_url, conf):
         self.ldd = ldd
         self.virtual_local_url = virtual_local_url
         self.virtual_baseurl = self.ldd.baseurl.replace(self.ldd.corpus_local_url, self.virtual_local_url)
         self.conf = conf
+        self.virtual_entity_director = rdflib.URIRef(self.ldd.baseurl + "prov/pa/7")
 
     def redirect(self, url):
         if url.endswith(self.__extensions):
@@ -93,15 +100,17 @@ class VirtualEntityDirector(object):
                 query, prefix, tp, use_it = item["query"], item["prefix"], item["tp"], item["use_it"]
                 if use_it == "yes" and citing.startswith(prefix) and cited.startswith(prefix):
                     sparql = SPARQLWrapper(tp)
-                    sparql.setQuery(re.sub("\\[\\[CITED\\]\\]", re.sub("^" + prefix, "", cited),
-                                           re.sub("\\[\\[CITING\\]\\]", re.sub("^" + prefix, "", citing), query)))
+                    sparql_query = re.sub("\\[\\[CITED\\]\\]", re.sub("^" + prefix, "", cited),
+                                          re.sub("\\[\\[CITING\\]\\]", re.sub("^" + prefix, "", citing), query))
+                    sparql.setQuery(sparql_query)
                     sparql.setReturnFormat(JSON)
                     q_res = sparql.query().convert()["results"]["bindings"]
                     if len(q_res) > 0:
                         answer = q_res[0]
                         result = answer["citing"]["value"], answer["cited"]["value"], \
                                  answer["citing_year"]["value"] if "citing_year" in answer else None, \
-                                 answer["cited_year"]["value"] if "cited_year" in answer else None
+                                 answer["cited_year"]["value"] if "cited_year" in answer else None, \
+                                 tp + "?query=" + quote(sparql_query)
 
         except StopIteration:
             pass  # No nothing
@@ -114,7 +123,7 @@ class VirtualEntityDirector(object):
 
         res = self.__execute_query(citing_entity_local_id, cited_entity_local_id)
         if res is not None:
-            citing_url, cited_url, citing_pub_year, cited_pub_year = res
+            citing_url, cited_url, citing_pub_year, cited_pub_year, sparql_query_url = res
 
             citation_graph = rdflib.Graph()
 
@@ -138,6 +147,9 @@ class VirtualEntityDirector(object):
                     rdflib.Literal(
                         int(citing_pub_year[:4]) - int(cited_pub_year[:4]), datatype=XSD.integer)))
 
+            citation_graph.add((citation, self.__was_attributed_to, self.virtual_entity_director))
+            citation_graph.add((citation, self.__had_primary_source, rdflib.URIRef(sparql_query_url)))
+
             return self.ldd.get_representation(url, True, citation_graph)
 
 
@@ -157,5 +169,9 @@ class VirtualEntityDirector(object):
                 identifier_graph.add((identifier, self.__uses_identifier_scheme, self.__oci))
                 identifier_graph.add((identifier, self.__has_literal_value,
                                       rdflib.Literal(identified_entity_corpus_id[3:])))
+
+            identifier_graph.add((identifier, self.__was_attributed_to, self.virtual_entity_director))
+            identifier_graph.add((identifier, self.__had_primary_source,
+                                  rdflib.URIRef(self.virtual_baseurl + identified_entity_corpus_id)))
 
             return self.ldd.get_representation(url, True, identifier_graph)
