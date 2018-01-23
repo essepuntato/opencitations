@@ -18,14 +18,14 @@ var search_conf = {
     {
       "name":"doi",
       "category": "document",
-      "regex":"10.\\d{4,9}\/[-._;()/:A-Za-z0-9]+$",
+      "regex":"(10.\\d{4,9}\/[-._;()/:A-Za-z0-9][^\\s]+)",
       "query": [
-        "SELECT DISTINCT ?doc ?short_iri ?doi ?title ?year ?author ?author_iri (COUNT(distinct ?cited) AS ?out_cits) (COUNT(distinct ?cited_by) AS ?in_cits) where {",
-            "?lit bds:search <VAR> . ?lit bds:matchAllTerms 'true' . ?lit bds:relevance ?score . ?lit bds:maxRank '1' .",
+        "SELECT DISTINCT ?iri ?short_iri ?doi ?title ?year ?author ?author_iri (COUNT(distinct ?cited) AS ?out_cits) (COUNT(distinct ?cited_by) AS ?in_cits) where {",
+            "BIND('[[VAR]]' as ?doi_txt) .",
+            "?lit bds:search ?doi_txt . ?lit bds:matchAllTerms 'true' . ?lit bds:relevance ?score . ?lit bds:maxRank '1' .",
             "?iri datacite:hasIdentifier/literal:hasLiteralValue ?lit .",
             "BIND(?lit AS ?doi).",
             "BIND(REPLACE(STR(?iri), 'https://w3id.org/oc/corpus', '', 'i') as ?short_iri) .",
-            "BIND(?iri as ?doc) .",
             "OPTIONAL {?iri dcterms:title ?title .}",
             "OPTIONAL {?iri fabio:hasSubtitle ?subtitle .}",
             "OPTIONAL {?iri fabio:hasPublicationYear ?year .}",
@@ -41,16 +41,43 @@ var search_conf = {
                     "?author_iri foaf:givenName ?name .",
                     "BIND(CONCAT(STR(?name),' ', STR(?fname)) as ?author) .",
              "}",
-          "} GROUP BY ?doc ?short_iri ?doi ?title ?year ?author ?author_iri"
+          "} GROUP BY ?iri ?short_iri ?doi ?title ?year ?author ?author_iri"
+      ]
+    },
+    {
+      "name":"br_resource",
+      "category": "document",
+      "regex":"(br\/\\d{1,})",
+      "query": [
+        "SELECT DISTINCT ?iri ?short_iri ?title ?year ?author ?author_iri (COUNT(distinct ?cited) AS ?out_cits) (COUNT(distinct ?cited_by) AS ?in_cits) where {",
+            "BIND('[[VAR]]' as ?short_iri) .",
+            "BIND(<https://w3id.org/oc/corpus/[[VAR]]> as ?iri) .",
+            "OPTIONAL {?iri dcterms:title ?title .}",
+            "OPTIONAL {?iri fabio:hasSubtitle ?subtitle .}",
+            "OPTIONAL {?iri fabio:hasPublicationYear ?year .}",
+            "OPTIONAL {?iri cito:cites ?cited .}",
+            "OPTIONAL {?cited_by cito:cites ?iri .}",
+            "",
+             "OPTIONAL {",
+                    "?iri pro:isDocumentContextFor [",
+                        "pro:withRole pro:author ;",
+                        "pro:isHeldBy ?author_iri",
+                    "].",
+                    "?author_iri foaf:familyName ?fname .",
+                    "?author_iri foaf:givenName ?name .",
+                    "BIND(CONCAT(STR(?name),' ', STR(?fname)) as ?author) .",
+             "}",
+          "} GROUP BY ?iri ?short_iri ?title ?year ?author ?author_iri"
       ]
     },
     {
       "name":"orcid",
       "category": "author",
-      "regex":"[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9X]{4}$",
+      "regex":"([0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9X]{4})",
       "query": [
         "SELECT ?author_iri ?short_iri ?orcid ?author (COUNT(?doc) AS ?num_docs) WHERE {",
-              "?lit bds:search <VAR> . ?lit bds:matchAllTerms 'true' . ?lit bds:relevance ?score . ?lit bds:maxRank '1' .",
+              "BIND('[[VAR]]' as ?orcid_txt) .",
+              "?lit bds:search ?orcid_txt . ?lit bds:matchAllTerms 'true' . ?lit bds:relevance ?score . ?lit bds:maxRank '1' .",
               "?author_iri datacite:hasIdentifier/literal:hasLiteralValue ?lit .",
               "BIND(?lit as ?orcid) .",
               "BIND(REPLACE(STR(?author_iri), 'https://w3id.org/oc/corpus', '', 'i') as ?short_iri) .",
@@ -70,16 +97,80 @@ var search_conf = {
       ]
     },
     {
+      "name":"ra_resource",
+      "category": "author",
+      "regex":"(ra\/\\d{1,})",
+      "query": [
+        "SELECT ?author_iri ?short_iri ?orcid ?author (COUNT(?doc) AS ?num_docs) WHERE {",
+            "BIND('[[VAR]]' as ?short_iri) .",
+            "BIND(<https://w3id.org/oc/corpus/[[VAR]]> as ?author_iri) .",
+            "OPTIONAL {?author_iri datacite:hasIdentifier[",
+                      "datacite:usesIdentifierScheme datacite:orcid ;",
+             			    "literal:hasLiteralValue ?orcid].}",
+            "?author_iri rdfs:label ?label .",
+            "OPTIONAL {",
+                    "?author_iri foaf:familyName ?fname .",
+                    "?author_iri foaf:givenName ?name .",
+                    "BIND(CONCAT(STR(?name),' ', STR(?fname)) as ?author) .",
+             "}",
+             "",
+             "OPTIONAL {",
+                  "?role pro:isHeldBy ?author_iri .",
+                  "?role pro:isHeldBy ?author_iri .",
+                  "?doc pro:isDocumentContextFor ?role.",
+             "}",
+        "}GROUP BY ?author_iri ?short_iri ?orcid ?author"
+      ]
+    },
+    {
+      "name":"author_works",
+      "category": "document",
+      "regex": "(https:\/\/w3id\\.org\/oc\/corpus\/ra\/\\d{1,})",
+      "query": [
+        "SELECT DISTINCT ?iri ?short_iri ?doi ?title ?year ?author ?author_iri (COUNT(distinct ?cited) AS ?out_cits) (COUNT(distinct ?cited_by) AS ?in_cits)",
+        "WHERE  {",
+          "?a_role_iri pro:isHeldBy <[[VAR]]> .",
+          "?iri pro:isDocumentContextFor ?a_role_iri .",
+          "OPTIONAL {",
+            "?iri rdf:type ?type .",
+            "BIND(REPLACE(STR(?iri), 'https://w3id.org/oc/corpus', '', 'i') as ?short_iri) .",
+            "OPTIONAL {?iri dcterms:title  ?title .}",
+            "OPTIONAL {?iri fabio:hasSubtitle  ?subtitle .}",
+            "OPTIONAL {?iri fabio:hasPublicationYear ?year .}",
+            "OPTIONAL {?iri cito:cites ?cited .}",
+            "OPTIONAL {?cited_by cito:cites ?iri .}",
+            "OPTIONAL {",
+             "?iri datacite:hasIdentifier [",
+              "datacite:usesIdentifierScheme datacite:doi ;",
+           "literal:hasLiteralValue ?doi",
+               "]",
+           "}",
+        "",
+           "OPTIONAL {",
+                 "?iri pro:isDocumentContextFor [",
+                     "pro:withRole pro:author ;",
+                     "pro:isHeldBy ?author_iri",
+                 "].",
+                 "?author_iri foaf:familyName ?fname .",
+                 "?author_iri foaf:givenName ?name .",
+                 "BIND(CONCAT(STR(?name),' ', STR(?fname)) as ?author) .",
+           "}",
+          "}",
+        "}GROUP BY ?iri ?short_iri ?doi ?title ?year ?author ?author_iri"
+      ]
+    },
+    {
       "name":"any_text",
       "category": "document",
       "regex":"[-'a-zA-Z ]+$",
       "query": [
-        "SELECT DISTINCT ?doc ?short_iri ?doi ?title ?year ?author ?author_iri (COUNT(distinct ?cited) AS ?out_cits) (COUNT(distinct ?cited_by) AS ?in_cits)",
+        "SELECT DISTINCT ?iri ?short_iri ?doi ?title ?year ?author ?author_iri (COUNT(distinct ?cited) AS ?out_cits) (COUNT(distinct ?cited_by) AS ?in_cits)",
             "WHERE  {",
-              "?lit bds:search <VAR> .",
+              "BIND('[[VAR]]' as ?free_txt) .",
+              "?lit bds:search ?free_txt .",
               "?lit bds:matchAllTerms 'true' .",
               "?lit bds:relevance ?score .",
-              "?lit bds:minRelevance '0.4' .",
+              "?lit bds:minRelevance '0.2' .",
               "?lit bds:maxRank '300' .",
             "",
               "{",
@@ -101,12 +192,11 @@ var search_conf = {
               "OPTIONAL {",
                 "?iri rdf:type ?type .",
                 "BIND(REPLACE(STR(?iri), 'https://w3id.org/oc/corpus', '', 'i') as ?short_iri) .",
-                "BIND(?iri as ?doc) .",
-                "OPTIONAL {?doc dcterms:title  ?title .}",
-                "OPTIONAL {?doc fabio:hasSubtitle  ?subtitle .}",
-                "OPTIONAL {?doc fabio:hasPublicationYear ?year .}",
-                "OPTIONAL {?doc cito:cites ?cited .}",
-                "OPTIONAL {?cited_by cito:cites ?doc .}",
+                "OPTIONAL {?iri dcterms:title  ?title .}",
+                "OPTIONAL {?iri fabio:hasSubtitle  ?subtitle .}",
+                "OPTIONAL {?iri fabio:hasPublicationYear ?year .}",
+                "OPTIONAL {?iri cito:cites ?cited .}",
+                "OPTIONAL {?cited_by cito:cites ?iri .}",
                 "OPTIONAL {",
                  "?iri datacite:hasIdentifier [",
                   "datacite:usesIdentifierScheme datacite:doi ;",
@@ -124,45 +214,7 @@ var search_conf = {
                      "BIND(CONCAT(STR(?name),' ', STR(?fname)) as ?author) .",
                "}",
               "}",
-            "}GROUP BY ?doc ?short_iri ?doi ?title ?year ?author ?author_iri"
-      ]
-    },
-    {
-      "name":"author_works",
-      "category": "document",
-      "rule": "https:\/\/w3id\\.org\/oc\/corpus\/ra\/.*",
-      "query": [
-        "SELECT DISTINCT ?doc ?short_iri ?doi ?title ?year ?author ?author_iri (COUNT(distinct ?cited) AS ?out_cits) (COUNT(distinct ?cited_by) AS ?in_cits)",
-        "WHERE  {",
-          "?a_role_iri pro:isHeldBy <URL-VAR> .",
-          "?iri pro:isDocumentContextFor ?a_role_iri .",
-          "OPTIONAL {",
-            "?iri rdf:type ?type .",
-            "BIND(REPLACE(STR(?iri), 'https://w3id.org/oc/corpus', '', 'i') as ?short_iri) .",
-            "BIND(?iri as ?doc) .",
-            "OPTIONAL {?doc dcterms:title  ?title .}",
-            "OPTIONAL {?doc fabio:hasSubtitle  ?subtitle .}",
-            "OPTIONAL {?doc fabio:hasPublicationYear ?year .}",
-            "OPTIONAL {?doc cito:cites ?cited .}",
-            "OPTIONAL {?cited_by cito:cites ?doc .}",
-            "OPTIONAL {",
-             "?iri datacite:hasIdentifier [",
-              "datacite:usesIdentifierScheme datacite:doi ;",
-           "literal:hasLiteralValue ?doi",
-               "]",
-           "}",
-        "",
-           "OPTIONAL {",
-                 "?iri pro:isDocumentContextFor [",
-                     "pro:withRole pro:author ;",
-                     "pro:isHeldBy ?author_iri",
-                 "].",
-                 "?author_iri foaf:familyName ?fname .",
-                 "?author_iri foaf:givenName ?name .",
-                 "BIND(CONCAT(STR(?name),' ', STR(?fname)) as ?author) .",
-           "}",
-          "}",
-        "}GROUP BY ?doc ?short_iri ?doi ?title ?year ?author ?author_iri"
+            "}GROUP BY ?iri ?short_iri ?doi ?title ?year ?author ?author_iri"
       ]
     }
   ],
@@ -171,13 +223,14 @@ var search_conf = {
     {
       "name": "document",
       "fields": [
-        {"value":"short_iri", "title": "Corpus ID","column_width":"15%","type": "text", "sort":{"value": true}, "link":{"field":"doc","prefix":""}},
+        {"value":"short_iri", "title": "Corpus ID","column_width":"15%","type": "text", "sort":{"value": true}, "link":{"field":"iri","prefix":""}},
         {"value":"year", "title": "Year", "column_width":"7%","type": "int", "filter":{"type_sort": "int", "min": 8, "sort": "value", "order": "desc"}, "sort":{"value": true, "default": {"order": "desc"}} },
-        {"value":"title", "title": "Title","column_width":"33%","type": "text", "sort":{"value": true}, "link":{"field":"doc","prefix":""}},
+        {"value":"title", "title": "Title","column_width":"33%","type": "text", "sort":{"value": true}, "link":{"field":"iri","prefix":""}},
         {"value":"author", "title": "Authors", "column_width":"32%","type": "text", "sort":{"value": true}, "filter":{"type_sort": "int", "min": 8, "sort": "sum", "order": "desc"}, "link":{"field":"author_iri","prefix":""}},
         {"value":"in_cits", "title": "Cited by", "column_width":"13%","type": "int", "sort":{"value": true}}
+        //{"value":"score", "title": "Score", "column_width":"8%","type": "int", "sort":{"value": true}}
       ],
-      "group_by": {"keys":["doc"], "concats":["author"]}
+      "group_by": {"keys":["iri"], "concats":["author"]}
     },
 
     {
@@ -192,6 +245,8 @@ var search_conf = {
   ],
 
 
-"page_limit": [5,10,15,20,30,40,50]
+"page_limit": [5,10,15,20,30,40,50],
+"on_abort": "/search",
+"def_adv_category": "document"
 
 }

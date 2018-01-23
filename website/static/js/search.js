@@ -2,6 +2,7 @@
 var search = (function () {
 
 		var search_conf_json = {};
+		var adv_cat_selected = null;
 		var table_conf ={
 				data: null,
 				category: "",
@@ -14,7 +15,18 @@ var search = (function () {
 			for (i = 0; i < search_conf_json["rules"].length; i++) {
 				var re = new RegExp(search_conf_json["rules"][i]["regex"]);
 				if (query_text.match(re)) {
+				//if (re.test(query_text)){
 					//console.log("Match with rule number"+String(i));
+					return search_conf_json["rules"][i];
+				}
+			}
+			return -1;
+		}
+
+		/*get rule entry with given name*/
+		function _get_rule_by_name(name){
+			for (i = 0; i < search_conf_json["rules"].length; i++) {
+				if (search_conf_json["rules"][i]['name'] == name) {
 					return search_conf_json["rules"][i];
 				}
 			}
@@ -42,55 +54,66 @@ var search = (function () {
 
 		/*THE MAIN FUNCTION CALL
 		call the sparql endpoint and do the query 'qtext'*/
-		function do_sparql_query(qtext){
+		function do_sparql_query(qtext, rule_name=null){
+
+			//initialize and get the search_config_json
+			//_get_search_conf();
+			search_conf_json = search_conf;
 
 			if (qtext != "") {
 
-				//initialize and get the search_config_json
-				//_get_search_conf();
-				search_conf_json = search_conf;
-
 				//get the rule of my input qtext
-				var rule =  _get_rule(qtext);
+				var rule = _get_rule_by_name(rule_name);
+				if (rule == -1) {
+					rule =  _get_rule(qtext);
+				}
 				//console.log(rule);
 
-				//build the sparql query in turtle format
-				var sparql_query = _build_turtle_prefixes() + _build_turtle_query(rule.query);
-				var global_r = new RegExp("<VAR>", "g");
-				sparql_query = sparql_query.replace(global_r, "'"+qtext+"'");
-				//in case there is a url variable
-				global_r = new RegExp("<URL-VAR>", "g");
-				sparql_query = sparql_query.replace(global_r, qtext);
-				//console.log(sparql_query);
+				//if i have a corresponding rule
+				if (rule != -1) {
+					//build the sparql query in turtle format
+					var sparql_query = _build_turtle_prefixes() + _build_turtle_query(rule.query);
 
-				//use this url to contact the sparql_endpoint triple store
-				var query_contact_tp = String(search_conf_json.sparql_endpoint)+"?query="+ encodeURIComponent(sparql_query) +"&format=json";
+					var re = new RegExp(rule.regex,'i');
+					var qtext_groups = qtext.match(re);
 
-				//put a loader div
-				htmldom.loader(true);
+					//console.log("Replace [[VAR]] with: "+qtext_groups[0]);
+					sparql_query = sparql_query.replace(/\[\[VAR\]\]/g, qtext_groups[0]);
+					//console.log(sparql_query);
 
-				//call the sparql end point and retrieve results in json format
-				$.ajax({
-			        dataType: "json",
-			        url: query_contact_tp,
-							type: 'GET',
-	    				success: function( res_data ) {
-									htmldom.loader(false);
-									htmldom.remove_footer();
-									console.log(JSON.parse(JSON.stringify(res_data)));
-									_init_data(rule,res_data);
+					//use this url to contact the sparql_endpoint triple store
+					var query_contact_tp = String(search_conf_json.sparql_endpoint)+"?query="+ encodeURIComponent(sparql_query) +"&format=json";
 
-									_build_filter_sec();
-									_limit_results();
-									_build_header_sec(rule);
-									_sort_results();
+					//put a loader div
+					htmldom.loader(true,qtext,search_conf_json["on_abort"]);
 
-									htmldom.update_page(table_conf,search_conf_json);
-	    				}
-			   });
+					//call the sparql end point and retrieve results in json format
+					$.ajax({
+				        dataType: "json",
+				        url: query_contact_tp,
+								type: 'GET',
+		    				success: function( res_data ) {
+										htmldom.loader(false);
+										htmldom.remove_footer();
+										//console.log(JSON.parse(JSON.stringify(res_data)));
+										_init_data(rule,res_data);
+
+										_build_filter_sec();
+										_limit_results();
+										_build_header_sec(rule);
+										_sort_results();
+
+										htmldom.update_page(table_conf,search_conf_json);
+		    				}
+				   });
+				 }
 
 			 }else {
 	 				htmldom.main_entry();
+
+					//in case you want the advanced search interface
+					//adv_cat_selected = search_conf_json["def_adv_category"];
+					//htmldom.build_advanced_search(search_conf_json, adv_cat_selected);
 			 }
 		}
 
@@ -268,6 +291,8 @@ var search = (function () {
 				arr_options = search_conf_json.page_limit;
 			}
 			htmldom.page_limit(arr_options);
+
+			htmldom.build_export_btn();
 		}
 		function _build_filter_sec(){
 			if (__build_limit_res() != -1) {
@@ -538,6 +563,46 @@ var search = (function () {
 			table_conf.view.fields_filter_index[myfield.value].i_to -= myfield.config.min;
 			htmldom.filter_checkboxes(table_conf);
 		}
+		function adv_query(){
+			var input_box = document.getElementById("advsearch_input_box");
+			var rules_selector = document.getElementById("rules_selector");
+			if (input_box.value != "") {
+				htmldom.remove_extras();
+				search.do_sparql_query(input_box.value,rules_selector.value);
+			}
+		}
+
+		function switch_adv_category(category_name){
+			adv_cat_selected = category_name;
+			htmldom.build_advanced_search(search_conf_json, adv_cat_selected);
+		}
+
+		function export_results(){
+			var matrix = [];
+			//console.log(table_conf.view.data.results.bindings);
+			var tab_results = table_conf.view.data.results.bindings;
+
+
+			var row_elem = [];
+			if (tab_results.length > 0) {
+
+				for (var key in tab_results[0]) {
+						row_elem.push(key);
+				}
+				matrix.push(row_elem);
+
+				for (var i = 0; i < tab_results.length; i++) {
+					var row_elem = [];
+					for (var key in tab_results[i]) {
+						row_elem.push(util.build_str(tab_results[i][key],"inline"));
+					}
+					matrix.push(row_elem);
+				}
+
+				var encodedUri = util.encode_matrix_to_csv(matrix);
+				htmldom.download_results(encodedUri);
+			}
+		}
 
 		return {
 				next_page: next_page,
@@ -552,12 +617,34 @@ var search = (function () {
 				select_filter_field: select_filter_field,
 				next_filter_page: next_filter_page,
 				prev_filter_page: prev_filter_page,
-				do_sparql_query: do_sparql_query
+				switch_adv_category: switch_adv_category,
+				adv_query: adv_query,
+				do_sparql_query: do_sparql_query,
+				export_results: export_results
 		 }
 })();
 
 
 var util = (function () {
+
+	function encode_matrix_to_csv(matrix) {
+		let csvContent = "data:text/csv;charset=utf-8,";
+
+		function withQuotes(elem){
+			return '"'+elem+'"';
+		}
+
+		matrix.forEach(function(rowArray){
+			 //var raw_vals = [];
+			 /*for (var key in rowArray) {
+				 raw_vals.push(rowArray[key]);
+			 }*/
+			 rowArray = rowArray.map(withQuotes);
+		   let row = rowArray.join(",");
+		   csvContent += row + "\r\n"; // add carriage return
+		});
+		return encodeURI(csvContent);
+	}
 
 		/**
 	 * Returns true if key is not a key in object or object[key] has
@@ -736,6 +823,46 @@ var util = (function () {
 		return a - b;
 	}
 
+	function build_str(obj,concat_style){
+		if (obj.hasOwnProperty("concat-list")) {
+			return __concat_vals(obj["concat-list"],concat_style);
+		}else {
+			return __get_val(obj);
+		}
+
+		function __get_val(obj){
+			if ((obj != null) && (obj != undefined)){
+				if (obj.value == "") {obj.value = "NONE";}
+				var str_html = obj.value;
+				return str_html;
+			}else {
+				return "NONE";
+			}
+		}
+		function __concat_vals(arr,concat_style){
+			var str_html = "";
+			var separator = ", ";
+
+			if ((concat_style != null) && (concat_style != undefined)) {
+				if (concat_style == "newline") {separator = "\n ";}
+				if (concat_style == "inline") {separator = ", ";}
+				if (concat_style == "first") {
+					if (arr.length > 0) {arr = [arr[0]];}
+				}
+				if (concat_style == "last") {
+					if (arr.length > 0) {arr = [arr[arr.length - 1]];}
+				}
+			}
+
+			for (var i = 0; i < arr.length; i++) {
+				var obj = arr[i];
+				if (i == arr.length - 1) {separator = " ";}
+				str_html = str_html + __get_val(obj) + separator;
+			}
+			return str_html;
+		}
+	}
+
 	return {
 		is_undefined_key: is_undefined_key,
 		group_by: group_by,
@@ -743,13 +870,16 @@ var util = (function () {
 		get_sub_arr: get_sub_arr,
 		sort_json_by_key: sort_json_by_key,
 		sort_int: sort_int,
-		index_in_arrjsons: index_in_arrjsons
+		index_in_arrjsons: index_in_arrjsons,
+		encode_matrix_to_csv: encode_matrix_to_csv,
+		build_str: build_str
 	 }
 })();
 
 
 var htmldom = (function () {
 
+	var input_box_container = document.getElementsByClassName("form-control oc-purple");
 	var results_container = document.getElementById("search_results");
 	var header_container = document.getElementById("search_header");
 	var sort_container = document.getElementById("sort_results");
@@ -757,7 +887,7 @@ var htmldom = (function () {
 	var limitres_container = document.getElementById("limit_results");
 	var filter_btns_container = document.getElementById("filter_btns");
 	var filter_values_container = document.getElementById("filter_values_list");
-
+	var extra_container = document.getElementById("search_extra");
 
 	function table_res_header(cols,fields){
 
@@ -972,6 +1102,71 @@ var htmldom = (function () {
 		return str_html;
 	}
 
+	function remove_extras(){
+		extra_container.innerHTML = "";
+	}
+
+	function build_advanced_search(conf_file, adv_cat_selected){
+
+		var str_lis = _build_lis(conf_file, adv_cat_selected);
+		var str_options = _build_options(conf_file, adv_cat_selected);
+
+		var str_html =
+						"<p><div class='adv-search'>"+
+								"<div class='adv-search-nav'>"+
+									"<ul class='nav pages-nav'>"+
+									str_lis+
+									"</ul>"+
+								"</div>"+
+								"<div class='adv-search-body'>"+
+									"<div class='adv-search-input'>"+
+										"<form class='input-group search-box' action='search' method='get'>"+
+											"<input id='advsearch_input_box' type='text' class='form-control oc-purple' placeholder='Search...' name='text'>"+
+										"</form>"+
+									"</div>"+
+									"<div class='adv-search-selector'>"+
+										"<select class='form-control input custom' onchange='' id='rules_selector'>"+
+										str_options+
+										"</select>"+
+									"</div>"+
+								"</div>"+
+								"<div class='adv-search-footer'>"+
+									"<div class='input-group-btn'>"+
+										"<button class='btn btn-default oc-purple' id='advsearch_btn'> <span class='search-btn-text'> Search inside OC </span><i class='glyphicon glyphicon-search large-icon'></i></button>"+
+									"</div>"+
+								"</div>"+
+						"</div></p>";
+		extra_container.innerHTML = str_html;
+		document.getElementById("advsearch_btn").onclick = search.adv_query;
+		return str_html;
+
+		function _build_options(conf_file, adv_cat_selected){
+			var str_allopt = "";
+			var str_selected = "selected";
+			for (var i = 0; i < conf_file["rules"].length; i++) {
+					var str_option = "";
+					if (conf_file["rules"][i].category == adv_cat_selected){
+						str_option = "<option "+str_selected+" value="+conf_file["rules"][i].name+">"+conf_file["rules"][i].name+"</option>";
+					}
+					str_allopt = str_allopt + str_option;
+					str_selected = "";
+			}
+			return str_allopt;
+		}
+		function _build_lis(conf_file, adv_cat_selected){
+			var str_lis = "";
+			for (var i = 0; i < conf_file["categories"].length; i++) {
+				var is_active = "";
+				if (conf_file["categories"][i].name == adv_cat_selected) {
+					is_active = "active";
+				}
+				var str_href = "javascript:search.switch_adv_category('"+conf_file["categories"][i].name+"')";
+				str_lis = str_lis + "<li class='"+is_active+"'><a href="+str_href+">"+conf_file["categories"][i].name+"</a></li>"
+			}
+			return str_lis;
+		}
+	}
+
 	function filter_btns(){
 		if (filter_btns_container != null) {
 			str_html =
@@ -1104,16 +1299,22 @@ var htmldom = (function () {
 		return new_btn;
 	}
 
-	function loader(build_bool){
+	function loader(build_bool, queryt, abort_link){
 		if (header_container != null) {
 			if (build_bool) {
-				var str_html = "<div id='search_loader' class='searchloader'> Searching in the corpus ...</div>";
+				retain_box_value(input_box_container,queryt);
+				var str_html = "<p><div id='search_loader' class='searchloader'> Searching the OpenCitations Corpus ...</div></p>"+
+											"<p><div id='abort_search' class='abort-search'><a href="+abort_link+" class='allert-a'> Abort search </a></div></p>"+
+											"";
 				parser = new DOMParser()
-	  		var dom = parser.parseFromString(str_html, "text/xml").firstChild;
-				header_container.appendChild(dom);
+	  		//var dom = parser.parseFromString(str_html, "text/xml").firstChild;
+				//header_container.appendChild(dom);
+				extra_container.innerHTML = str_html;
 			}else {
-				var element = document.getElementById("search_loader");
-				element.parentNode.removeChild(element);
+				//reset_box_value(input_box_container);
+				//var element = document.getElementById("search_loader");
+				//element.parentNode.removeChild(element);
+				extra_container.innerHTML = "";
 			}
 		}
 	}
@@ -1253,6 +1454,43 @@ var htmldom = (function () {
 		}
 	}
 
+	function retain_box_value(input_container, txtval){
+		for (var i = 0; i < input_container.length; i++) {
+			//input_container[i].placeholder = txtval ;
+			input_container[i].value = txtval ;
+		}
+	}
+
+	function reset_box_value(input_container){
+		for (var i = 0; i < input_container.length; i++) {
+			input_container[i].value = "" ;
+			input_container[i].placeholder = "Search..." ;
+		}
+	}
+
+	function build_export_btn(){
+ 		//var str_html = "<div id='abort_search' class='abort-search'><a href='javascript:search.export_results()' download='results.csv' > Export results </a></div>";
+		var link = document.createElement("a");
+		link.id = "export_a";
+		link.className = "export-results";
+		link.innerHTML = "Export results";
+		//link.setAttribute("onclick","search.export_results()");
+		//link.onclick = search.export_results;
+
+		link.setAttribute("href", "javascript:search.export_results();");
+		//link.setAttribute("download", "results.csv");
+
+		header_container.appendChild(link);
+		//return str_html;
+	}
+
+	function download_results(csv_data){
+		var export_a = document.getElementById("export_a");
+		export_a.setAttribute("href", csv_data);
+		export_a.setAttribute("download", "results.csv");
+		export_a.click();
+	}
+
 
 	return {
 		table_res_header: table_res_header,
@@ -1262,12 +1500,16 @@ var htmldom = (function () {
 		page_limit: page_limit,
 		sort_box: sort_box,
 		main_entry: main_entry,
+		build_advanced_search: build_advanced_search,
+		remove_extras: remove_extras,
 		filter_btns: filter_btns,
 		limit_filter: limit_filter,
 		filter_checkboxes: filter_checkboxes,
 		update_page: update_page,
 		disable_filter_btns:disable_filter_btns,
 		loader: loader,
-		remove_footer: remove_footer
+		remove_footer: remove_footer,
+		build_export_btn: build_export_btn,
+		download_results: download_results
 	}
 })();

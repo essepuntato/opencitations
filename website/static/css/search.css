@@ -133,7 +133,7 @@ spanfooter + spanfooter {
 
 
 
-/* (2) The search header */
+/* (2) The search header*/
 /* ===================== */
 
 .search-header{font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;}
@@ -156,6 +156,13 @@ spanfooter + spanfooter {
   font-size:medium;
 }
 
+.export-results {
+  float:left;
+  margin-left: 15px;
+  margin-top: 15px;
+  vertical-align: middle;
+}
+
 select {
   text-indent: 0%;
   margin: 5px;
@@ -174,7 +181,6 @@ select.custom {
 select.custom::-ms-expand {
   display: none;
 }
-
 /* ========================== (2) The search header */
 
 
@@ -261,6 +267,8 @@ td ar + ar {
 
 /* (4) The search entry (first page) */
 /* ================================= */
+.search-extra{font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;}
+
 .search-entry{
   font-size: 230%;
   margin-top: 70px;
@@ -274,6 +282,70 @@ td ar + ar {
 }
 
 #search_loader{
+  font-size: 140%;
+}
+
+.adv-search-nav{
+  text-align:left;
+}
+.adv-search-nav .pages-nav > li > a {
+  font-size: 24px;
+}
+
+.adv-search-input .search-box{
+  float:left;
+  margin-top: 20px;
+  width:50%;
+}
+.adv-search-input input{
+  font-size: 22px;
+}
+.adv-search-selector{
+  margin-right: 40px;
+  margin-top: 15px;
+  float:right;
+  width: 40%;
+}
+.adv-search-selector select {
+  font-size: 135%;
+}
+.adv-search-footer{
+  width:80%;
+  margin-top: 15px;
+  float:right;
+}
+.adv-search-footer .input-group-btn #advsearch_btn{
+ float:right;
+ margin-right: 50px;
+}
+.search-btn-text{
+  font-size: 140%;
+  margin-right:10px;
+}
+.large-icon{
+  font-size: 140%;
+}
+.abort-search{
+  margin-top: 50px;
+  color: #990000;
+  font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+  font-size: 100%;
+}
+
+.allert-a:active,
+.allert-a:hover,
+.allert-a:focus {
+  color: #990000;
+  border-bottom-color: #990000;
+}
+
+.allert-text{
+  color: #990000;
+}
+.platino-font{
+  font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+}
+.large-text{
   font-size: 140%;
 }
 /* ========================== (4) The search entry (first page) */
