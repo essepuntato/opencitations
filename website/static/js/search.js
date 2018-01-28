@@ -11,26 +11,28 @@ var search = (function () {
 		}
 
 		/* get the rule which matches my query_text*/
-		function _get_rule(query_text) {
+		function _get_rules(query_text) {
+			var arr_rules = [];
 			for (i = 0; i < search_conf_json["rules"].length; i++) {
 				var re = new RegExp(search_conf_json["rules"][i]["regex"]);
 				if (query_text.match(re)) {
 				//if (re.test(query_text)){
 					//console.log("Match with rule number"+String(i));
-					return search_conf_json["rules"][i];
+					//return search_conf_json["rules"][i];
+					arr_rules.push(search_conf_json["rules"][i]);
 				}
 			}
-			return -1;
+			return arr_rules;
 		}
 
 		/*get rule entry with given name*/
 		function _get_rule_by_name(name){
 			for (i = 0; i < search_conf_json["rules"].length; i++) {
 				if (search_conf_json["rules"][i]['name'] == name) {
-					return search_conf_json["rules"][i];
+					return [search_conf_json["rules"][i]];
 				}
 			}
-			return -1;
+			return [];
 		}
 
 		/*build a string with all the prefixes in a turtle format*/
@@ -63,50 +65,22 @@ var search = (function () {
 			if (qtext != "") {
 
 				//get the rule of my input qtext
-				var rule = _get_rule_by_name(rule_name);
-				if (rule == -1) {
-					rule =  _get_rule(qtext);
-				}
-				//console.log(rule);
+				// in case I am using an advanced search
+				//var rules = _get_rule_by_name(rule_name);
+
+				var rules = [];
+				//if (rules == []) {
+				rules =  _get_rules(qtext);
+				//}
+				//console.log(rules);
 
 				//if i have a corresponding rule
-				if (rule != -1) {
-					//build the sparql query in turtle format
-					var sparql_query = _build_turtle_prefixes() + _build_turtle_query(rule.query);
-
-					var re = new RegExp(rule.regex,'i');
-					var qtext_groups = qtext.match(re);
-
-					//console.log("Replace [[VAR]] with: "+qtext_groups[0]);
-					sparql_query = sparql_query.replace(/\[\[VAR\]\]/g, qtext_groups[0]);
-					//console.log(sparql_query);
-
-					//use this url to contact the sparql_endpoint triple store
-					var query_contact_tp = String(search_conf_json.sparql_endpoint)+"?query="+ encodeURIComponent(sparql_query) +"&format=json";
-
-					//put a loader div
-					htmldom.loader(true,qtext,search_conf_json["on_abort"]);
-
-					//call the sparql end point and retrieve results in json format
-					$.ajax({
-				        dataType: "json",
-				        url: query_contact_tp,
-								type: 'GET',
-		    				success: function( res_data ) {
-										htmldom.loader(false);
-										htmldom.remove_footer();
-										//console.log(JSON.parse(JSON.stringify(res_data)));
-										_init_data(rule,res_data);
-
-										_build_filter_sec();
-										_limit_results();
-										_build_header_sec(rule);
-										_sort_results();
-
-										htmldom.update_page(table_conf,search_conf_json);
-		    				}
-				   });
-				 }
+				//if (rules != -1) {
+				if(rules != []){
+					_exec_rule(rules, 0, qtext);
+				}else {
+					//empty: no rule suitable
+				}
 
 			 }else {
 	 				htmldom.main_entry();
@@ -114,6 +88,57 @@ var search = (function () {
 					//in case you want the advanced search interface
 					//adv_cat_selected = search_conf_json["def_adv_category"];
 					//htmldom.build_advanced_search(search_conf_json, adv_cat_selected);
+			 }
+		}
+
+		function _exec_rule(rules, rule_index, qtext){
+
+			if (rule_index < rules.length) {
+
+				//console.log("Executing rule: "+rules[rule_index].name);
+				var rule = rules[rule_index];
+				//build the sparql query in turtle format
+				var sparql_query = _build_turtle_prefixes() + _build_turtle_query(rule.query);
+
+				var re = new RegExp(rule.regex,'i');
+				var qtext_groups = qtext.match(re);
+
+				//console.log("Replace [[VAR]] with: "+qtext_groups[0]);
+				sparql_query = sparql_query.replace(/\[\[VAR\]\]/g, qtext_groups[0]);
+				//console.log(sparql_query);
+
+				//use this url to contact the sparql_endpoint triple store
+				var query_contact_tp = String(search_conf_json.sparql_endpoint)+"?query="+ encodeURIComponent(sparql_query) +"&format=json";
+
+				//put a loader div
+				htmldom.loader(true,qtext,search_conf_json["on_abort"]);
+
+				//call the sparql end point and retrieve results in json format
+				$.ajax({
+							dataType: "json",
+							url: query_contact_tp,
+							type: 'GET',
+							//async: false,
+							success: function( res_data ) {
+									htmldom.loader(false);
+									htmldom.remove_footer();
+									//console.log(JSON.parse(JSON.stringify(res_data)));
+
+									if ((res_data.results.bindings.length == 0) && (rule_index != rules.length - 1)) {
+										_exec_rule(rules, rule_index + 1, qtext);
+									}else {
+										_init_data(rule,res_data);
+										_build_filter_sec();
+										_limit_results();
+										_gen_data_checkboxes();
+										htmldom.filter_checkboxes(table_conf);
+										_build_header_sec(rule);
+										_sort_results();
+
+										htmldom.update_page(table_conf,search_conf_json);
+									}
+							}
+				 });
 			 }
 		}
 
@@ -295,15 +320,15 @@ var search = (function () {
 			htmldom.build_export_btn();
 		}
 		function _build_filter_sec(){
-			if (__build_limit_res() != -1) {
+
 				if (htmldom.filter_btns() != -1){
 					_gen_data_checkboxes();
 					htmldom.filter_checkboxes(table_conf);
 				}
-			}
+			__build_limit_res()
 
 			function __build_limit_res(){
-				var data = table_conf.view.data.results.bindings;
+				var data = table_conf.filters.data.results.bindings;
 				//init limit results filter
 				var max_val = data.length;
 				var init_val = max_val;
@@ -340,21 +365,28 @@ var search = (function () {
 			var order = table_conf.view.sort.order
 			var val_type = table_conf.view.sort.type
 
-			var field_val = ".value";
-			var index_category = util.index_in_arrjsons(search_conf_json.categories,["name"],[table_conf.category]);
+			//start always from the filtered data
+			//table_conf.view.data.results.bindings = JSON.parse(JSON.stringify(table_conf.view.data.results.bindings));
+			//_limit_results();
+			if (field != 'none') {
+					var field_val = ".value";
+					var index_category = util.index_in_arrjsons(search_conf_json.categories,["name"],[table_conf.category]);
 
-			if (! util.is_undefined_key(search_conf_json.categories[index_category],"group_by.concats")) {
-					if (search_conf_json.categories[index_category]["group_by"].concats.indexOf(field) != -1) {
-						field_val = ".concat-list";
+					if (! util.is_undefined_key(search_conf_json.categories[index_category],"group_by.concats")) {
+							if (search_conf_json.categories[index_category]["group_by"].concats.indexOf(field) != -1) {
+								field_val = ".concat-list";
+							}
 					}
+					table_conf.view.data.results.bindings = util.sort_objarr_by_key(
+								JSON.parse(JSON.stringify(table_conf.view.data.results.bindings)),
+								order,
+								field+field_val,
+								val_type
+					);
+			}else {
+				_limit_results();
 			}
 
-			table_conf.view.data.results.bindings = util.sort_json_by_key(
-						table_conf.view.data.results.bindings,
-						order,
-						field+field_val,
-						val_type
-			);
 			table_conf.view.page = 0;
 		}
 		function _reset_filters_page(){
@@ -368,17 +400,19 @@ var search = (function () {
 			var new_data = JSON.parse(JSON.stringify(table_conf.filters.data));
 			var arr_new_results = [];
 
-			var list_data = table_conf.filters.data.results.bindings;
+			var list_data = JSON.parse(JSON.stringify(table_conf.view.data.results.bindings));
+			//console.log(list_data);
 			for (var i = 0; i < list_data.length; i++) {
 				var data_obj = list_data[i];
+				//console.log(data_obj);
 				if(__check_if_respects_filters(data_obj) == flag){
 					arr_new_results.push(data_obj);
 				}
 			}
 			new_data.results.bindings = arr_new_results;
-			table_conf.filters.data = new_data;
+			table_conf.filters.data = JSON.parse(JSON.stringify(new_data));
 
-			table_conf.view.data = JSON.parse(JSON.stringify(new_data));
+			//table_conf.view.data = JSON.parse(JSON.stringify(new_data));
 
 			function __check_if_respects_filters(data_obj){
 				//retrieve the entries checked
@@ -501,6 +535,8 @@ var search = (function () {
 			//like in the init phase, but the header is not built
 			_build_filter_sec();
 			_limit_results();
+			_gen_data_checkboxes();
+			htmldom.filter_checkboxes(table_conf);
 			_sort_results();
 			htmldom.update_page(table_conf,search_conf_json);
 		}
@@ -515,6 +551,8 @@ var search = (function () {
 			//like in the init phase, but the header is not built
 			_build_filter_sec();
 			_limit_results();
+			_gen_data_checkboxes();
+			htmldom.filter_checkboxes(table_conf);
 			_sort_results();
 			htmldom.update_page(table_conf,search_conf_json);
 		}
@@ -582,19 +620,23 @@ var search = (function () {
 			//console.log(table_conf.view.data.results.bindings);
 			var tab_results = table_conf.view.data.results.bindings;
 
-
 			var row_elem = [];
 			if (tab_results.length > 0) {
 
-				for (var key in tab_results[0]) {
-						row_elem.push(key);
+				var index_cat = util.index_in_arrjsons(search_conf_json.categories, ["name"], [table_conf.category]);
+				var my_cat = search_conf_json.categories[index_cat];
+
+				var set_keys = [];
+				for (var i = 0; i < my_cat.fields.length; i++) {
+					row_elem.push(my_cat.fields[i].title);
+					set_keys.push(my_cat.fields[i].value);
 				}
 				matrix.push(row_elem);
 
 				for (var i = 0; i < tab_results.length; i++) {
 					var row_elem = [];
-					for (var key in tab_results[i]) {
-						row_elem.push(util.build_str(tab_results[i][key],"inline"));
+					for (var j = 0; j < set_keys.length; j++) {
+						row_elem.push(util.build_str(tab_results[i][set_keys[j]],"inline"));
 					}
 					matrix.push(row_elem);
 				}
@@ -754,69 +796,88 @@ var util = (function () {
 
 	/*sort 'array' of objects with respect to the field "key"
 	with data type equal to 'val_type' in the order 'order'*/
-	function sort_json_by_key(array, order, key, val_type) {
-					var array_key = key.split('.');
-					return array.sort(function(a, b) {
+	function sort_objarr_by_key(objarr, order, key, val_type) {
 
-						var a_val = _init_val(a, array_key, val_type);
-						var b_val = _init_val(b, array_key, val_type);
+		var sorted_arr = [];
+		var array_key = key.split('.');
 
-						if (val_type == "text"){
-							var x = a_val.toLowerCase();
-							var y = b_val.toLowerCase();
-						}else{
-								if (val_type == "date") {
-										 var x = new Date(a_val);
-										 var y = new Date(b_val);
-								}else{
-											if (val_type == "int") {
-														var x = parseFloat(a_val);
-														var y = parseFloat(b_val);
-											}
-											else{
-														var x = parseInt(a_val);
-														var y = parseInt(b_val);
-											}
-								}
-						}
+		for (var i = 0; i < objarr.length; i++) {
+			var objval = _init_val(objarr[i], array_key, val_type);
 
-						if (order == 'desc') {
-							return ((x > y) ? -1 : ((x < y) ? 1 : 0));
-						}else{
-							return ((x < y) ? -1 : ((x > y) ? 1 : 0));
-						}
-					});
+			var insert_index = -1;
+			for (var j = 0; j < sorted_arr.length; j++) {
 
-					function _init_val(arr,array_key,val_type) {
-						var val= null;
-						if (arr.hasOwnProperty(array_key[0])) {
-							val= arr[array_key[0]];
-							if(array_key.length > 1){
-								val = arr[array_key[0]][array_key[1]];
-							}
-						}else{
-							switch (val_type) {
-								case "text": val= ""; break;
-								case "int": val= -1; break;
-								default:
-							}
-						}
-						if ( (val == "None") && (val_type = "int")){
-							val = -1;
-						}
+				var objcompval = _init_val(sorted_arr[j], array_key, val_type);
 
-						if (array_key[1] == "concat-list") {
-							var str_concat = "";
-							for (var i = 0; i < val.length; i++) {
-								str_concat = str_concat + " " +val[i].value;
-							}
-							val = str_concat;
-						}
-
-						return val;
+				if (order == 'desc') {
+					if (objcompval < objval) {
+						insert_index = j;
+						break;
 					}
-
+				}
+				else {
+					if (order == 'asc') {
+						if (objcompval > objval) {
+							insert_index = j;
+							break;
+						}
+					}
+				}
+			}
+			//if (insert_index == sorted_arr.length - 1) {
+			if (insert_index == -1) {
+				sorted_arr.push(objarr[i]);
+			}else {
+				sorted_arr.splice(insert_index, 0, objarr[i]);
+			}
 		}
+
+		return sorted_arr;
+	}
+
+	function _init_val(arr,array_key,val_type) {
+		var val= null;
+		if (arr.hasOwnProperty(array_key[0])) {
+			val= arr[array_key[0]];
+			if(array_key.length > 1){
+				val = arr[array_key[0]][array_key[1]];
+			}
+		}else{
+			switch (val_type) {
+				case "text": val= ""; break;
+				case "int": val= -1; break;
+				default:
+			}
+		}
+		if ( (val == "None") && (val_type = "int")){
+			val = -1;
+		}
+
+		if (array_key[1] == "concat-list") {
+			var str_concat = "";
+			for (var i = 0; i < val.length; i++) {
+				str_concat = str_concat + " " +val[i].value;
+			}
+			val = str_concat;
+		}
+
+		if (val_type == "text"){
+			val = val.toLowerCase();
+		}else{
+				if (val_type == "date") {
+						 var val = new Date(val);
+				}else{
+							if (val_type == "int") {
+										var val = parseFloat(val);
+							}
+							else{
+										var val = parseInt(val);
+							}
+				}
+		}
+
+		return val;
+	}
 
 	/*sort int function*/
 	function sort_int(a,b) {
@@ -824,10 +885,14 @@ var util = (function () {
 	}
 
 	function build_str(obj,concat_style){
-		if (obj.hasOwnProperty("concat-list")) {
-			return __concat_vals(obj["concat-list"],concat_style);
+		if (obj != undefined) {
+			if (obj.hasOwnProperty("concat-list")) {
+				return __concat_vals(obj["concat-list"],concat_style);
+			}else {
+				return __get_val(obj);
+			}
 		}else {
-			return __get_val(obj);
+			return "";
 		}
 
 		function __get_val(obj){
@@ -868,7 +933,7 @@ var util = (function () {
 		group_by: group_by,
 		collect_values: collect_values,
 		get_sub_arr: get_sub_arr,
-		sort_json_by_key: sort_json_by_key,
+		sort_objarr_by_key: sort_objarr_by_key,
 		sort_int: sort_int,
 		index_in_arrjsons: index_in_arrjsons,
 		encode_matrix_to_csv: encode_matrix_to_csv,
@@ -1064,18 +1129,27 @@ var htmldom = (function () {
 	function sort_box(arr_options,def_value, def_order, def_type){
 		//var options_html = "<option disabled selected value></option>";
 		if (sort_container != null) {
+			var str_selected = "";
 			var options_html = "";
+			var default_field = false;
+
 			for (var i = 0; i < arr_options.length; i++) {
-				var str_selected = "";
+				str_selected = "";
 				if ((arr_options[i].value == def_value)
 					&& (arr_options[i].order == def_order)
 					&& (arr_options[i].type == def_type)) {
 						str_selected = "selected";
+						default_field = true;
 				}
 				var str_option = "<option "+str_selected+" value="+arr_options[i].value+" type="+arr_options[i].type+" order="+arr_options[i].order+">"+arr_options[i].text+"</option>";
 
 				options_html= options_html + str_option;
 			}
+
+			if (!default_field) {str_selected = "selected";}
+			var str_option = "<option "+str_selected+" value='none' type='none' order='none'>"+"None"+"</option>";
+			options_html= options_html + str_option;
+
 			var str_html =
 				"<div class='sort-results'>Sort: <select class='form-control input custom' onchange='search.check_sort_opt(this.options[selectedIndex])' id='sort_box_input'></div>"+
 				options_html+"</select>";
@@ -1220,7 +1294,7 @@ var htmldom = (function () {
 						}else {
 							if (myfields[i].dropdown_active == true)
 							{
-									arr_check_values = util.sort_json_by_key(arr_check_values, myfields[i].config.order, myfields[i].config.sort, myfields[i].config.type_sort);
+									arr_check_values = util.sort_objarr_by_key(arr_check_values, myfields[i].config.order, myfields[i].config.sort, myfields[i].config.type_sort);
 									var j_from = table_conf.view.fields_filter_index[myfields[i].value].i_from;
 									var j_to = table_conf.view.fields_filter_index[myfields[i].value].i_to;
 									if (j_to > arr_check_values.length) { j_to = arr_check_values.length;}
