@@ -21,8 +21,10 @@ var search_conf = {
       "regex":"(10.\\d{4,9}\/[-._;()/:A-Za-z0-9][^\\s]+)",
       "query": [
         "SELECT DISTINCT ?iri ?short_iri ?doi ?title ?year ?author ?author_iri (COUNT(distinct ?cited) AS ?out_cits) (COUNT(distinct ?cited_by) AS ?in_cits) where {",
-            "?iri datacite:hasIdentifier/literal:hasLiteralValue '[[VAR]]' .",
-            "BIND('[[VAR]]' AS ?doi).",
+            "BIND('[[VAR]]' as ?doi_txt) .",
+            "?lit bds:search ?doi_txt . ?lit bds:matchAllTerms 'true' . ?lit bds:relevance ?score . ?lit bds:maxRank '1' .",
+            "?iri datacite:hasIdentifier/literal:hasLiteralValue ?lit .",
+            "BIND(?lit AS ?doi).",
             "BIND(REPLACE(STR(?iri), 'https://w3id.org/oc/corpus', '', 'i') as ?short_iri) .",
             "OPTIONAL {?iri dcterms:title ?title .}",
             "OPTIONAL {?iri fabio:hasSubtitle ?subtitle .}",
@@ -74,8 +76,10 @@ var search_conf = {
       "regex":"([0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9X]{4})",
       "query": [
         "SELECT ?author_iri ?short_iri ?orcid ?author (COUNT(?doc) AS ?num_docs) WHERE {",
-              "?author_iri datacite:hasIdentifier/literal:hasLiteralValue '[[VAR]]' .",
-              "BIND('[[VAR]]' as ?orcid) .",
+              "BIND('[[VAR]]' as ?orcid_txt) .",
+              "?lit bds:search ?orcid_txt . ?lit bds:matchAllTerms 'true' . ?lit bds:relevance ?score . ?lit bds:maxRank '1' .",
+              "?author_iri datacite:hasIdentifier/literal:hasLiteralValue ?lit .",
+              "BIND(?lit as ?orcid) .",
               "BIND(REPLACE(STR(?author_iri), 'https://w3id.org/oc/corpus', '', 'i') as ?short_iri) .",
               "?author_iri rdfs:label ?label .",
               "OPTIONAL {",
@@ -265,9 +269,9 @@ var search_conf = {
       "name": "document",
       "fields": [
         {"value":"short_iri", "title": "Corpus ID","column_width":"15%","type": "text", "sort":{"value": true}, "link":{"field":"iri","prefix":""}},
-        {"value":"year", "title": "Year", "column_width":"7%","type": "int", "filter":{"type_sort": "int", "min": 4, "sort": "value", "order": "desc"}, "sort":{"value": true, "default": {"order": "desc"}} },
+        {"value":"year", "title": "Year", "column_width":"7%","type": "int", "filter":{"type_sort": "int", "min": 8, "sort": "value", "order": "desc"}, "sort":{"value": true} },
         {"value":"title", "title": "Title","column_width":"33%","type": "text", "sort":{"value": true}, "link":{"field":"iri","prefix":""}},
-        {"value":"author", "title": "Authors", "column_width":"32%","type": "text", "sort":{"value": true}, "filter":{"type_sort": "int", "min": 4, "sort": "sum", "order": "desc"}, "link":{"field":"author_iri","prefix":""}},
+        {"value":"author", "title": "Authors", "column_width":"32%","type": "text", "sort":{"value": true}, "filter":{"type_sort": "text", "min": 8, "sort": "value", "order": "asc"}, "link":{"field":"author_iri","prefix":""}},
         {"value":"in_cits", "title": "Cited by", "column_width":"13%","type": "int", "sort":{"value": true}}
         //{"value":"score", "title": "Score", "column_width":"8%","type": "int"}
       ],
