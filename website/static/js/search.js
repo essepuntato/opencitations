@@ -121,6 +121,7 @@ var search = (function () {
 							//async: false,
 							success: function( res_data ) {
 									htmldom.loader(false);
+									//htmldom.footer_block();
 									htmldom.remove_footer();
 									//console.log(JSON.parse(JSON.stringify(res_data)));
 
@@ -994,7 +995,7 @@ var htmldom = (function () {
 							for (var k = 0; k < arr.length; k++) {
 								if (k == arr.length -1) {str_sep = " ";}
 								if(arr[k].hasOwnProperty("uri")){
-									str_html = str_html + "<a class='res-val-link' href='"+String(arr[k].uri)+"'>"+arr[k].value+"</a>";
+									str_html = str_html + "<a class='res-val-link' href='"+String(arr[k].uri)+"' target='_blank'>"+arr[k].value+"</a>";
 								}else {
 									str_html = str_html + String(arr[k].value);
 								}
@@ -1003,7 +1004,7 @@ var htmldom = (function () {
 						}
 						else {
 							if(results_obj[f_obj["value"]].hasOwnProperty("uri")){
-								str_html = "<a class='res-val-link' href='"+String(results_obj[f_obj["value"]].uri)+"'>"+results_obj[f_obj["value"]].value+"</a>";
+								str_html = "<a class='res-val-link' href='"+String(results_obj[f_obj["value"]].uri)+"' target='_blank'>"+results_obj[f_obj["value"]].value+"</a>";
 							}else {
 								str_html = results_obj[f_obj["value"]].value;
 							}
@@ -1408,6 +1409,11 @@ var htmldom = (function () {
 		}
 	}
 
+	function footer_block(){
+		var footer_inner = document.getElementById("footer").innerHTML;
+		document.getElementById("footer").innerHTML = "<p>"+footer_inner+"</p>";
+	}
+
 	function update_page(table_conf,search_conf_json){
 
 		if (results_container != null) {
@@ -1583,6 +1589,7 @@ var htmldom = (function () {
 		disable_filter_btns:disable_filter_btns,
 		loader: loader,
 		remove_footer: remove_footer,
+		footer_block: footer_block,
 		build_export_btn: build_export_btn,
 		download_results: download_results
 	}
