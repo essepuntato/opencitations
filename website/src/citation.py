@@ -153,7 +153,7 @@ class Citation(object):
             result += "-"
         result += "P"
 
-        if delta.years != 0 or (consider_months and delta.months == 0 and consider_days and delta.days == 0):
+        if delta.years != 0 or ((not consider_months or delta.months == 0) and (not consider_days or delta.days == 0)):
             result += "%sY" % abs(delta.years)
 
         if consider_months and delta.months != 0:
