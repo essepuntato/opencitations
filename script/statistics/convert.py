@@ -23,18 +23,27 @@ import argparse
 field_names = ['TIME', 'REMOTE_ADDR', 'HTTP_USER_AGENT', 'HTTP_REFERER', 'HTTP_HOST', 'REQUEST_URI']
 
 
-def convert(input_dash_file, output_csv_file):
+def convert(input_dash_files, output_csv_file):
+    all_lines = set()
     final_file = []
-    with open(input_dash_file) as f:
-        for line in f:
-            cur_tuple = {}
-            for i, item in enumerate(line.split(" # ")):
-                if i > 0:
-                    cur_value = item.replace(field_names[i] + ": ", "")
-                else:
-                    cur_value = item
-                cur_tuple[field_names[i]] = cur_value.strip()
-            final_file += [cur_tuple]
+
+    for input_dash_file in input_dash_files:
+        print "Analyse '%s'" % input_dash_file
+        with open(input_dash_file) as f:
+            for line in f:
+                try:
+                    if line not in all_lines:
+                        all_lines.add(line)
+                        cur_tuple = {}
+                        for i, item in enumerate(line.split(" # ")):
+                            if i > 0:
+                                cur_value = item.replace(field_names[i] + ": ", "")
+                            else:
+                                cur_value = item
+                            cur_tuple[field_names[i]] = cur_value.strip()
+                        final_file += [cur_tuple]
+                except IndexError:
+                    print "Error: " + line
 
     with open(output_csv_file, "w") as f:
         writer = csv.DictWriter(f, fieldnames=field_names)
@@ -47,8 +56,8 @@ if __name__ == "__main__":
                                          description="This script converts the file with the accesses "
                                                      "to the OpenCitations website resources into a "
                                                      "CSV document.")
-    arg_parser.add_argument("-i", "--input", dest="input", required=True,
-                            help="The file with access logs.")
+    arg_parser.add_argument("-i", "--input", dest="input", nargs="+", required=True,
+                            help="The file list with access logs.")
     arg_parser.add_argument("-o", "--output", dest="output", required=True,
                             help="The file where to store the CSV file.")
 

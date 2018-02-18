@@ -14,11 +14,11 @@
 # SOFTWARE.
 
 import re
-import rdflib
 import web
-from rdflib.namespace import RDF, RDFS, XSD
 from SPARQLWrapper import SPARQLWrapper, JSON
 from urllib import quote
+from datetime import datetime
+from citation import Citation
 
 
 class VirtualEntityDirector(object):
@@ -28,39 +28,15 @@ class VirtualEntityDirector(object):
     __turtle = ("text/turtle", "text/n3")
     __jsonld = ("application/ld+json", "application/json")
 
-    __cito_base = "http://purl.org/spar/cito/"
-    __cites = rdflib.URIRef(__cito_base + "cites")
-    __citation = rdflib.URIRef(__cito_base + "Citation")
-    __has_citation_time_span = rdflib.URIRef(__cito_base + "hasCitationTimeSpan")
-    __has_citing_entity = rdflib.URIRef(__cito_base + "hasCitingEntity")
-    __has_cited_entity = rdflib.URIRef(__cito_base + "hasCitedEntity")
-
-    __datacite_base = "http://purl.org/spar/datacite/"
-    __has_identifier = rdflib.URIRef(__datacite_base + "hasIdentifier")
-    __identifier = rdflib.URIRef(__datacite_base + "Identifier")
-    __uses_identifier_scheme = rdflib.URIRef(__datacite_base + "usesIdentifierScheme")
-    __oci = rdflib.URIRef(__datacite_base + "oci")
-
-    __literal_base = "http://www.essepuntato.it/2010/06/literalreification/"
-    __has_literal_value = rdflib.URIRef(__literal_base + "hasLiteralValue")
-
-    __fabio_base = "http://purl.org/spar/fabio/"
-    __has_publication_year = rdflib.URIRef(__fabio_base + "hasPublicationYear")
-
-    __prov_base = "http://www.w3.org/ns/prov#"
-    __was_attributed_to = rdflib.URIRef(__prov_base + "wasAttributedTo")
-    __had_primary_source = rdflib.URIRef(__prov_base + "hadPrimarySource")
-
     __citation_local_url_re = "((0[1-9]+0)?[1-9][0-9]*)-((0[1-9]+0)?[1-9][0-9]*)"
     __identifier_local_url_re = "([a-z][a-z])-" + __citation_local_url_re
-
 
     def __init__(self, ldd, virtual_local_url, conf):
         self.ldd = ldd
         self.virtual_local_url = virtual_local_url
         self.virtual_baseurl = self.ldd.baseurl.replace(self.ldd.corpus_local_url, self.virtual_local_url)
         self.conf = conf
-        self.virtual_entity_director = rdflib.URIRef(self.ldd.baseurl + "prov/pa/7")
+        self.virtual_entity_director = self.ldd.baseurl + "prov/pa/7"
 
     def redirect(self, url):
         if url.endswith(self.__extensions):
@@ -123,55 +99,28 @@ class VirtualEntityDirector(object):
 
         res = self.__execute_query(citing_entity_local_id, cited_entity_local_id)
         if res is not None:
-            citing_url, cited_url, citing_pub_year, cited_pub_year, sparql_query_url = res
+            citing_url, cited_url, full_citing_pub_date, full_cited_pub_date, sparql_query_url = res
+            citing_pub_date = full_citing_pub_date[:10]
+            cited_pub_date = full_cited_pub_date[:10]
 
-            citation_graph = rdflib.Graph()
+            citation = Citation(citing_entity_local_id, citing_url, citing_pub_date,
+                                cited_entity_local_id, cited_url, cited_pub_date,
+                                self.virtual_entity_director, sparql_query_url,
+                                datetime.now().strftime('%Y-%m-%dT%H:%M:%S'))
 
-            citing_br = rdflib.URIRef(citing_url)
-            cited_br = rdflib.URIRef(cited_url)
-
-            citation_local_id = citing_entity_local_id + "-" + cited_entity_local_id
-            citation_corpus_id = "ci/" + citation_local_id
-            citation = rdflib.URIRef(self.virtual_baseurl + citation_corpus_id)
-            occ_citation_id = rdflib.URIRef(self.virtual_baseurl + "id/" + citation_corpus_id.replace("/", "-"))
-            citation_graph.add((citation, RDFS.label,
-                                rdflib.Literal("citation %s [%s]" % (citation_local_id, citation_corpus_id))))
-            citation_graph.add((citation, RDF.type, self.__citation))
-            citation_graph.add((citation, self.__has_citing_entity, citing_br))
-            citation_graph.add((citation, self.__has_cited_entity, cited_br))
-            citation_graph.add((citation, self.__has_identifier, occ_citation_id))
-
-            if citing_pub_year is not None and cited_pub_year is not None:
-                citation_graph.add((
-                    citation, self.__has_citation_time_span,
-                    rdflib.Literal(
-                        int(citing_pub_year[:4]) - int(cited_pub_year[:4]), datatype=XSD.integer)))
-
-            citation_graph.add((citation, self.__was_attributed_to, self.virtual_entity_director))
-            citation_graph.add((citation, self.__had_primary_source, rdflib.URIRef(sparql_query_url)))
-
-            return self.ldd.get_representation(url, True, citation_graph)
-
+            return self.ldd.get_representation(url, True, citation.get_citation_rdf(self.virtual_baseurl, False))
 
     def __handle_identifier(self, url, ex_regex):
         identified_entity_corpus_id = re.sub("^id/%s%s$" % (self.__identifier_local_url_re, ex_regex), "\\1/\\2-\\4",
                                              url)
         identified_entity_rdf = self.get_representation(identified_entity_corpus_id + ".rdf")
         if identified_entity_rdf is not None:
-            identifier_graph = rdflib.Graph()
-            identifier_local_id = identified_entity_corpus_id.replace("/", "-")
-            identifier_corpus_id = "id/" + identifier_local_id
-            identifier = rdflib.URIRef(self.virtual_baseurl + identifier_corpus_id)
-            identifier_graph.add((identifier, RDFS.label,
-                                  rdflib.Literal("identifier %s [%s]" % (identifier_local_id, identifier_corpus_id))))
-            identifier_graph.add((identifier, RDF.type, self.__identifier))
-            if identified_entity_corpus_id.startswith("ci/"):  # OCI for citations
-                identifier_graph.add((identifier, self.__uses_identifier_scheme, self.__oci))
-                identifier_graph.add((identifier, self.__has_literal_value,
-                                      rdflib.Literal(identified_entity_corpus_id[3:])))
+            citing_entity_local_id, cited_entity_local_id = identified_entity_corpus_id[3:].split("-")
+            identifier = Citation(citing_entity_local_id, None, None,
+                                  cited_entity_local_id, None, None,
+                                  self.virtual_entity_director,
+                                  self.virtual_baseurl + identified_entity_corpus_id,
+                                  datetime.now().strftime('%Y-%m-%dT%H:%M:%S'))
 
-            identifier_graph.add((identifier, self.__was_attributed_to, self.virtual_entity_director))
-            identifier_graph.add((identifier, self.__had_primary_source,
-                                  rdflib.URIRef(self.virtual_baseurl + identified_entity_corpus_id)))
+            return self.ldd.get_representation(url, True, identifier.get_oci_rdf(self.virtual_baseurl))
 
-            return self.ldd.get_representation(url, True, identifier_graph)

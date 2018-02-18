@@ -112,8 +112,9 @@
     "document_url": { "@id": "frbr:exemplar", "@type": "@vocab" },
     "webpage": { "@id": "dcat:landingPage", "@type": "@vocab" },
 
-    "citation_time_span": { "@id": "cito:hasCitationTimeSpan", "@type": "xsd:integer" },
     "byte": { "@id": "dcat:byteSize", "@type": "xsd:decimal" },
+    "citation_creation_date": "cito:hasCitationCreationDate",
+    "citation_time_span": { "@id": "cito:hasCitationTimeSpan", "@type": "xsd:duration" },
     "description": "dcterms:description",
     "edition": "prism:edition",
     "fname": "foaf:familyName",

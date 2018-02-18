@@ -105,7 +105,7 @@ $def with (data, keys, label_iri)
                   </dd>
 
               $for key in keys:
-                $if key not in ['is a', 'iri', 'label', '__entityiri', 'title', 'subtitle', 'year', 'citing document', 'cited document', 'source', 'attributed to']:
+                $if key not in ['is a', 'iri', 'label', '__entityiri', 'title', 'subtitle', 'year', 'citing document', 'cited document', 'source', 'attributed to', 'generated']:
                     <dt class="bg-info">$key</dt>
                     <dd>
                         <ul class="list-unstyled" rel="$label_iri[key]">
@@ -133,6 +133,14 @@ $def with (data, keys, label_iri)
                                   $data["attributed to"][0]["__entityiri"]
                               </a>
                           </li>
+                      </ul>
+                  </dd>
+
+              $if 'generated' in data:
+                  <dt class="bg-info">generated</dt>
+                  <dd>
+                      <ul class="list-unstyled">
+                          <li property="$label_iri['attributed to']">$data["generated"][0]</li>
                       </ul>
                   </dd>
 
