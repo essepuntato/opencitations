@@ -100,11 +100,9 @@ class VirtualEntityDirector(object):
         res = self.__execute_query(citing_entity_local_id, cited_entity_local_id)
         if res is not None:
             citing_url, cited_url, full_citing_pub_date, full_cited_pub_date, sparql_query_url = res
-            citing_pub_date = full_citing_pub_date[:10]
-            cited_pub_date = full_cited_pub_date[:10]
 
-            citation = Citation(citing_entity_local_id, citing_url, citing_pub_date,
-                                cited_entity_local_id, cited_url, cited_pub_date,
+            citation = Citation(citing_entity_local_id, citing_url, full_citing_pub_date,
+                                cited_entity_local_id, cited_url, full_cited_pub_date,
                                 self.virtual_entity_director, sparql_query_url,
                                 datetime.now().strftime('%Y-%m-%dT%H:%M:%S'))
 
