@@ -57,11 +57,12 @@ class Citation(object):
         self.duration = None
         if self.contains_years(citing_pub_date):
             default_date = datetime(1970, 1, 1, 0, 0)
-            citing_pub_datetime = parse(citing_pub_date, default=default_date)
             self.creation_date = citing_pub_date[:10]
+            citing_pub_datetime = parse(self.creation_date, default=default_date)
 
             if self.contains_years(cited_pub_date):
                 cited_pub_datetime = parse(cited_pub_date[:10], default=default_date)
+                print(citing_pub_datetime, cited_pub_datetime)
                 delta = relativedelta(citing_pub_datetime, cited_pub_datetime)
                 self.duration = self.get_duration(
                     delta,
