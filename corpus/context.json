@@ -180,6 +180,7 @@
     "pmcid": "datacite:pmcid",
     "pmid": "datacite:pmid",
     "metadata_provider": "oco:source-metadata-provider",
+    "oci": "datacite:oci",
     "publisher": "pro:publisher",
     "purl": "datacite:purl",
     "rdfxml": "application:rdf+xml",
